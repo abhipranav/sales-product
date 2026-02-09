@@ -1,0 +1,397 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum AccountSegment {
+  STARTUP
+  MID_MARKET
+  ENTERPRISE
+}
+
+enum StakeholderRole {
+  CHAMPION
+  APPROVER
+  BLOCKER
+  INFLUENCER
+}
+
+enum DealStage {
+  DISCOVERY
+  EVALUATION
+  PROPOSAL
+  PROCUREMENT
+  CLOSED_WON
+  CLOSED_LOST
+}
+
+enum SignalType {
+  HIRING
+  FUNDING
+  TOOLING
+  ENGAGEMENT
+}
+
+enum ActivityType {
+  CALL
+  EMAIL
+  MEETING
+  NOTE
+}
+
+enum TaskOwner {
+  REP
+  MANAGER
+  SYSTEM
+}
+
+enum TaskPriority {
+  HIGH
+  MEDIUM
+  LOW
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  DONE
+}
+
+enum SuggestedChannel {
+  EMAIL
+  PHONE
+  LINKEDIN
+  MEETING
+}
+
+enum WorkspaceMemberRole {
+  OWNER
+  MANAGER
+  REP
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum IntegrationProvider {
+  HUBSPOT
+}
+
+enum NotificationStatus {
+  UNREAD
+  ACKNOWLEDGED
+}
+
+enum SequenceExecutionStatus {
+  ACTIVE
+  COMPLETED
+}
+
+enum SequenceStepStatus {
+  TODO
+  IN_PROGRESS
+  DONE
+  SKIPPED
+}
+
+model Workspace {
+  id        String            @id @default(cuid())
+  slug      String            @unique
+  name      String
+  members   WorkspaceMember[]
+  accounts  Account[]
+  syncStates IntegrationSyncState[]
+  notifications SignalNotification[]
+  sequenceExecutions SequenceExecution[]
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+}
+
+model WorkspaceMember {
+  id          String              @id @default(cuid())
+  workspaceId String
+  workspace   Workspace           @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  email       String
+  fullName    String
+  role        WorkspaceMemberRole @default(REP)
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+
+  @@unique([workspaceId, email])
+  @@index([workspaceId])
+}
+
+model Account {
+  id           String         @id @default(cuid())
+  workspaceId   String
+  workspace     Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  externalId   String?        @unique
+  name         String
+  segment      AccountSegment
+  website      String?
+  employeeBand String?
+  contacts     Contact[]
+  deals        Deal[]
+  signals      Signal[]
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  @@index([workspaceId])
+}
+
+model Contact {
+  id         String          @id @default(cuid())
+  externalId String?         @unique
+  accountId  String
+  account    Account         @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  fullName   String
+  title      String
+  email      String?
+  linkedIn   String?
+  role       StakeholderRole
+  sequenceExecutions SequenceExecution[]
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+
+  @@index([accountId])
+}
+
+model Deal {
+  id           String         @id @default(cuid())
+  externalId   String?        @unique
+  accountId    String
+  account      Account        @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  name         String
+  stage        DealStage
+  amount       Int
+  confidence   Float
+  closeDate    DateTime
+  riskSummary  String
+  tasks        Task[]
+  activities   Activity[]
+  calendarEvents CalendarEvent[]
+  auditLogs    AuditLog[]
+  outboundApprovals OutboundApproval[]
+  signalNotifications SignalNotification[]
+  sequenceExecutions SequenceExecution[]
+  meetingBrief MeetingBrief?
+  followUp     FollowUpDraft?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  @@index([accountId])
+  @@index([stage])
+}
+
+model Signal {
+  id         String     @id @default(cuid())
+  externalId String?    @unique
+  accountId  String
+  account    Account    @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  type       SignalType
+  summary    String
+  happenedAt DateTime
+  score      Int
+  notifications SignalNotification[]
+  createdAt  DateTime   @default(now())
+
+  @@index([accountId])
+  @@index([happenedAt])
+}
+
+model Activity {
+  id         String       @id @default(cuid())
+  externalId String?      @unique
+  dealId     String
+  deal       Deal         @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  type       ActivityType
+  happenedAt DateTime
+  summary    String
+  createdAt  DateTime     @default(now())
+
+  @@index([dealId])
+  @@index([happenedAt])
+}
+
+model Task {
+  id               String           @id @default(cuid())
+  externalId       String?          @unique
+  dealId           String
+  deal             Deal             @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  title            String
+  owner            TaskOwner
+  dueAt            DateTime
+  priority         TaskPriority
+  status           TaskStatus
+  suggestedChannel SuggestedChannel
+  completedAt      DateTime?
+  auditLogs        AuditLog[]
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  @@index([dealId])
+  @@index([status])
+  @@index([dueAt])
+}
+
+model CalendarEvent {
+  id             String   @id @default(cuid())
+  externalId     String?  @unique
+  dealId         String
+  deal           Deal     @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  title          String
+  startsAt       DateTime
+  endsAt         DateTime
+  organizerEmail String?
+  attendees      String[]
+  source         String
+  createdAt      DateTime @default(now())
+
+  @@index([dealId])
+  @@index([startsAt])
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  dealId     String
+  deal       Deal     @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  taskId     String?
+  task       Task?    @relation(fields: [taskId], references: [id], onDelete: SetNull)
+  entityType String
+  entityId   String
+  action     String
+  actor      String
+  details    String
+  createdAt  DateTime @default(now())
+
+  @@index([dealId])
+  @@index([taskId])
+  @@index([entityType, entityId])
+  @@index([createdAt])
+}
+
+model MeetingBrief {
+  id                   String   @id @default(cuid())
+  dealId               String   @unique
+  deal                 Deal     @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  primaryGoal          String
+  likelyObjections     String[]
+  recommendedNarrative String
+  proofPoints          String[]
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+}
+
+model FollowUpDraft {
+  id            String   @id @default(cuid())
+  dealId        String   @unique
+  deal          Deal     @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  subject       String
+  body          String
+  ask           String
+  ctaTimeWindow String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model OutboundApproval {
+  id              String         @id @default(cuid())
+  dealId           String
+  deal             Deal           @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  channel          SuggestedChannel
+  subject          String
+  body             String
+  status           ApprovalStatus @default(PENDING)
+  requestedBy      String
+  reviewedBy       String?
+  reviewedAt       DateTime?
+  rejectionReason  String?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  @@index([dealId, status])
+  @@index([createdAt])
+}
+
+model IntegrationSyncState {
+  id          String              @id @default(cuid())
+  workspaceId String
+  workspace   Workspace           @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  provider    IntegrationProvider
+  cursor      String?
+  status      String              @default("idle")
+  lastRunAt   DateTime?
+  lastError   String?
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+
+  @@unique([workspaceId, provider])
+  @@index([workspaceId, updatedAt])
+}
+
+model SignalNotification {
+  id               String             @id @default(cuid())
+  workspaceId      String
+  workspace        Workspace          @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  signalId         String
+  signal           Signal             @relation(fields: [signalId], references: [id], onDelete: Cascade)
+  dealId           String?
+  deal             Deal?              @relation(fields: [dealId], references: [id], onDelete: SetNull)
+  priority         TaskPriority
+  summary          String
+  recommendedAction String
+  status           NotificationStatus @default(UNREAD)
+  acknowledgedAt   DateTime?
+  acknowledgedBy   String?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  @@unique([workspaceId, signalId])
+  @@index([workspaceId, status, createdAt])
+  @@index([dealId])
+}
+
+model SequenceExecution {
+  id           String                  @id @default(cuid())
+  workspaceId  String
+  workspace    Workspace               @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  dealId       String
+  deal         Deal                    @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  contactId    String?
+  contact      Contact?                @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  title        String
+  channelMix   SuggestedChannel[]
+  status       SequenceExecutionStatus @default(ACTIVE)
+  createdBy    String
+  steps        SequenceStep[]
+  createdAt    DateTime                @default(now())
+  updatedAt    DateTime                @updatedAt
+
+  @@index([workspaceId, status, createdAt])
+  @@index([dealId])
+}
+
+model SequenceStep {
+  id           String             @id @default(cuid())
+  executionId  String
+  execution    SequenceExecution  @relation(fields: [executionId], references: [id], onDelete: Cascade)
+  order        Int
+  channel      SuggestedChannel
+  instruction  String
+  status       SequenceStepStatus @default(TODO)
+  outcome      String?
+  completedAt  DateTime?
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+
+  @@unique([executionId, order])
+  @@index([status, createdAt])
+}
