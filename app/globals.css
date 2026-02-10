@@ -1,0 +1,217 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   THEME 1: CALM NEUTRAL WITH BLUE ACCENTS
+   Trust + Modern Serenity • Sleek Premium
+   
+   - Soft cream/beige base for readability
+   - Deep navy blues for trust and reliability
+   - Subtle warm accents for CTAs
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+:root {
+  /* Base - Soft cream/off-white */
+  --background: 42 30% 97%;
+  --foreground: 210 40% 12%;
+  
+  /* Cards - Pure white with warmth */
+  --card: 40 20% 99%;
+  --card-foreground: 210 40% 12%;
+  
+  /* Muted - Warm grey */
+  --muted: 40 15% 94%;
+  --muted-foreground: 210 15% 40%;
+  
+  /* Borders - Subtle warm */
+  --border: 40 12% 88%;
+  
+  /* Primary - Deep Navy Blue */
+  --primary: 210 70% 20%;
+  --primary-foreground: 0 0% 100%;
+  
+  /* Accent - Electric/Azure Blue */
+  --accent: 205 90% 45%;
+  --accent-foreground: 0 0% 100%;
+  
+  /* CTA - Warm amber/gold */
+  --cta: 35 90% 52%;
+  --cta-foreground: 210 70% 12%;
+  
+  /* Ring focus */
+  --ring: 205 90% 50%;
+  
+  /* Semantic */
+  --success: 160 55% 38%;
+  --warning: 38 90% 50%;
+  --destructive: 0 65% 50%;
+}
+
+.dark {
+  /* Base - Deep navy slate */
+  --background: 215 35% 8%;
+  --foreground: 40 20% 95%;
+  
+  /* Cards - Slightly lighter navy */
+  --card: 215 30% 11%;
+  --card-foreground: 40 20% 95%;
+  
+  /* Muted */
+  --muted: 215 25% 16%;
+  --muted-foreground: 210 15% 55%;
+  
+  /* Borders */
+  --border: 215 20% 22%;
+  
+  /* Primary - Brighter blue for dark mode */
+  --primary: 205 85% 55%;
+  --primary-foreground: 215 35% 8%;
+  
+  /* Accent */
+  --accent: 205 90% 60%;
+  --accent-foreground: 215 35% 8%;
+  
+  /* CTA */
+  --cta: 35 90% 55%;
+  --cta-foreground: 210 70% 8%;
+  
+  /* Ring */
+  --ring: 205 90% 55%;
+  
+  /* Semantic */
+  --success: 160 55% 45%;
+  --warning: 38 90% 55%;
+  --destructive: 0 65% 55%;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   BASE STYLES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  color: hsl(var(--foreground));
+  background: hsl(var(--background));
+  font-family: "Inter", "IBM Plex Sans", system-ui, sans-serif;
+  font-feature-settings: "cv11", "ss01";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   SLEEK ANIMATIONS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.reveal {
+  opacity: 0;
+  animation: fade-in 0.35s ease-out forwards;
+}
+
+.reveal-delay-1 { animation-delay: 40ms; }
+.reveal-delay-2 { animation-delay: 80ms; }
+.reveal-delay-3 { animation-delay: 120ms; }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   LANDING PAGE - Subtle blue ambient
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+.landing-grid {
+  background-image:
+    linear-gradient(to right, hsl(var(--border) / 0.5) 1px, transparent 1px),
+    linear-gradient(to bottom, hsl(var(--border) / 0.4) 1px, transparent 1px);
+  background-size: 72px 72px;
+  mask-image: radial-gradient(ellipse 50% 35% at 50% 15%, black 10%, transparent 55%);
+}
+
+.landing-orb {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(100px);
+  pointer-events: none;
+  opacity: 0.35;
+}
+
+.landing-orb-a {
+  left: -8%;
+  top: 8%;
+  height: 350px;
+  width: 380px;
+  background: hsl(205 90% 50% / 0.2);
+}
+
+.landing-orb-b {
+  right: 5%;
+  top: 25%;
+  height: 280px;
+  width: 320px;
+  background: hsl(35 90% 55% / 0.12);
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   PREMIUM UTILITIES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+/* Premium scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted-foreground) / 0.2);
+  border-radius: 2px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.3);
+}
+
+/* Selection */
+::selection {
+  background: hsl(var(--accent) / 0.15);
+  color: inherit;
+}
+
+/* Focus states */
+*:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   REDUCED MOTION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  .reveal {
+    opacity: 1 !important;
+    animation: none !important;
+  }
+}
