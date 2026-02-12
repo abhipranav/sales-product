@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: sales-product-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: sales_product
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - sales_product_pgdata:/var/lib/postgresql/data
+
+volumes:
+  sales_product_pgdata:
