@@ -25,19 +25,19 @@ export default async function CockpitPage() {
     <section className="mx-auto max-w-7xl py-2 md:py-4">
       <header className="reveal mb-8 flex flex-col gap-4 md:mb-10 md:flex-row md:items-end md:justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[hsl(var(--muted-foreground))]">Sales Execution System</p>
-          <h2 className="font-['Sora',sans-serif] text-3xl font-bold text-[hsl(var(--foreground))] md:text-4xl">Rep Cockpit</h2>
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.12em] text-[hsl(var(--muted-foreground))]">SALES_EXECUTION // REP_SURFACE</p>
+          <h2 className="font-serif text-3xl font-bold text-[hsl(var(--foreground))] md:text-4xl">Rep Cockpit</h2>
           <p className="mt-1 text-sm">
             <Link
               href={`/accounts/${data.account.id}` as "/accounts"}
-              className="text-[hsl(var(--foreground))] hover:text-[hsl(var(--primary))] hover:underline"
+              className="text-[hsl(var(--foreground))] font-bold hover:underline"
             >
               {data.account.name}
             </Link>
             <span className="text-[hsl(var(--muted-foreground))]"> · </span>
             <Link
               href={`/pipeline/${data.deal.id}` as "/pipeline"}
-              className="text-[hsl(var(--foreground))] hover:text-[hsl(var(--primary))] hover:underline"
+              className="text-[hsl(var(--foreground))] font-bold hover:underline"
             >
               {data.deal.name}
             </Link>
@@ -49,13 +49,15 @@ export default async function CockpitPage() {
           </div>
         </div>
         <Link href={`/pipeline/${data.deal.id}` as "/pipeline"}>
-          <Card className="border-[hsl(var(--border))] hover:border-[hsl(var(--primary))] transition-colors cursor-pointer">
+          <Card className="hover:bg-[hsl(var(--foreground))] hover:text-[hsl(var(--background))] transition-all duration-150 cursor-pointer">
             <CardContent className="space-y-2 p-4 text-sm">
               <p>
-                <span className="font-semibold text-[hsl(var(--foreground))]">Deal size:</span> ${data.deal.amount.toLocaleString()}
+                <span className="font-mono text-[10px] uppercase tracking-wider">DEAL_SIZE:</span>{" "}
+                <span className="font-bold">${data.deal.amount.toLocaleString()}</span>
               </p>
               <p>
-                <span className="font-semibold text-[hsl(var(--foreground))]">Close target:</span> {new Date(data.deal.closeDate).toDateString()}
+                <span className="font-mono text-[10px] uppercase tracking-wider">CLOSE_TARGET:</span>{" "}
+                <span className="font-bold">{new Date(data.deal.closeDate).toDateString()}</span>
               </p>
             </CardContent>
           </Card>
@@ -101,13 +103,13 @@ export default async function CockpitPage() {
 
           <Card className="reveal reveal-delay-2">
             <CardContent className="p-5">
-              <h3 className="font-['Sora',sans-serif] text-lg font-semibold text-zinc-900">Recent Activity</h3>
+              <h3 className="font-mono text-xs font-bold uppercase tracking-wider text-[hsl(var(--foreground))]">RECENT_ACTIVITY</h3>
               <ul className="mt-3 space-y-3">
                 {data.recentActivities.map((activity) => (
-                  <li key={activity.id} className="rounded-lg bg-zinc-50 p-3 text-sm text-zinc-700">
-                    <p className="font-medium capitalize text-zinc-900">{activity.type}</p>
-                    <p>{activity.summary}</p>
-                    <p className="mt-1 text-xs text-zinc-500">{new Date(activity.happenedAt).toLocaleString()}</p>
+                  <li key={activity.id} className="border-[2px] border-[hsl(var(--border))] bg-[hsl(var(--muted))] p-3 text-sm">
+                    <p className="font-bold capitalize text-[hsl(var(--foreground))]">{activity.type}</p>
+                    <p className="text-[hsl(var(--muted-foreground))]">{activity.summary}</p>
+                    <p className="mt-1 font-mono text-[10px] uppercase tracking-wider text-[hsl(var(--muted-foreground))]">{new Date(activity.happenedAt).toLocaleString()}</p>
                   </li>
                 ))}
               </ul>

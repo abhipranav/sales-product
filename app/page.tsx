@@ -1,339 +1,510 @@
-import Image from "next/image";
+"use client";
+
 import Link from "next/link";
-import { ThemeToggle } from "@/components/shell/theme-toggle";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState } from "react";
+
+/* ─── data ─────────────────────────────────────────────────────────────── */
+
+const ticker = [
+  "AI MEETING NOTES → ACTIONS IN UNDER 30S",
+  "PIPELINE RISK UPDATES EVERY 5 MINUTES",
+  "SIGNAL INBOX PRIORITIZED BY DEAL IMPACT",
+  "HUMAN APPROVALS FOR OUTBOUND AI MESSAGES",
+  "WORKSPACE-SCOPED CRM SYNCHRONIZATION",
+] as const;
+
+const modules = [
+  { id: "MODULE_01", title: "WORKSPACE", href: "/workspace", summary: "Cross-module launchpad and KPI command view." },
+  { id: "MODULE_02", title: "COCKPIT", href: "/cockpit", summary: "Rep execution surface for daily actions." },
+  { id: "MODULE_03", title: "ACCOUNTS", href: "/accounts", summary: "Stakeholder map and account intelligence." },
+  { id: "MODULE_04", title: "PIPELINE", href: "/pipeline", summary: "Revenue pressure and close-risk controls." },
+  { id: "MODULE_05", title: "INTELLIGENCE", href: "/intelligence", summary: "Strategy, notes, and follow-up orchestration." },
+  { id: "MODULE_06", title: "NOTIFICATIONS", href: "/notifications", summary: "Buying-signal inbox with action cues." },
+  { id: "MODULE_07", title: "INTEGRATIONS", href: "/integrations", summary: "CRM and calendar sync observability." },
+  { id: "MODULE_08", title: "WORKFLOWS", href: "/workflows", summary: "Tasks, approvals, and execution audit trail." },
+] as const;
+
+const pillars = [
+  {
+    id: "P_01",
+    title: "Editorial Clarity",
+    body: "Decision-critical metrics are surfaced first so teams move on facts, not tabs.",
+  },
+  {
+    id: "P_02",
+    title: "AI + Human Control",
+    body: "AI drafts and recommendations are fast, while approvals and governance stay explicit.",
+  },
+  {
+    id: "P_03",
+    title: "Systemized Execution",
+    body: "Each insight is immediately tied to tasks, sequences, and owner accountability.",
+  },
+] as const;
+
+const capabilities = [
+  "Call intelligence with notes-to-actions",
+  "Buying-signal detection with priority scoring",
+  "Sequence planning and step-level execution tracking",
+  "CRM command center for account/contact/deal updates",
+  "Workspace access controls with actor scoping",
+  "Audit-ready workflow logs across every mutation",
+] as const;
+
+const integrationLogos = ["Salesforce", "HubSpot", "Google", "Microsoft", "Zoom", "Slack"] as const;
+
+const faqs = [
+  {
+    question: "Can we keep our current CRM setup?",
+    answer: "Yes. Sync endpoints are designed for incremental upsert workflows, not forced migrations.",
+  },
+  {
+    question: "Can AI send messages automatically?",
+    answer: "Only where you allow it. Approval queues can gate outbound communication.",
+  },
+  {
+    question: "Can we run polyglot services later?",
+    answer: "Yes. The product surface stays in TypeScript while heavy AI paths can move to Python or Go.",
+  },
+] as const;
+
+/* ─── page ─────────────────────────────────────────────────────────────── */
 
 export default function LandingPage() {
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
+
   return (
-    <main className="relative overflow-hidden pb-14">
-      {/* Subtle background */}
-      <div className="landing-grid pointer-events-none absolute inset-0 -z-20" />
-      <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-        <div className="landing-orb landing-orb-a" />
-        <div className="landing-orb landing-orb-b" />
+    <main className="relative overflow-hidden pb-0 ind-grid-bg">
+      {/* ── TICKER ─────────────────────────────────────────────────────── */}
+      <div className="pm-ticker">
+        <div className="pm-ticker-track">
+          {[...ticker, ...ticker].map((item, index) => (
+            <span key={`${item}-${index}`} className="pm-ticker-item">
+              {item}
+            </span>
+          ))}
+        </div>
       </div>
 
-      {/* Header */}
-      <header className="sticky top-0 z-30 border-b border-[hsl(var(--border))] bg-[hsl(var(--background))]/95 backdrop-blur-sm">
-        <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-5 py-3">
-          <Link href="/" className="flex items-center gap-2.5">
-            <div className="h-7 w-7 rounded bg-[hsl(var(--primary))]" />
-            <div>
-              <p className="text-[9px] font-semibold uppercase tracking-[0.18em] text-[hsl(var(--muted-foreground))]">Sales AI</p>
-              <p className="text-sm font-semibold text-[hsl(var(--foreground))]">VelocityOS</p>
-            </div>
+      {/* ── HEADER ─────────────────────────────────────────────────────── */}
+      <header className="sticky top-0 z-30 border-b-[2px] border-[hsl(var(--border))] bg-[hsl(var(--background))]/95 backdrop-blur-sm">
+        <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-5 py-2.5 md:px-8">
+          {/* Logo */}
+          <Link href="/" className="flex items-center gap-0">
+            <span className="font-mono text-base font-bold tracking-tight text-[hsl(var(--foreground))]">
+              VELOCITY_OS
+            </span>
+            <span className="font-mono text-[10px] font-bold text-[hsl(var(--muted-foreground))] ml-0.5">®</span>
           </Link>
-          <nav className="hidden items-center gap-5 text-[13px] font-medium text-[hsl(var(--muted-foreground))] md:flex">
-            <a href="#command-center" className="transition-colors hover:text-[hsl(var(--foreground))]">Command Center</a>
-            <a href="#modules" className="transition-colors hover:text-[hsl(var(--foreground))]">Modules</a>
-            <a href="#pricing" className="transition-colors hover:text-[hsl(var(--foreground))]">Pricing</a>
+
+          {/* Nav — separated by vertical dividers like Ankitkr0 */}
+          <nav className="hidden items-center md:flex">
+            <div className="ind-divider-v h-5 mx-4" />
+            <a href="#features" className="ind-label hover:text-[hsl(var(--foreground))] transition-colors">
+              Features
+            </a>
+            <div className="ind-divider-v h-5 mx-4" />
+            <a href="#modules" className="ind-label hover:text-[hsl(var(--foreground))] transition-colors">
+              Modules
+            </a>
+            <div className="ind-divider-v h-5 mx-4" />
+            <a href="#pricing" className="ind-label hover:text-[hsl(var(--foreground))] transition-colors">
+              Pricing
+            </a>
+            <div className="ind-divider-v h-5 mx-4" />
+            <a href="#faq" className="ind-label hover:text-[hsl(var(--foreground))] transition-colors">
+              FAQ
+            </a>
+            <div className="ind-divider-v h-5 mx-4" />
           </nav>
-          <div className="flex items-center gap-2">
-            <Button asChild variant="outline" size="sm">
-              <Link href="/workspace">Open App</Link>
-            </Button>
-            <ThemeToggle />
+
+          {/* Actions */}
+          <div className="flex items-center gap-3">
+            <Link href="/auth/signin" className="ind-btn-outline text-xs py-1.5 px-3">
+              SIGN IN
+            </Link>
+            <Link href="/workspace" className="ind-btn text-xs py-1.5 px-3">
+              OPEN APP
+            </Link>
           </div>
         </div>
       </header>
 
-      {/* ═══════════════════════════════════════════════════════════════════════
-          HERO - Command Center Preview
-      ═══════════════════════════════════════════════════════════════════════ */}
-      <section className="mx-auto w-full max-w-6xl px-5 py-10">
-        <div className="text-center mb-8">
-          <Badge variant="accent" className="mb-3">AI-Native Revenue Execution</Badge>
-          <h1 className="text-3xl font-bold leading-tight tracking-[-0.02em] text-[hsl(var(--foreground))] md:text-4xl lg:text-[42px]">
-            Your Sales Command Center
-          </h1>
-          <p className="mt-3 mx-auto max-w-xl text-[15px] leading-relaxed text-[hsl(var(--muted-foreground))]">
-            CRM execution, pipeline intelligence, call insights, and workflow orchestration. All in one unified interface.
-          </p>
-          <div className="mt-5 flex justify-center gap-2.5">
-            <Button asChild variant="cta" size="lg">
-              <Link href="/workspace">Launch Command Center</Link>
-            </Button>
-            <Button asChild variant="outline" size="lg">
-              <Link href="/cockpit">Preview Cockpit</Link>
-            </Button>
+      {/* ── HERO ───────────────────────────────────────────────────────── */}
+      <section className="mx-auto w-full max-w-7xl px-5 pb-0 pt-8 md:px-8">
+        <div className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr] lg:items-start">
+          {/* Left — Main hero card */}
+          <div className="ind-card relative">
+            {/* Yellow badge rotated — Ankitkr0 "IN STOCK" style */}
+            <div className="absolute -top-3 -right-2 z-10">
+              <span className="ind-badge">AI-NATIVE</span>
+            </div>
+
+            <div className="ind-label mb-4">REVENUE_OS // V1.0</div>
+
+            <h1 className="font-serif text-4xl font-bold leading-[1.05] tracking-[-0.02em] text-[hsl(var(--foreground))] md:text-[3.5rem]">
+              Reimagine how
+              <br />
+              sales teams execute
+              <br />
+              <span className="relative">
+                with AI.
+                <svg className="absolute -bottom-1 left-0 w-full h-2 text-[hsl(var(--foreground))]" viewBox="0 0 200 8" preserveAspectRatio="none">
+                  <path d="M0 5 Q50 0 100 5 T200 5" stroke="currentColor" strokeWidth="3" fill="none" />
+                </svg>
+              </span>
+            </h1>
+
+            <p className="mt-6 max-w-lg text-sm leading-relaxed text-[hsl(var(--muted-foreground))] font-mono">
+              One command layer for CRM actions, call intelligence, pipeline control, and execution workflows.
+              Fast enough for reps, structured enough for leaders.
+            </p>
+
+            <div className="mt-7 flex flex-wrap gap-3">
+              <Link href="/workspace" className="ind-btn">
+                LAUNCH WORKSPACE →
+              </Link>
+              <Link href="/auth/signin" className="ind-btn-outline">
+                SIGN IN
+              </Link>
+              <Link href="/cockpit" className="ind-btn-outline">
+                PREVIEW COCKPIT
+              </Link>
+            </div>
+
+            {/* Barcode decorative */}
+            <div className="mt-6 flex items-end justify-between">
+              <div className="ind-barcode">VELOCITY V1</div>
+              <div className="ind-label text-right">
+                EST. 2026<br />
+                <span className="text-[hsl(var(--foreground))] font-bold">BANGALORE</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Right — Status + Stats stack */}
+          <div className="flex flex-col gap-4">
+            {/* Status card — Ankitkr0 "STATUS: OPEN" */}
+            <div className="ind-card p-0 overflow-hidden">
+              <div className="flex items-center justify-between px-5 py-4">
+                <div className="flex items-center gap-3">
+                  <span className="flex h-8 w-8 items-center justify-center  bg-[hsl(var(--foreground))] text-lg">
+                    ⚡
+                  </span>
+                  <div>
+                    <p className="font-mono text-base font-bold tracking-tight text-[hsl(var(--foreground))]">STATUS: LIVE</p>
+                    <p className="font-mono text-[10px] text-[hsl(var(--muted-foreground))] tracking-wider">
+                      ACCEPTING NEW TEAMS [GROWTH/ENTERPRISE]
+                    </p>
+                  </div>
+                </div>
+                <Link href="/workspace" className="ind-btn text-xs py-1.5 px-3">
+                  GET ACCESS
+                </Link>
+              </div>
+              <div className="caution-stripe" />
+            </div>
+
+            {/* Archive / work cards — Ankitkr0 "ARCHIVE_01" style */}
+            <div className="grid grid-cols-2 gap-4">
+              <Link href="/workspace" className="ind-card-dashed ind-hover cursor-pointer block">
+                <div className="flex items-center justify-between mb-4">
+                  <span className="ind-label">ARCHIVE_01</span>
+                  <span className="flex h-7 w-7 items-center justify-center  bg-[hsl(var(--foreground))] text-white text-xs">📊</span>
+                </div>
+                <p className="font-sans text-2xl font-bold leading-tight text-[hsl(var(--foreground))] ind-hover-invert">
+                  LIVE<br />EXECUTION
+                </p>
+                <p className="ind-label mt-3 ind-hover-invert">WEIGHTED: $174,300</p>
+              </Link>
+
+              <Link href="/notifications" className="ind-card-dashed ind-hover cursor-pointer block">
+                <div className="flex items-center justify-between mb-4">
+                  <span className="ind-label">ARCHIVE_02</span>
+                  <span className="flex h-7 w-7 items-center justify-center  bg-caution text-ink text-xs">🎯</span>
+                </div>
+                <p className="font-sans text-2xl font-bold leading-tight text-[hsl(var(--foreground))] ind-hover-invert">
+                  SIGNAL<br />INBOX
+                </p>
+                <p className="ind-label mt-3 ind-hover-invert">3 HIGH PRIORITY</p>
+              </Link>
+            </div>
+
+            {/* Stats row */}
+            <div className="grid grid-cols-3 gap-3">
+              <div className="ind-card text-center">
+                <p className="ind-label">ADMIN_LOAD</p>
+                <p className="mt-1 text-3xl font-black text-[hsl(var(--foreground))] font-sans">-37%</p>
+              </div>
+              <div className="ind-card text-center">
+                <p className="ind-label">FOLLOW_UP</p>
+                <p className="mt-1 text-3xl font-black text-[hsl(var(--foreground))] font-sans">2.4x</p>
+              </div>
+              <div className="ind-card text-center">
+                <p className="ind-label">CYCLE_TIME</p>
+                <p className="mt-1 text-3xl font-black text-[hsl(var(--foreground))] font-sans">-9d</p>
+              </div>
+            </div>
           </div>
         </div>
+      </section>
 
-        {/* Hero Stats Bar */}
-        <div className="grid grid-cols-3 gap-px bg-[hsl(var(--border))] rounded-lg overflow-hidden max-w-lg mx-auto">
-          {[
-            { value: "37%", label: "Less admin" },
-            { value: "2.4×", label: "Faster follow-up" },
-            { value: "9 days", label: "Cycle reduction" }
-          ].map((stat) => (
-            <div key={stat.label} className="bg-[hsl(var(--card))] p-3 text-center">
-              <p className="text-lg font-bold text-[hsl(var(--primary))]">{stat.value}</p>
-              <p className="text-[10px] text-[hsl(var(--muted-foreground))]">{stat.label}</p>
+      {/* ── INTEGRATIONS ──────────────────────────────────────────────── */}
+      <section className="mx-auto w-full max-w-7xl px-5 py-8 md:px-8">
+        <div className="ind-divider-h mb-6" />
+        <p className="ind-label text-center mb-4">WORKS_WITH // YOUR STACK</p>
+        <div className="grid gap-2 sm:grid-cols-3 lg:grid-cols-6">
+          {integrationLogos.map((name) => (
+            <div
+              key={name}
+              className="ind-card text-center py-2.5 px-3 ind-hover cursor-default"
+            >
+              <span className="font-mono text-xs font-bold ind-hover-invert">{name.toUpperCase()}</span>
             </div>
           ))}
         </div>
       </section>
 
-      {/* ═══════════════════════════════════════════════════════════════════════
-          COMMAND CENTER - Bento Grid Layout
-      ═══════════════════════════════════════════════════════════════════════ */}
-      <section id="command-center" className="mx-auto w-full max-w-6xl px-5 py-10">
-        <div className="mb-6">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[hsl(var(--accent))]">Command Center</p>
-          <h2 className="text-2xl font-bold tracking-[-0.02em] text-[hsl(var(--foreground))] mt-1">
-            Every module, one unified dashboard.
+      {/* ── DESIGN PRINCIPLES ─────────────────────────────────────────── */}
+      <section id="features" className="mx-auto w-full max-w-7xl px-5 py-10 md:px-8">
+        <div className="ind-divider-h mb-8" />
+        <div className="mb-8">
+          <span className="ind-badge-black">DESIGN_PRINCIPLES</span>
+          <h2 className="mt-4 font-serif text-3xl font-bold text-[hsl(var(--foreground))] md:text-4xl leading-tight">
+            Minimal visuals.<br />
+            Maximum execution signal.
           </h2>
         </div>
-
-        {/* Bento Grid - Command Center Style */}
-        <div className="grid grid-cols-12 gap-3">
-          {/* Main Preview - spans 8 cols */}
-          <Card className="col-span-12 lg:col-span-8 overflow-hidden">
-            <CardContent className="p-0">
-              <Image
-                src="https://images.unsplash.com/photo-1526628953301-3e589a6a8b74?auto=format&fit=crop&w=1800&q=75"
-                alt="Command center dashboard"
-                width={1600}
-                height={800}
-                priority
-                className="h-48 lg:h-64 w-full object-cover"
-              />
-              <div className="p-4">
-                <p className="text-[9px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--muted-foreground))]">Rep Cockpit</p>
-                <p className="mt-1 text-sm font-semibold text-[hsl(var(--foreground))]">Daily priorities, approvals, meeting prep, and follow-up drafting in one surface.</p>
+        <div className="grid gap-4 md:grid-cols-3">
+          {pillars.map((pillar) => (
+            <div key={pillar.id} className="ind-card ind-hover cursor-default">
+              <div className="flex items-center justify-between mb-3">
+                <span className="ind-label">{pillar.id}</span>
               </div>
-            </CardContent>
-          </Card>
-
-          {/* Side Stats - spans 4 cols */}
-          <div className="col-span-12 lg:col-span-4 grid gap-3">
-            <Card>
-              <CardContent className="p-4">
-                <p className="text-[9px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--muted-foreground))]">Pipeline Intelligence</p>
-                <p className="mt-2 text-2xl font-bold text-[hsl(var(--foreground))]">$174K</p>
-                <p className="text-[11px] text-[hsl(var(--muted-foreground))]">Weighted pipeline value</p>
-                <div className="mt-3 h-1.5 w-full bg-[hsl(var(--muted))] rounded-full overflow-hidden">
-                  <div className="h-full w-3/4 bg-[hsl(var(--accent))] rounded-full" />
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4">
-                <p className="text-[9px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--muted-foreground))]">Task Engine</p>
-                <div className="mt-2 flex items-baseline gap-2">
-                  <p className="text-2xl font-bold text-[hsl(var(--foreground))]">7</p>
-                  <p className="text-[11px] text-[hsl(var(--muted-foreground))]">tasks due today</p>
-                </div>
-                <div className="mt-3 flex gap-1">
-                  <span className="h-6 w-6 rounded bg-[hsl(var(--destructive))] flex items-center justify-center text-[10px] text-white font-medium">2</span>
-                  <span className="h-6 w-6 rounded bg-[hsl(var(--warning))] flex items-center justify-center text-[10px] text-white font-medium">3</span>
-                  <span className="h-6 w-6 rounded bg-[hsl(var(--success))] flex items-center justify-center text-[10px] text-white font-medium">2</span>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Bottom Row - 3 equal panels */}
-          <Card className="col-span-12 md:col-span-4">
-            <CardContent className="p-4">
-              <p className="text-[9px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--muted-foreground))]">Call Intelligence</p>
-              <p className="mt-2 text-sm font-semibold text-[hsl(var(--foreground))]">Meeting notes → actions</p>
-              <p className="mt-1 text-[11px] text-[hsl(var(--muted-foreground))]">Conversation data becomes tasks, briefs, and strategy updates automatically.</p>
-            </CardContent>
-          </Card>
-          <Card className="col-span-12 md:col-span-4">
-            <CardContent className="p-4">
-              <p className="text-[9px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--muted-foreground))]">Workflow Engine</p>
-              <p className="mt-2 text-sm font-semibold text-[hsl(var(--foreground))]">Structured orchestration</p>
-              <p className="mt-1 text-[11px] text-[hsl(var(--muted-foreground))]">Owner, priority, due date, and completion states for every action.</p>
-            </CardContent>
-          </Card>
-          <Card className="col-span-12 md:col-span-4">
-            <CardContent className="p-4">
-              <p className="text-[9px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--muted-foreground))]">Governance Controls</p>
-              <p className="mt-2 text-sm font-semibold text-[hsl(var(--foreground))]">Human-in-the-loop</p>
-              <p className="mt-1 text-[11px] text-[hsl(var(--muted-foreground))]">Approval queue for outbound AI messaging and sensitive actions.</p>
-            </CardContent>
-          </Card>
+              <h3 className="font-sans text-lg font-bold text-[hsl(var(--foreground))] mb-2 ind-hover-invert">
+                {pillar.title}
+              </h3>
+              <p className="text-sm text-[hsl(var(--muted-foreground))] ind-hover-invert leading-relaxed">
+                {pillar.body}
+              </p>
+            </div>
+          ))}
         </div>
       </section>
 
-      {/* ═══════════════════════════════════════════════════════════════════════
-          MODULES - Organized Grid
-      ═══════════════════════════════════════════════════════════════════════ */}
-      <section id="modules" className="mx-auto w-full max-w-6xl px-5 py-10">
-        <div className="mb-6">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[hsl(var(--accent))]">App Surface</p>
-          <h2 className="text-2xl font-bold tracking-[-0.02em] text-[hsl(var(--foreground))] mt-1">
-            Seven modules. Zero guessing.
+      {/* ── CAPABILITIES + EXECUTION LOOP ─────────────────────────────── */}
+      <section className="mx-auto w-full max-w-7xl px-5 py-4 md:px-8">
+        <div className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
+          {/* Capability Surface */}
+          <div className="ind-card">
+            <div className="flex items-center justify-between mb-4">
+              <span className="ind-badge-black">CAPABILITY_SURFACE</span>
+            </div>
+            <p className="ind-label mb-4">PRODUCTION-FOCUSED FUNCTIONALITY // ALREADY WIRED</p>
+            <div className="grid gap-2 sm:grid-cols-2">
+              {capabilities.map((cap, i) => (
+                <div key={cap} className="flex items-start gap-2 border-[2px] border-[hsl(var(--border))] bg-[hsl(var(--muted))] px-3 py-2.5">
+                  <span className="font-mono text-[10px] font-bold text-[hsl(var(--muted-foreground))] mt-0.5">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <span className="text-sm text-[hsl(var(--foreground))]">{cap}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Execution Loop */}
+          <div className="ind-card-dashed">
+            <span className="ind-badge-black mb-4">EXECUTION_LOOP</span>
+            <div className="space-y-3 mt-4">
+              {["Ingest context", "Score risk and momentum", "Generate tasks and sequences", "Execute with approvals"].map(
+                (step, index) => (
+                  <div key={step} className="flex items-center gap-3 border-[2px] border-[hsl(var(--border))] bg-[hsl(var(--muted))] p-3">
+                    <span className="flex h-7 w-7 shrink-0 items-center justify-center bg-[hsl(var(--foreground))] text-[hsl(var(--background))] font-mono text-xs font-bold">
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+                    <p className="text-sm font-medium text-[hsl(var(--foreground))]">{step}</p>
+                  </div>
+                )
+              )}
+            </div>
+            <div className="caution-stripe-thin mt-4" />
+          </div>
+        </div>
+      </section>
+
+      {/* ── MODULES ───────────────────────────────────────────────────── */}
+      <section id="modules" className="mx-auto w-full max-w-7xl px-5 py-10 md:px-8">
+        <div className="ind-divider-h mb-8" />
+        <div className="mb-8">
+          <span className="ind-badge-black">PRODUCT_MODULES</span>
+          <h2 className="mt-4 font-serif text-3xl font-bold text-[hsl(var(--foreground))] md:text-4xl leading-tight">
+            Defined surfaces for<br />
+            every GTM motion.
           </h2>
         </div>
-
-        <div className="grid grid-cols-12 gap-2">
-          {([
-            { title: "Workspace", href: "/workspace", desc: "Super-app launchpad", span: "col-span-6 md:col-span-3" },
-            { title: "Cockpit", href: "/cockpit", desc: "Rep execution center", span: "col-span-6 md:col-span-3" },
-            { title: "Accounts", href: "/accounts", desc: "Stakeholder intel", span: "col-span-6 md:col-span-3" },
-            { title: "Pipeline", href: "/pipeline", desc: "Revenue visibility", span: "col-span-6 md:col-span-3" },
-            { title: "Intelligence", href: "/intelligence", desc: "AI strategy flows", span: "col-span-6 md:col-span-4" },
-            { title: "Notifications", href: "/notifications", desc: "Signal inbox", span: "col-span-6 md:col-span-4" },
-            { title: "Workflows", href: "/workflows", desc: "Tasks + approvals", span: "col-span-12 md:col-span-4" }
-          ] as const).map((module) => (
-            <Link 
-              key={module.title} 
-              href={module.href}
-              className={`${module.span} group rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-3 transition-colors hover:border-[hsl(var(--accent))]`}
-            >
-              <p className="text-[13px] font-semibold text-[hsl(var(--foreground))] group-hover:text-[hsl(var(--accent))]">{module.title}</p>
-              <p className="mt-0.5 text-[10px] text-[hsl(var(--muted-foreground))]">{module.desc}</p>
+        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+          {modules.map((mod) => (
+            <Link key={mod.id} href={mod.href} className="group">
+              <div className="ind-card-dashed ind-hover h-full flex flex-col">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="ind-label ind-hover-invert">{mod.id}</span>
+                  <span className="font-mono text-[10px] text-[hsl(var(--muted-foreground))] ind-hover-invert">→</span>
+                </div>
+                <h3 className="font-sans text-lg font-bold text-[hsl(var(--foreground))] ind-hover-invert">
+                  {mod.title}
+                </h3>
+                <p className="text-xs text-[hsl(var(--muted-foreground))] mt-1 ind-hover-invert leading-relaxed flex-1">
+                  {mod.summary}
+                </p>
+                <div className="mt-4 ind-btn-outline text-[10px] py-1 px-2 w-full text-center group-hover:bg-[hsl(var(--background))] group-hover:text-[hsl(var(--foreground))]">
+                  OPEN
+                </div>
+              </div>
             </Link>
           ))}
         </div>
       </section>
 
-      {/* ═══════════════════════════════════════════════════════════════════════
-          INTEGRATIONS + SECURITY - Side by Side
-      ═══════════════════════════════════════════════════════════════════════ */}
-      <section className="mx-auto w-full max-w-6xl px-5 py-10">
-        <div className="grid grid-cols-12 gap-3">
-          <Card className="col-span-12 lg:col-span-6">
-            <CardHeader className="pb-3">
-              <CardTitle>Integrations</CardTitle>
-              <CardDescription>CRM + calendar ingestion with operational controls.</CardDescription>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <ul className="space-y-2 text-[12px] text-[hsl(var(--muted-foreground))]">
-                <li className="flex items-center gap-2">
-                  <span className="h-1.5 w-1.5 rounded-full bg-[hsl(var(--success))]" />
-                  Incremental sync checkpoints per workspace
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="h-1.5 w-1.5 rounded-full bg-[hsl(var(--success))]" />
-                  Manual + automated ingest paths
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="h-1.5 w-1.5 rounded-full bg-[hsl(var(--success))]" />
-                  Payload-driven upsert for account/contact/deal
-                </li>
-              </ul>
-              {/* Logo strip */}
-              <div className="mt-4 flex gap-2">
-                {["Salesforce", "HubSpot", "Google", "Slack"].map((name) => (
-                  <span key={name} className="rounded border border-[hsl(var(--border))] bg-[hsl(var(--muted))] px-2 py-1 text-[9px] font-medium text-[hsl(var(--muted-foreground))]">
-                    {name}
+      {/* ── PRICING ───────────────────────────────────────────────────── */}
+      <section id="pricing" className="mx-auto w-full max-w-7xl px-5 py-10 md:px-8">
+        <div className="ind-divider-h mb-8" />
+        <div className="mb-8">
+          <span className="ind-badge-black">PRICING</span>
+          <h2 className="mt-4 font-serif text-3xl font-bold text-[hsl(var(--foreground))] md:text-4xl leading-tight">
+            Built for teams<br />
+            that execute daily.
+          </h2>
+        </div>
+        <div className="grid gap-4 md:grid-cols-3">
+          {/* Starter */}
+          <div className="ind-card flex flex-col">
+            <span className="ind-label mb-1">TIER_01</span>
+            <h3 className="font-sans text-xl font-bold text-[hsl(var(--foreground))]">STARTER</h3>
+            <p className="ind-label mt-1">PER REP / MONTH</p>
+            <p className="text-4xl font-black text-[hsl(var(--foreground))] mt-4 font-sans">$39</p>
+            <ul className="mt-4 space-y-2 text-sm text-[hsl(var(--muted-foreground))] flex-1">
+              <li className="flex items-center gap-2"><span className="text-xs">▪</span> Cockpit + workflows</li>
+              <li className="flex items-center gap-2"><span className="text-xs">▪</span> Tasks and approvals</li>
+              <li className="flex items-center gap-2"><span className="text-xs">▪</span> Core CRM sync</li>
+            </ul>
+            <button className="ind-btn-outline w-full mt-5 text-xs py-2">GET STARTED</button>
+          </div>
+
+          {/* Growth — Featured */}
+          <div className="ind-card flex flex-col relative border-[hsl(var(--foreground))] border-[3px]">
+            <div className="absolute -top-3 right-3">
+              <span className="ind-badge">POPULAR</span>
+            </div>
+            <span className="ind-label mb-1">TIER_02</span>
+            <h3 className="font-sans text-xl font-bold text-[hsl(var(--foreground))]">GROWTH</h3>
+            <p className="ind-label mt-1">PER REP / MONTH</p>
+            <p className="text-4xl font-black text-[hsl(var(--foreground))] mt-4 font-sans">$89</p>
+            <ul className="mt-4 space-y-2 text-sm text-[hsl(var(--muted-foreground))] flex-1">
+              <li className="flex items-center gap-2"><span className="text-xs">▪</span> Everything in Starter</li>
+              <li className="flex items-center gap-2"><span className="text-xs">▪</span> Intelligence + signals</li>
+              <li className="flex items-center gap-2"><span className="text-xs">▪</span> Sequence tracking</li>
+            </ul>
+            <button className="ind-btn w-full mt-5 text-xs py-2">CHOOSE GROWTH</button>
+          </div>
+
+          {/* Enterprise */}
+          <div className="ind-card flex flex-col">
+            <span className="ind-label mb-1">TIER_03</span>
+            <h3 className="font-sans text-xl font-bold text-[hsl(var(--foreground))]">ENTERPRISE</h3>
+            <p className="ind-label mt-1">ANNUAL PLAN</p>
+            <p className="text-4xl font-black text-[hsl(var(--foreground))] mt-4 font-sans">Custom</p>
+            <ul className="mt-4 space-y-2 text-sm text-[hsl(var(--muted-foreground))] flex-1">
+              <li className="flex items-center gap-2"><span className="text-xs">▪</span> Governance + policy controls</li>
+              <li className="flex items-center gap-2"><span className="text-xs">▪</span> Dedicated architecture support</li>
+              <li className="flex items-center gap-2"><span className="text-xs">▪</span> Custom deployment lanes</li>
+            </ul>
+            <button className="ind-btn-outline w-full mt-5 text-xs py-2">CONTACT SALES</button>
+          </div>
+        </div>
+      </section>
+
+      {/* ── FAQ — Accordion style like Ankitkr0 "Side Projects" ───── */}
+      <section id="faq" className="mx-auto w-full max-w-7xl px-5 py-10 md:px-8">
+        <div className="ind-divider-h mb-8" />
+        <div className="mb-8">
+          <span className="ind-badge-black">FAQ</span>
+          <h2 className="mt-4 font-serif text-3xl font-bold text-[hsl(var(--foreground))] md:text-4xl leading-tight">
+            Questions from<br />
+            GTM operators.
+          </h2>
+        </div>
+        <div className="ind-card-dashed space-y-0">
+          {faqs.map((faq, i) => (
+            <div key={faq.question}>
+              <button
+                onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                className="w-full flex items-center justify-between py-4 px-1 text-left group"
+              >
+                <div className="flex items-center gap-3">
+                  <span className="ind-label">Q_{String(i + 1).padStart(2, "0")}</span>
+                  <span className="font-sans text-sm font-bold text-[hsl(var(--foreground))]">
+                    {faq.question}
                   </span>
-                ))}
+                </div>
+                <span className="font-mono text-lg text-[hsl(var(--muted-foreground))] transition-transform duration-200"
+                  style={{ transform: openFaq === i ? "rotate(180deg)" : "rotate(0)" }}
+                >
+                  ▾
+                </span>
+              </button>
+              <div
+                className="overflow-hidden transition-all duration-300"
+                style={{ maxHeight: openFaq === i ? "200px" : "0", opacity: openFaq === i ? 1 : 0 }}
+              >
+                <p className="text-sm text-[hsl(var(--muted-foreground))] pb-4 pl-[3.5rem] leading-relaxed">
+                  {faq.answer}
+                </p>
               </div>
-            </CardContent>
-          </Card>
-          <Card className="col-span-12 lg:col-span-6">
-            <CardHeader className="pb-3">
-              <CardTitle>Security & Governance</CardTitle>
-              <CardDescription>Enterprise-grade execution controls.</CardDescription>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <ul className="space-y-2 text-[12px] text-[hsl(var(--muted-foreground))]">
-                <li className="flex items-center gap-2">
-                  <span className="h-1.5 w-1.5 rounded-full bg-[hsl(var(--accent))]" />
-                  Workspace membership scoping on data paths
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="h-1.5 w-1.5 rounded-full bg-[hsl(var(--accent))]" />
-                  Approval gates for outbound AI actions
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="h-1.5 w-1.5 rounded-full bg-[hsl(var(--accent))]" />
-                  Full audit trail for task and event mutations
-                </li>
-              </ul>
-            </CardContent>
-          </Card>
+              {i < faqs.length - 1 && <div className="ind-divider-h" />}
+            </div>
+          ))}
         </div>
       </section>
 
-      {/* ═══════════════════════════════════════════════════════════════════════
-          PRICING - 3 Cards
-      ═══════════════════════════════════════════════════════════════════════ */}
-      <section id="pricing" className="mx-auto w-full max-w-6xl px-5 py-10">
-        <div className="mb-6">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[hsl(var(--accent))]">Pricing</p>
-          <h2 className="text-2xl font-bold tracking-[-0.02em] text-[hsl(var(--foreground))] mt-1">Predictable plans.</h2>
-        </div>
-        <div className="grid grid-cols-12 gap-3">
-          <Card className="col-span-12 md:col-span-4">
-            <CardContent className="p-4">
-              <p className="text-[13px] font-semibold text-[hsl(var(--foreground))]">Starter</p>
-              <p className="text-[11px] text-[hsl(var(--muted-foreground))]">Per rep / month</p>
-              <p className="mt-3 text-2xl font-bold text-[hsl(var(--foreground))]">$39</p>
-              <ul className="mt-3 space-y-1.5 text-[11px] text-[hsl(var(--muted-foreground))]">
-                <li>• Cockpit and workflows</li>
-                <li>• Task engine</li>
-                <li>• CRM baseline</li>
-              </ul>
-              <Button variant="outline" size="sm" className="w-full mt-4">Get Started</Button>
-            </CardContent>
-          </Card>
-          <Card className="col-span-12 md:col-span-4 border-[hsl(var(--primary))] border-2">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <p className="text-[13px] font-semibold text-[hsl(var(--foreground))]">Growth</p>
-                <Badge>Popular</Badge>
-              </div>
-              <p className="text-[11px] text-[hsl(var(--muted-foreground))]">Per rep / month</p>
-              <p className="mt-3 text-2xl font-bold text-[hsl(var(--foreground))]">$89</p>
-              <ul className="mt-3 space-y-1.5 text-[11px] text-[hsl(var(--muted-foreground))]">
-                <li>• Everything in Starter</li>
-                <li>• Call intelligence</li>
-                <li>• Advanced pipeline</li>
-              </ul>
-              <Button variant="cta" size="sm" className="w-full mt-4">Get Started</Button>
-            </CardContent>
-          </Card>
-          <Card className="col-span-12 md:col-span-4">
-            <CardContent className="p-4">
-              <p className="text-[13px] font-semibold text-[hsl(var(--foreground))]">Enterprise</p>
-              <p className="text-[11px] text-[hsl(var(--muted-foreground))]">Annual</p>
-              <p className="mt-3 text-2xl font-bold text-[hsl(var(--foreground))]">Custom</p>
-              <ul className="mt-3 space-y-1.5 text-[11px] text-[hsl(var(--muted-foreground))]">
-                <li>• Governance</li>
-                <li>• Model routing</li>
-                <li>• Architecture support</li>
-              </ul>
-              <Button variant="outline" size="sm" className="w-full mt-4">Contact Sales</Button>
-            </CardContent>
-          </Card>
-        </div>
-      </section>
-
-      {/* ═══════════════════════════════════════════════════════════════════════
-          CTA
-      ═══════════════════════════════════════════════════════════════════════ */}
-      <section className="mx-auto w-full max-w-6xl px-5 pb-10 pt-4">
-        <Card className="bg-[hsl(var(--primary))] border-0 text-white">
-          <CardContent className="flex flex-col gap-4 p-5 md:flex-row md:items-center md:justify-between">
+      {/* ── CTA BANNER ─────────────────────────────────────────────────── */}
+      <section className="mx-auto w-full max-w-7xl px-5 pb-0 pt-4 md:px-8">
+        <div className="border-[2px] border-[#111111] p-5" style={{ background: '#111111' }}>
+          <div className="flex flex-col gap-5 p-4 md:flex-row md:items-center md:justify-between">
             <div>
-              <h3 className="text-lg font-bold">Launch your command center.</h3>
-              <p className="mt-1 text-white/70 text-[12px]">Connect your stack and operate from a single surface.</p>
+              <h3 className="font-serif text-2xl font-bold text-white">
+                Build from one execution surface.
+              </h3>
+              <p className="mt-1 text-sm font-mono text-white/70 tracking-wider">
+                CONNECT YOUR STACK // RUN YOUR SALES MOTION WITH AI + OPERATOR CONTROL
+              </p>
             </div>
-            <div className="flex gap-2">
-              <Button asChild className="bg-white text-[hsl(var(--primary))] hover:bg-white/90">
-                <Link href="/workspace">Open Workspace</Link>
-              </Button>
-              <Button asChild variant="outline" className="border-white/30 text-white hover:bg-white/10">
-                <Link href="/integrations">Integrations</Link>
-              </Button>
+            <div className="flex flex-wrap gap-3">
+              <Link href="/workspace" className="ind-btn bg-[#FFFF00] text-[#111111] border-[2px] border-[#111111] hover:bg-white hover:text-[#111111] hover:border-[#111111]">
+                OPEN WORKSPACE
+              </Link>
+              <Link href="/integrations" className="ind-btn-outline border-white/50 text-white hover:bg-white/10 hover:border-white">
+                SEE INTEGRATIONS
+              </Link>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </section>
 
-      {/* Footer */}
-      <footer className="mx-auto w-full max-w-6xl px-5 py-4 text-[10px] text-[hsl(var(--muted-foreground))]">
-        <div className="flex items-center justify-between border-t border-[hsl(var(--border))] pt-3">
-          <p>VelocityOS • Sales AI Command Center</p>
-          <p>Built for revenue teams.</p>
+      {/* ── FOOTER ─────────────────────────────────────────────────────── */}
+      <footer className="mx-auto w-full max-w-7xl px-5 pb-4 pt-6 md:px-8">
+        <div className="caution-stripe-thin mb-4" />
+        <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+          <div className="flex items-center gap-4">
+            <span className="font-mono text-xs font-bold text-[hsl(var(--foreground))]">VELOCITY_OS®</span>
+            <div className="ind-divider-v h-3" />
+            <span className="ind-label">AI-NATIVE SALES EXECUTION</span>
+          </div>
+          <div className="flex items-center gap-4">
+            <span className="ind-label">EST. 2026</span>
+            <div className="ind-divider-v h-3" />
+            <span className="ind-label">SYSTEM_STATUS: <span className="text-[hsl(var(--foreground))] font-bold">OPERATIONAL</span></span>
+          </div>
         </div>
       </footer>
     </main>
