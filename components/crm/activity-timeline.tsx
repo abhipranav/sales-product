@@ -67,7 +67,7 @@ export function ActivityTimeline({
         {/* Log Activity Form */}
         {isFormOpen && (
           <form
-            className="rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--muted))] p-4 space-y-3"
+            className=" border border-[hsl(var(--border))] bg-[hsl(var(--muted))] p-4 space-y-3"
             action={(formData) => {
               startTransition(async () => {
                 await logActivityAction(formData);
@@ -81,7 +81,7 @@ export function ActivityTimeline({
               <select
                 name="type"
                 defaultValue="note"
-                className="rounded-md border border-[hsl(var(--border))] bg-[hsl(var(--background))] px-3 py-2 text-sm"
+                className=" border border-[hsl(var(--border))] bg-[hsl(var(--background))] px-3 py-2 text-sm"
               >
                 <option value="call">📞 Call</option>
                 <option value="email">✉️ Email</option>
@@ -93,7 +93,7 @@ export function ActivityTimeline({
                 type="datetime-local"
                 name="happenedAt"
                 defaultValue={new Date().toISOString().slice(0, 16)}
-                className="rounded-md border border-[hsl(var(--border))] bg-[hsl(var(--background))] px-3 py-2 text-sm flex-1"
+                className=" border border-[hsl(var(--border))] bg-[hsl(var(--background))] px-3 py-2 text-sm flex-1"
               />
             </div>
 
@@ -102,7 +102,7 @@ export function ActivityTimeline({
               required
               placeholder="What happened? Key takeaways, next steps..."
               rows={3}
-              className="w-full rounded-md border border-[hsl(var(--border))] bg-[hsl(var(--background))] px-3 py-2 text-sm placeholder:text-[hsl(var(--muted-foreground))] resize-none"
+              className="w-full  border border-[hsl(var(--border))] bg-[hsl(var(--background))] px-3 py-2 text-sm placeholder:text-[hsl(var(--muted-foreground))] resize-none"
             />
 
             <div className="flex justify-end">
@@ -128,11 +128,11 @@ export function ActivityTimeline({
                 <li key={activity.id} className="relative pl-10">
                   {/* Dot */}
                   <div
-                    className="absolute left-[11px] top-3 h-[10px] w-[10px] rounded-full border-2 border-[hsl(var(--background))]"
+                    className="absolute left-[11px] top-3 h-[10px] w-[10px]  border-2 border-[hsl(var(--background))]"
                     style={{ backgroundColor: typeColors[activity.type] }}
                   />
 
-                  <div className="rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-3">
+                  <div className=" border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-3">
                     <div className="flex items-center gap-2 mb-1.5 flex-wrap">
                       <span className="text-sm">{typeIcons[activity.type]}</span>
                       <Badge variant="secondary" className="capitalize text-xs">

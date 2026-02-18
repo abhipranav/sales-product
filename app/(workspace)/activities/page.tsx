@@ -11,7 +11,7 @@ type ActivityRow = Awaited<ReturnType<typeof listRecentActivities>>[number];
 
 export default async function ActivityFeedPage() {
   const actor = await getActorFromServerContext();
-  const data = await getCachedDashboardData(actor, "/activities");
+  const data = await getCachedDashboardData(actor, "/activities", { includeStrategyPlays: false });
 
   let activities: ActivityRow[] = [];
   try {
@@ -42,20 +42,20 @@ export default async function ActivityFeedPage() {
   return (
     <section className="mx-auto max-w-7xl py-2 md:py-4">
       <header className="mb-6">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">Activity Feed</p>
-        <h2 className="font-['Sora',sans-serif] text-3xl font-bold text-zinc-900">All Activities</h2>
-        <p className="mt-1 text-sm text-zinc-700">
+        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.12em] text-[hsl(var(--muted-foreground))]">ACTIVITY_FEED // TIMELINE</p>
+        <h2 className="font-serif text-3xl font-bold text-[hsl(var(--foreground))]">All Activities</h2>
+        <p className="mt-1 text-sm text-[hsl(var(--muted-foreground))]">
           Unified timeline across all deals.{" · "}
           <Link
             href={`/pipeline/${data.deal.id}` as "/pipeline"}
-            className="text-[hsl(var(--primary))] hover:underline"
+            className="text-[hsl(var(--foreground))] font-bold hover:underline"
           >
             {data.deal.name}
           </Link>
           {" · "}
           <Link
             href={`/accounts/${data.account.id}` as "/accounts"}
-            className="text-[hsl(var(--primary))] hover:underline"
+            className="text-[hsl(var(--foreground))] font-bold hover:underline"
           >
             {data.account.name}
           </Link>
@@ -67,7 +67,7 @@ export default async function ActivityFeedPage() {
         <Card>
           <CardContent className="pt-4 text-center">
             <p className="text-2xl font-bold text-[hsl(var(--foreground))]">{activities.length}</p>
-            <p className="text-xs text-[hsl(var(--muted-foreground))]">Total Activities</p>
+            <p className="font-mono text-[10px] uppercase tracking-wider text-[hsl(var(--muted-foreground))]">TOTAL</p>
           </CardContent>
         </Card>
         {(["call", "email", "meeting", "note"] as const).map((type) => (
@@ -76,7 +76,7 @@ export default async function ActivityFeedPage() {
               <p className="text-2xl font-bold text-[hsl(var(--foreground))]">
                 {typeIcons[type]} {typeCounts[type] || 0}
               </p>
-              <p className="text-xs capitalize text-[hsl(var(--muted-foreground))]">{type}s</p>
+              <p className="font-mono text-[10px] uppercase tracking-wider text-[hsl(var(--muted-foreground))]">{type}S</p>
             </CardContent>
           </Card>
         ))}
@@ -85,25 +85,25 @@ export default async function ActivityFeedPage() {
       {/* Timeline */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Activity Timeline</CardTitle>
+          <CardTitle className="font-mono text-xs uppercase tracking-wider">ACTIVITY_TIMELINE</CardTitle>
         </CardHeader>
         <CardContent>
           {activities.length === 0 ? (
             <p className="text-sm text-[hsl(var(--muted-foreground))] text-center py-8">
               No activities yet. Log your first interaction from a{" "}
-              <Link href="/pipeline" className="text-[hsl(var(--primary))] hover:underline">
+              <Link href="/pipeline" className="text-[hsl(var(--foreground))] font-bold hover:underline">
                 deal detail page
               </Link>.
             </p>
           ) : (
             <div className="relative">
-              <div className="absolute left-4 top-0 bottom-0 w-px bg-[hsl(var(--border))]" />
+              <div className="absolute left-4 top-0 bottom-0 w-[2px] bg-[hsl(var(--border))]" />
 
               <ul className="space-y-4">
                 {activities.map((activity) => (
                   <li key={activity.id} className="relative pl-10">
                     <div
-                      className="absolute left-[11px] top-3 h-[10px] w-[10px] rounded-full border-2 border-[hsl(var(--background))]"
+                      className="absolute left-[11px] top-3 h-[10px] w-[10px] border-2 border-[hsl(var(--background))]"
                       style={{
                         backgroundColor:
                           activity.type === "call"
@@ -116,28 +116,28 @@ export default async function ActivityFeedPage() {
                       }}
                     />
 
-                    <div className="rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-3">
+                    <div className="border-[2px] border-[hsl(var(--border))] bg-[hsl(var(--card))] p-3">
                       <div className="flex items-center gap-2 mb-1.5 flex-wrap">
                         <span className="text-sm">{typeIcons[activity.type]}</span>
-                        <Badge variant="secondary" className="capitalize text-xs">
+                        <Badge variant="secondary" className="uppercase text-[10px]">
                           {activity.type}
                         </Badge>
-                        <span className="text-xs text-[hsl(var(--muted-foreground))]">
+                        <span className="font-mono text-[10px] uppercase tracking-wider text-[hsl(var(--muted-foreground))]">
                           {new Date(activity.happenedAt).toLocaleString()}
                         </span>
                       </div>
 
-                      <div className="flex items-center gap-1 text-xs text-[hsl(var(--muted-foreground))] mb-1">
+                      <div className="flex items-center gap-1 font-mono text-[10px] uppercase tracking-wider text-[hsl(var(--muted-foreground))] mb-1">
                         <Link
                           href={`/pipeline/${activity.dealDisplayId}` as "/pipeline"}
-                          className="hover:text-[hsl(var(--primary))] hover:underline"
+                          className="hover:text-[hsl(var(--foreground))] hover:underline"
                         >
                           {activity.dealName}
                         </Link>
                         <span>·</span>
                         <Link
                           href={`/accounts/${activity.accountId}` as "/accounts"}
-                          className="hover:text-[hsl(var(--primary))] hover:underline"
+                          className="hover:text-[hsl(var(--foreground))] hover:underline"
                         >
                           {activity.accountName}
                         </Link>
