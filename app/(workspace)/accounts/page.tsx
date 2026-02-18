@@ -19,10 +19,10 @@ export default function AccountsPage() {
   return (
     <section className="mx-auto max-w-7xl py-2 md:py-4">
       <header className="mb-6">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[hsl(var(--muted-foreground))]">
-          CRM
+        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.12em] text-[hsl(var(--muted-foreground))]">
+          CRM // ACCOUNTS
         </p>
-        <h2 className="font-['Sora',sans-serif] text-3xl font-bold text-[hsl(var(--foreground))]">
+        <h2 className="font-serif text-3xl font-bold text-[hsl(var(--foreground))]">
           Accounts
         </h2>
         <p className="mt-1 text-sm text-[hsl(var(--muted-foreground))]">
@@ -36,7 +36,7 @@ export default function AccountsPage() {
         <DialogContent>
           <DialogClose onClose={() => setCreateOpen(false)} />
           <DialogHeader>
-            <DialogTitle>Create Account</DialogTitle>
+            <DialogTitle>CREATE ACCOUNT</DialogTitle>
           </DialogHeader>
           <AccountForm
             mode="create"

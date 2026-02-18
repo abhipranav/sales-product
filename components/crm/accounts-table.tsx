@@ -167,6 +167,14 @@ export function AccountsTable({ initialData, onCreateClick }: AccountsTableProps
     }
   };
 
+  const getWebsiteLabel = (website: string) => {
+    try {
+      return new URL(website).hostname;
+    } catch {
+      return website.replace(/^https?:\/\//, "");
+    }
+  };
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
@@ -208,7 +216,7 @@ export function AccountsTable({ initialData, onCreateClick }: AccountsTableProps
       <CardContent>
         {/* Bulk Action Bar */}
         {selectedIds.size > 0 && (
-          <div className="mb-4 flex items-center gap-3 rounded-lg border border-[hsl(var(--primary)/0.3)] bg-[hsl(var(--primary)/0.05)] p-3">
+          <div className="mb-4 flex items-center gap-3  border border-[hsl(var(--primary)/0.3)] bg-[hsl(var(--primary)/0.05)] p-3">
             <span className="text-sm font-medium text-[hsl(var(--foreground))]">
               {selectedIds.size} selected
             </span>
@@ -342,7 +350,7 @@ export function AccountsTable({ initialData, onCreateClick }: AccountsTableProps
                             rel="noopener noreferrer"
                             className="text-sm text-[hsl(var(--primary))] hover:underline"
                           >
-                            {new URL(account.website).hostname}
+                            {getWebsiteLabel(account.website)}
                           </a>
                         ) : (
                           <span className="text-sm text-[hsl(var(--muted-foreground))]">—</span>

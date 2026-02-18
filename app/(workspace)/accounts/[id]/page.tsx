@@ -63,7 +63,7 @@ export default async function AccountDetailPage({ params }: PageProps) {
       {/* Header */}
       <header className="mb-6 flex items-start justify-between">
         <div>
-          <h1 className="font-['Sora',sans-serif] text-3xl font-bold text-[hsl(var(--foreground))]">
+          <h1 className="font-serif text-3xl font-bold text-[hsl(var(--foreground))]">
             {account.name}
           </h1>
           <div className="mt-2 flex flex-wrap items-center gap-2">
@@ -132,7 +132,7 @@ export default async function AccountDetailPage({ params }: PageProps) {
                 {account.contacts.map((contact) => (
                   <li
                     key={contact.id}
-                    className="flex items-center justify-between rounded-md border border-[hsl(var(--border))] p-3 transition-colors hover:bg-[hsl(var(--muted)/0.5)]"
+                    className="flex items-center justify-between  border border-[hsl(var(--border))] p-3 transition-colors hover:bg-[hsl(var(--muted)/0.5)]"
                   >
                     <div>
                       <Link
@@ -170,7 +170,7 @@ export default async function AccountDetailPage({ params }: PageProps) {
                 {account.deals.map((deal) => (
                   <li
                     key={deal.id}
-                    className="rounded-md border border-[hsl(var(--border))] p-3"
+                    className=" border border-[hsl(var(--border))] p-3"
                   >
                     <div className="flex items-start justify-between">
                       <div>
@@ -215,7 +215,7 @@ export default async function AccountDetailPage({ params }: PageProps) {
                 {account.signals.map((signal) => (
                   <li
                     key={signal.id}
-                    className="flex items-center justify-between rounded-md border border-[hsl(var(--border))] p-3"
+                    className="flex items-center justify-between  border border-[hsl(var(--border))] p-3"
                   >
                     <div>
                       <p className="font-medium text-[hsl(var(--foreground))]">{signal.summary}</p>
