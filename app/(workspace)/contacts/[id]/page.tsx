@@ -49,7 +49,7 @@ export default async function ContactDetailPage({ params }: PageProps) {
       {/* Header */}
       <header className="mb-6 flex items-start justify-between">
         <div>
-          <h1 className="font-['Sora',sans-serif] text-3xl font-bold text-[hsl(var(--foreground))]">
+          <h1 className="font-serif text-3xl font-bold text-[hsl(var(--foreground))]">
             {contact.fullName}
           </h1>
           <p className="mt-1 text-lg text-[hsl(var(--muted-foreground))]">{contact.title}</p>
@@ -119,7 +119,7 @@ export default async function ContactDetailPage({ params }: PageProps) {
             <CardTitle>Account</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="rounded-md border border-[hsl(var(--border))] p-4">
+            <div className=" border border-[hsl(var(--border))] p-4">
               <Link
                 href={`/accounts/${contact.account.id}`}
                 className="font-medium text-[hsl(var(--foreground))] hover:text-[hsl(var(--primary))] hover:underline"
@@ -145,7 +145,7 @@ export default async function ContactDetailPage({ params }: PageProps) {
                 {contact.recentSequences.map((seq) => (
                   <li
                     key={seq.id}
-                    className="flex items-center justify-between rounded-md border border-[hsl(var(--border))] p-3"
+                    className="flex items-center justify-between  border border-[hsl(var(--border))] p-3"
                   >
                     <div>
                       <p className="font-medium text-[hsl(var(--foreground))]">{seq.title}</p>

@@ -20,7 +20,6 @@ export default function ContactsPage() {
   const [accounts, setAccounts] = useState<Array<{ id: string; name: string }>>([]);
 
   useEffect(() => {
-    // Fetch accounts for the create form
     fetch("/api/accounts?limit=100")
       .then((res) => res.json())
       .then((data) => {
@@ -34,10 +33,10 @@ export default function ContactsPage() {
   return (
     <section className="mx-auto max-w-7xl py-2 md:py-4">
       <header className="mb-6">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[hsl(var(--muted-foreground))]">
-          CRM
+        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.12em] text-[hsl(var(--muted-foreground))]">
+          CRM // CONTACTS
         </p>
-        <h2 className="font-['Sora',sans-serif] text-3xl font-bold text-[hsl(var(--foreground))]">
+        <h2 className="font-serif text-3xl font-bold text-[hsl(var(--foreground))]">
           Contacts
         </h2>
         <p className="mt-1 text-sm text-[hsl(var(--muted-foreground))]">
@@ -54,7 +53,7 @@ export default function ContactsPage() {
         <DialogContent>
           <DialogClose onClose={() => setCreateOpen(false)} />
           <DialogHeader>
-            <DialogTitle>Create Contact</DialogTitle>
+            <DialogTitle>CREATE CONTACT</DialogTitle>
           </DialogHeader>
           <ContactForm
             mode="create"
