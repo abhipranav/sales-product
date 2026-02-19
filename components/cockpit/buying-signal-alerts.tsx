@@ -19,15 +19,15 @@ export function BuyingSignalAlerts({ deal, signals }: BuyingSignalAlertsProps) {
       <CardContent>
         <ul className="space-y-2">
           {alerts.map((alert) => (
-            <li key={alert.id} className="rounded-lg border border-zinc-200 bg-zinc-50 p-3 dark:border-zinc-800 dark:bg-zinc-900">
+            <li key={alert.id} className=" border border-[hsl(var(--border))] bg-[hsl(var(--muted))] p-3 dark:border-[hsl(var(--border))] dark:bg-[hsl(var(--foreground))]">
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">{alert.summary}</p>
+                <p className="text-sm font-medium text-[hsl(var(--foreground))] dark:text-[hsl(var(--foreground))]">{alert.summary}</p>
                 <Badge variant={alert.priority === "high" ? "destructive" : alert.priority === "medium" ? "warning" : "secondary"}>
                   {alert.priority}
                 </Badge>
               </div>
-              <p className="mt-1 text-xs text-zinc-600 dark:text-zinc-400">{alert.detail}</p>
-              <p className="mt-1 text-xs text-zinc-700 dark:text-zinc-300">{alert.recommendedAction}</p>
+              <p className="mt-1 text-xs text-[hsl(var(--muted-foreground))] dark:text-[hsl(var(--muted-foreground))]">{alert.detail}</p>
+              <p className="mt-1 text-xs text-[hsl(var(--muted-foreground))] dark:text-[hsl(var(--muted-foreground))]">{alert.recommendedAction}</p>
             </li>
           ))}
         </ul>

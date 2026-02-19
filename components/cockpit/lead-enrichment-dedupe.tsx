@@ -20,31 +20,31 @@ export function LeadEnrichmentDedupe({ contacts, signals }: LeadEnrichmentDedupe
       <CardContent className="space-y-4">
         <ul className="space-y-2">
           {enriched.map((contact) => (
-            <li key={contact.contactId} className="rounded-lg border border-zinc-200 bg-zinc-50 p-3 dark:border-zinc-800 dark:bg-zinc-900">
+            <li key={contact.contactId} className=" border border-[hsl(var(--border))] bg-[hsl(var(--muted))] p-3 dark:border-[hsl(var(--border))] dark:bg-[hsl(var(--foreground))]">
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+                <p className="text-sm font-semibold text-[hsl(var(--foreground))] dark:text-[hsl(var(--foreground))]">
                   {contact.fullName} · {contact.title}
                 </p>
                 <Badge variant={contact.engagementPriority === "high" ? "success" : contact.engagementPriority === "medium" ? "warning" : "secondary"}>
                   {contact.influenceScore}
                 </Badge>
               </div>
-              <p className="mt-1 text-xs text-zinc-600 dark:text-zinc-400">
+              <p className="mt-1 text-xs text-[hsl(var(--muted-foreground))] dark:text-[hsl(var(--muted-foreground))]">
                 {contact.persona} · role {contact.role}
               </p>
-              <p className="mt-1 text-xs text-zinc-700 dark:text-zinc-300">{contact.recommendedAngle}</p>
+              <p className="mt-1 text-xs text-[hsl(var(--muted-foreground))] dark:text-[hsl(var(--muted-foreground))]">{contact.recommendedAngle}</p>
             </li>
           ))}
         </ul>
 
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-zinc-500 dark:text-zinc-400">Potential Duplicates</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[hsl(var(--muted-foreground))] dark:text-[hsl(var(--muted-foreground))]">Potential Duplicates</p>
           {dedupeClusters.length === 0 ? (
-            <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">No duplicate candidates found.</p>
+            <p className="mt-1 text-sm text-[hsl(var(--muted-foreground))] dark:text-[hsl(var(--muted-foreground))]">No duplicate candidates found.</p>
           ) : (
             <ul className="mt-2 space-y-2">
               {dedupeClusters.map((cluster) => (
-                <li key={cluster.key} className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900 dark:border-amber-700 dark:bg-amber-950/30 dark:text-amber-200">
+                <li key={cluster.key} className=" border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900 dark:border-amber-700 dark:bg-amber-950/30 dark:text-amber-200">
                   <p className="font-medium">Reason: {cluster.reason === "email" ? "same email" : "same name + title"}</p>
                   <p className="text-xs">{cluster.contacts.map((contact) => contact.fullName).join(" · ")}</p>
                 </li>

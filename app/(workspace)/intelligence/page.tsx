@@ -17,20 +17,20 @@ export default async function IntelligencePage() {
   return (
     <section className="mx-auto max-w-7xl py-2 md:py-4">
       <header className="mb-6">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">Intelligence</p>
-        <h2 className="font-['Sora',sans-serif] text-3xl font-bold text-zinc-900">Deal Intelligence Studio</h2>
-        <p className="mt-1 text-sm text-zinc-700">
+        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.12em] text-[hsl(var(--muted-foreground))]">INTELLIGENCE // DEAL_STUDIO</p>
+        <h2 className="font-serif text-3xl font-bold text-[hsl(var(--foreground))]">Deal Intelligence Studio</h2>
+        <p className="mt-1 text-sm text-[hsl(var(--muted-foreground))]">
           From transcripts and signals to next-best strategic moves.{" · "}
           <Link
             href={`/pipeline/${data.deal.id}` as "/pipeline"}
-            className="text-[hsl(var(--primary))] hover:underline"
+            className="text-[hsl(var(--foreground))] font-bold hover:underline"
           >
             {data.deal.name}
           </Link>
           {" · "}
           <Link
             href={`/accounts/${data.account.id}` as "/accounts"}
-            className="text-[hsl(var(--primary))] hover:underline"
+            className="text-[hsl(var(--foreground))] font-bold hover:underline"
           >
             {data.account.name}
           </Link>
@@ -39,35 +39,35 @@ export default async function IntelligencePage() {
 
       <section className="mb-4 grid gap-4 md:grid-cols-3">
         <Link href="/notifications" className="block">
-          <Card className="h-full transition-colors hover:border-[hsl(var(--primary)/0.3)] cursor-pointer">
+          <Card className="h-full transition-all duration-150 hover:bg-[hsl(var(--foreground))] hover:text-[hsl(var(--background))] cursor-pointer group">
             <CardHeader>
-              <CardTitle className="text-base">Signal Strength</CardTitle>
+              <CardTitle className="font-mono text-xs uppercase tracking-wider group-hover:text-[hsl(var(--background))]">SIGNAL_STRENGTH</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-2xl font-bold text-zinc-900">
+              <p className="text-2xl font-bold text-[hsl(var(--foreground))] group-hover:text-[hsl(var(--background))]">
                 {Math.round(data.account.signals.reduce((sum, signal) => sum + signal.score, 0) / data.account.signals.length || 0)}
               </p>
-              <p className="text-sm text-zinc-600">Average account signal score</p>
+              <p className="font-mono text-[10px] uppercase tracking-wider text-[hsl(var(--muted-foreground))] group-hover:text-[hsl(var(--background))]/60">Average account signal score</p>
             </CardContent>
           </Card>
         </Link>
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Strategy Plays</CardTitle>
+            <CardTitle className="font-mono text-xs uppercase tracking-wider">STRATEGY_PLAYS</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold text-zinc-900">{data.strategyPlays.length}</p>
-            <p className="text-sm text-zinc-600">AI-generated active plays</p>
+            <p className="text-2xl font-bold text-[hsl(var(--foreground))]">{data.strategyPlays.length}</p>
+            <p className="font-mono text-[10px] uppercase tracking-wider text-[hsl(var(--muted-foreground))]">AI-generated active plays</p>
           </CardContent>
         </Card>
         <Link href={`/pipeline/${data.deal.id}` as "/pipeline"} className="block">
-          <Card className="h-full transition-colors hover:border-[hsl(var(--primary)/0.3)] cursor-pointer">
+          <Card className="h-full transition-all duration-150 hover:bg-[hsl(var(--foreground))] hover:text-[hsl(var(--background))] cursor-pointer group">
             <CardHeader>
-              <CardTitle className="text-base">Current Stage</CardTitle>
+              <CardTitle className="font-mono text-xs uppercase tracking-wider group-hover:text-[hsl(var(--background))]">CURRENT_STAGE</CardTitle>
             </CardHeader>
             <CardContent>
               <Badge variant="secondary">{data.deal.stage}</Badge>
-              <p className="mt-2 text-sm text-zinc-600">Confidence {Math.round(data.deal.confidence * 100)}%</p>
+              <p className="mt-2 font-mono text-[10px] uppercase tracking-wider text-[hsl(var(--muted-foreground))] group-hover:text-[hsl(var(--background))]/60">Confidence {Math.round(data.deal.confidence * 100)}%</p>
             </CardContent>
           </Card>
         </Link>
