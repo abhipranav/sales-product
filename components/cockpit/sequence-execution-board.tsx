@@ -52,7 +52,7 @@ export function SequenceExecutionBoard({ dealId, contacts, sequences }: Sequence
         <Badge variant="secondary">{sequences.length} active records</Badge>
       </CardHeader>
       <CardContent className="space-y-4">
-        <form action={createSequenceExecutionAction} className="grid gap-2 rounded-xl border border-zinc-200 bg-zinc-50 p-3">
+        <form action={createSequenceExecutionAction} className="grid gap-2  border border-[hsl(var(--border))] bg-[hsl(var(--muted))] p-3">
           <input type="hidden" name="dealId" value={dealId} />
           <Input name="title" required minLength={3} maxLength={180} placeholder="Sequence title..." />
           <div className="grid gap-2 md:grid-cols-2">
@@ -76,15 +76,15 @@ export function SequenceExecutionBoard({ dealId, contacts, sequences }: Sequence
         </form>
 
         {sequences.length === 0 ? (
-          <p className="text-sm text-zinc-600">No sequence records yet. Create one above to start execution tracking.</p>
+          <p className="text-sm text-[hsl(var(--muted-foreground))]">No sequence records yet. Create one above to start execution tracking.</p>
         ) : (
           <ul className="space-y-4">
             {sequences.map((sequence) => (
-              <li key={sequence.id} className="rounded-xl border border-zinc-200 bg-white p-3 dark:border-zinc-800 dark:bg-zinc-950">
+              <li key={sequence.id} className=" border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-3 dark:border-[hsl(var(--border))] dark:bg-[hsl(var(--foreground))]">
                 <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
                   <div>
-                    <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">{sequence.title}</p>
-                    <p className="text-xs text-zinc-600 dark:text-zinc-400">
+                    <p className="text-sm font-semibold text-[hsl(var(--foreground))] dark:text-[hsl(var(--foreground))]">{sequence.title}</p>
+                    <p className="text-xs text-[hsl(var(--muted-foreground))] dark:text-[hsl(var(--muted-foreground))]">
                       <Link
                         href={`/pipeline/${sequence.dealId}` as "/pipeline"}
                         className="text-[hsl(var(--primary))] hover:underline"
@@ -112,12 +112,12 @@ export function SequenceExecutionBoard({ dealId, contacts, sequences }: Sequence
 
                 <ol className="space-y-2">
                   {sequence.steps.map((step) => (
-                    <li key={step.id} className="rounded-lg border border-zinc-200 bg-zinc-50 p-2 dark:border-zinc-800 dark:bg-zinc-900">
-                      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-zinc-500 dark:text-zinc-400">
+                    <li key={step.id} className=" border border-[hsl(var(--border))] bg-[hsl(var(--muted))] p-2 dark:border-[hsl(var(--border))] dark:bg-[hsl(var(--foreground))]">
+                      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[hsl(var(--muted-foreground))] dark:text-[hsl(var(--muted-foreground))]">
                         Step {step.order} · {step.channel}
                       </p>
-                      <p className="mt-1 text-sm text-zinc-900 dark:text-zinc-100">{step.instruction}</p>
-                      <p className="mt-1 text-xs text-zinc-600 dark:text-zinc-400">
+                      <p className="mt-1 text-sm text-[hsl(var(--foreground))] dark:text-[hsl(var(--foreground))]">{step.instruction}</p>
+                      <p className="mt-1 text-xs text-[hsl(var(--muted-foreground))] dark:text-[hsl(var(--muted-foreground))]">
                         {step.completedAt ? `Completed ${new Date(step.completedAt).toLocaleString()}` : "Not completed"}
                       </p>
                       <form action={updateSequenceStepAction} className="mt-2 grid gap-2 md:grid-cols-[0.8fr_1.2fr_auto]">

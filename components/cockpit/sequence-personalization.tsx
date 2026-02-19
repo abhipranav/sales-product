@@ -23,9 +23,9 @@ export function SequencePersonalization({ contacts, deal, signals }: SequencePer
       <CardContent>
         <ul className="space-y-3">
           {plans.map((plan) => (
-            <li key={plan.id} className="rounded-lg border border-zinc-200 bg-zinc-50 p-3 dark:border-zinc-800 dark:bg-zinc-900">
+            <li key={plan.id} className=" border border-[hsl(var(--border))] bg-[hsl(var(--muted))] p-3 dark:border-[hsl(var(--border))] dark:bg-[hsl(var(--foreground))]">
               <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-                <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+                <p className="text-sm font-semibold text-[hsl(var(--foreground))] dark:text-[hsl(var(--foreground))]">
                   <Link
                     href={`/contacts/${plan.contactId}` as "/contacts"}
                     className="hover:text-[hsl(var(--primary))] hover:underline"
@@ -36,7 +36,7 @@ export function SequencePersonalization({ contacts, deal, signals }: SequencePer
                 </p>
                 <Badge variant="outline">{plan.channelMix.join(" · ")}</Badge>
               </div>
-              <ol className="space-y-1 text-xs text-zinc-700 dark:text-zinc-300">
+              <ol className="space-y-1 text-xs text-[hsl(var(--muted-foreground))] dark:text-[hsl(var(--muted-foreground))]">
                 {plan.steps.map((step) => (
                   <li key={step}>• {step}</li>
                 ))}

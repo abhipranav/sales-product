@@ -12,7 +12,7 @@ import { WorkspaceAccessDeniedError } from "@/lib/services/workspace";
 
 export default async function WorkflowsPage() {
   const actor = await getActorFromServerContext();
-  const data = await getCachedDashboardData(actor, "/workflows");
+  const data = await getCachedDashboardData(actor, "/workflows", { includeStrategyPlays: false });
   let sequenceExecutions: Awaited<ReturnType<typeof listSequenceExecutions>> = [];
 
   try {
@@ -33,20 +33,20 @@ export default async function WorkflowsPage() {
   return (
     <section className="mx-auto max-w-7xl py-2 md:py-4">
       <header className="mb-6">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">Workflows</p>
-        <h2 className="font-['Sora',sans-serif] text-3xl font-bold text-zinc-900">Execution Orchestrator</h2>
-        <p className="mt-1 text-sm text-zinc-700">
+        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.12em] text-[hsl(var(--muted-foreground))]">WORKFLOWS // ORCHESTRATOR</p>
+        <h2 className="font-serif text-3xl font-bold text-[hsl(var(--foreground))]">Execution Orchestrator</h2>
+        <p className="mt-1 text-sm text-[hsl(var(--muted-foreground))]">
           Task engine, human approvals, and auditability for every action.{" · "}
           <Link
             href={`/pipeline/${data.deal.id}` as "/pipeline"}
-            className="text-[hsl(var(--primary))] hover:underline"
+            className="text-[hsl(var(--foreground))] font-bold hover:underline"
           >
             {data.deal.name}
           </Link>
           {" · "}
           <Link
             href={`/accounts/${data.account.id}` as "/accounts"}
-            className="text-[hsl(var(--primary))] hover:underline"
+            className="text-[hsl(var(--foreground))] font-bold hover:underline"
           >
             {data.account.name}
           </Link>
@@ -55,32 +55,32 @@ export default async function WorkflowsPage() {
 
       <section className="mb-4 grid gap-4 md:grid-cols-3">
         <Link href="/cockpit" className="block">
-          <Card className="h-full transition-colors hover:border-[hsl(var(--primary)/0.3)] cursor-pointer">
+          <Card className="h-full transition-all duration-150 hover:bg-[hsl(var(--foreground))] hover:text-[hsl(var(--background))] cursor-pointer group">
             <CardHeader>
-              <CardTitle className="text-base">Open Tasks</CardTitle>
+              <CardTitle className="font-mono text-xs uppercase tracking-wider group-hover:text-[hsl(var(--background))]">OPEN_TASKS</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-2xl font-bold text-zinc-900">{openTasks}</p>
-              <p className="text-sm text-zinc-600">Across rep, manager, and system owners</p>
+              <p className="text-2xl font-bold text-[hsl(var(--foreground))] group-hover:text-[hsl(var(--background))]">{openTasks}</p>
+              <p className="font-mono text-[10px] uppercase tracking-wider text-[hsl(var(--muted-foreground))] group-hover:text-[hsl(var(--background))]/60">Across rep, manager, and system owners</p>
             </CardContent>
           </Card>
         </Link>
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Pending Approvals</CardTitle>
+            <CardTitle className="font-mono text-xs uppercase tracking-wider">PENDING_APPROVALS</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold text-zinc-900">{pendingApprovals}</p>
-            <p className="text-sm text-zinc-600">Outbound communication waiting for review</p>
+            <p className="text-2xl font-bold text-[hsl(var(--foreground))]">{pendingApprovals}</p>
+            <p className="font-mono text-[10px] uppercase tracking-wider text-[hsl(var(--muted-foreground))]">Outbound communication waiting for review</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Audit Coverage</CardTitle>
+            <CardTitle className="font-mono text-xs uppercase tracking-wider">AUDIT_COVERAGE</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
-            <Badge variant="success">Tracked</Badge>
-            <p className="text-sm text-zinc-600">Every workflow action is written to execution audit logs.</p>
+            <Badge variant="success">TRACKED</Badge>
+            <p className="font-mono text-[10px] uppercase tracking-wider text-[hsl(var(--muted-foreground))]">Every workflow action is written to execution audit logs.</p>
           </CardContent>
         </Card>
       </section>
