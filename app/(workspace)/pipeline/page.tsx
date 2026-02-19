@@ -6,7 +6,6 @@ import { Card, CardContent } from "@/components/ui/card";
 export default async function PipelinePage() {
   const actor = await getActorFromServerContext();
 
-  // Fetch all deals for pipeline view
   const { items: deals, total } = await listDeals(
     { stages: ["discovery", "evaluation", "proposal", "procurement", "closed-won", "closed-lost"] },
     { limit: 100 },
@@ -14,7 +13,6 @@ export default async function PipelinePage() {
     actor
   ).catch(() => ({ items: [], total: 0, hasMore: false }));
 
-  // Calculate pipeline metrics
   const openDeals = deals.filter((d) => !["closed-won", "closed-lost"].includes(d.stage));
   const totalPipelineValue = openDeals.reduce((sum, d) => sum + d.amount, 0);
   const weightedValue = openDeals.reduce((sum, d) => sum + d.amount * d.confidence, 0);
@@ -24,10 +22,10 @@ export default async function PipelinePage() {
   return (
     <section className="mx-auto max-w-full py-2 md:py-4 px-4">
       <header className="mb-6">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[hsl(var(--muted-foreground))]">
-          CRM
+        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.12em] text-[hsl(var(--muted-foreground))]">
+          CRM // PIPELINE
         </p>
-        <h2 className="font-['Sora',sans-serif] text-3xl font-bold text-[hsl(var(--foreground))]">
+        <h2 className="font-serif text-3xl font-bold text-[hsl(var(--foreground))]">
           Pipeline
         </h2>
         <p className="mt-1 text-sm text-[hsl(var(--muted-foreground))]">
@@ -40,7 +38,7 @@ export default async function PipelinePage() {
         <Card>
           <CardContent className="pt-4">
             <p className="text-2xl font-bold text-[hsl(var(--foreground))]">{total}</p>
-            <p className="text-xs text-[hsl(var(--muted-foreground))]">Total Deals</p>
+            <p className="font-mono text-[10px] uppercase tracking-wider text-[hsl(var(--muted-foreground))]">TOTAL_DEALS</p>
           </CardContent>
         </Card>
         <Card>
@@ -48,7 +46,7 @@ export default async function PipelinePage() {
             <p className="text-2xl font-bold text-[hsl(var(--foreground))]">
               ${totalPipelineValue.toLocaleString()}
             </p>
-            <p className="text-xs text-[hsl(var(--muted-foreground))]">Pipeline Value</p>
+            <p className="font-mono text-[10px] uppercase tracking-wider text-[hsl(var(--muted-foreground))]">PIPELINE_VALUE</p>
           </CardContent>
         </Card>
         <Card>
@@ -56,7 +54,7 @@ export default async function PipelinePage() {
             <p className="text-2xl font-bold text-[hsl(var(--foreground))]">
               ${Math.round(weightedValue).toLocaleString()}
             </p>
-            <p className="text-xs text-[hsl(var(--muted-foreground))]">Weighted Value</p>
+            <p className="font-mono text-[10px] uppercase tracking-wider text-[hsl(var(--muted-foreground))]">WEIGHTED</p>
           </CardContent>
         </Card>
         <Card>
@@ -64,12 +62,11 @@ export default async function PipelinePage() {
             <p className="text-2xl font-bold text-[hsl(var(--success))]">
               ${wonValue.toLocaleString()}
             </p>
-            <p className="text-xs text-[hsl(var(--muted-foreground))]">Won This Period</p>
+            <p className="font-mono text-[10px] uppercase tracking-wider text-[hsl(var(--muted-foreground))]">WON_PERIOD</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Pipeline Board */}
       {deals.length === 0 ? (
         <Card>
           <CardContent className="py-12 text-center">

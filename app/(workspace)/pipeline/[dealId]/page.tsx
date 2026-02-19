@@ -65,7 +65,7 @@ export default async function DealDetailPage({ params }: PageProps) {
               ← Back to Pipeline
             </Link>
           </div>
-          <h1 className="font-['Sora',sans-serif] text-3xl font-bold text-[hsl(var(--foreground))]">
+          <h1 className="font-serif text-3xl font-bold text-[hsl(var(--foreground))]">
             {deal.name}
           </h1>
           <div className="mt-2 flex flex-wrap items-center gap-2">
@@ -157,7 +157,7 @@ export default async function DealDetailPage({ params }: PageProps) {
               ) : (
                 <ul className="space-y-3">
                   {deal.tasks.map((task) => (
-                    <li key={task.id} className="rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--muted))] p-3">
+                    <li key={task.id} className=" border border-[hsl(var(--border))] bg-[hsl(var(--muted))] p-3">
                       <div className="flex items-start justify-between gap-2">
                         <p className="font-medium text-[hsl(var(--foreground))]">{task.title}</p>
                         <Badge variant={task.priority === "high" ? "destructive" : task.priority === "low" ? "success" : "warning"}>

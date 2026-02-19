@@ -108,7 +108,29 @@ export function PipelineBoard({ initialDeals }: PipelineBoardProps) {
     }
   }, [deals]);
 
-  const getDealsForStage = (stage: Stage) => deals.filter((d) => d.stage === stage);
+  const attentionScore = (deal: Deal) => {
+    const now = Date.now();
+    const closeAt = new Date(deal.closeDate).getTime();
+    const daysToClose = Math.ceil((closeAt - now) / (1000 * 60 * 60 * 24));
+
+    const closePressure =
+      daysToClose <= 0 ? 120 : daysToClose <= 7 ? 90 : daysToClose <= 14 ? 65 : daysToClose <= 30 ? 40 : 20;
+    const confidenceRisk = Math.round((1 - deal.confidence) * 60);
+    const valueWeight = Math.min(25, Math.round(deal.amount / 10000));
+    const noTaskPenalty = deal.taskCount === 0 ? 20 : 0;
+
+    return closePressure + confidenceRisk + valueWeight + noTaskPenalty;
+  };
+
+  const getDealsForStage = (stage: Stage) => {
+    const stageDeals = deals.filter((d) => d.stage === stage);
+
+    if (stage === "closed-won" || stage === "closed-lost") {
+      return [...stageDeals].sort((a, b) => new Date(b.closeDate).getTime() - new Date(a.closeDate).getTime());
+    }
+
+    return [...stageDeals].sort((a, b) => attentionScore(b) - attentionScore(a));
+  };
 
   const getTotalForStage = (stage: Stage) =>
     deals
@@ -157,7 +179,7 @@ function StageColumn({ stage, deals, total }: StageColumnProps) {
     <div
       ref={setNodeRef}
       className={`
-        flex-shrink-0 w-72 rounded-lg border transition-colors
+        flex-shrink-0 w-72  border transition-colors
         ${isOver ? "border-[hsl(var(--primary))] bg-[hsl(var(--primary)/0.05)]" : "border-[hsl(var(--border))] bg-[hsl(var(--card))]"}
       `}
     >
@@ -230,7 +252,7 @@ function DealCard({ deal, isDragging }: DealCardProps) {
     <Card
       className={`
         cursor-grab active:cursor-grabbing transition-shadow
-        ${isDragging ? "shadow-lg ring-2 ring-[hsl(var(--primary))]" : "hover:shadow-md"}
+        ${isDragging ? " ring-2 ring-[hsl(var(--primary))]" : "hover:"}
       `}
     >
       <CardContent className="p-3 space-y-2">
