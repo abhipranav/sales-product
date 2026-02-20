@@ -32,10 +32,10 @@ export function PipelineMetricsStrip({ metrics }: PipelineMetricsProps) {
   return (
     <section className="reveal reveal-delay-1 grid gap-3 md:grid-cols-5">
       {cards.map((card) => (
-        <Card key={card.label} className="rounded-xl">
+        <Card key={card.label} className="">
           <CardContent className="p-4">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-zinc-500">{card.label}</p>
-            <p className="mt-1 text-lg font-semibold text-zinc-900">{card.value}</p>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[hsl(var(--muted-foreground))]">{card.label}</p>
+            <p className="mt-1 text-lg font-semibold text-[hsl(var(--foreground))]">{card.value}</p>
           </CardContent>
         </Card>
       ))}

@@ -39,7 +39,7 @@ export function StakeholderMap({ contacts }: StakeholderMapProps) {
           {roleCards.map((card) => {
             const roleContacts = getContactsByRole(contacts, card.role);
             return (
-              <div key={card.role} className="rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--muted))] p-3">
+              <div key={card.role} className=" border border-[hsl(var(--border))] bg-[hsl(var(--muted))] p-3">
                 <p className="text-xs uppercase tracking-[0.14em] text-[hsl(var(--muted-foreground))]">{card.label}</p>
                 <Badge variant={card.hasVariant ? card.variantTrue : card.variantFalse}>
                   {card.hasVariant ? card.statusTrue : card.statusFalse}
@@ -69,7 +69,7 @@ export function StakeholderMap({ contacts }: StakeholderMapProps) {
           })}
         </div>
 
-        <div className="rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-3 text-sm text-[hsl(var(--foreground))]">
+        <div className=" border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-3 text-sm text-[hsl(var(--foreground))]">
           {coverage.gapSummary}
         </div>
 

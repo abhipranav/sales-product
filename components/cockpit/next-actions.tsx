@@ -19,7 +19,7 @@ export function NextActions({ dealId, tasks }: NextActionsProps) {
         <Badge variant="secondary">Task Engine</Badge>
       </CardHeader>
       <CardContent>
-        <form action={createTaskAction} className="mb-4 grid gap-2 rounded-md border border-[hsl(var(--border))] bg-[hsl(var(--muted))] p-3 md:grid-cols-[1.4fr_0.9fr_0.9fr_auto]">
+        <form action={createTaskAction} className="mb-4 grid gap-2  border border-[hsl(var(--border))] bg-[hsl(var(--muted))] p-3 md:grid-cols-[1.4fr_0.9fr_0.9fr_auto]">
           <input type="hidden" name="dealId" value={dealId} />
           <Input type="text" name="title" required minLength={3} placeholder="Add follow-up task..." />
           <Input type="datetime-local" name="dueAt" required />
@@ -45,7 +45,7 @@ export function NextActions({ dealId, tasks }: NextActionsProps) {
         </form>
         <ul className="space-y-3">
           {tasks.map((task) => (
-            <li key={task.id} className="rounded-md border border-[hsl(var(--border))] bg-[hsl(var(--muted))] p-3">
+            <li key={task.id} className=" border border-[hsl(var(--border))] bg-[hsl(var(--muted))] p-3">
               <div className="mb-1 flex items-start justify-between gap-2">
                 <p className="font-medium text-[hsl(var(--foreground))]">{task.title}</p>
                 <Badge variant={task.priority === "high" ? "destructive" : task.priority === "low" ? "success" : "warning"}>

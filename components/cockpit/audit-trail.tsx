@@ -14,13 +14,13 @@ export function AuditTrail({ events }: AuditTrailProps) {
       <CardContent>
         <ul className="space-y-2">
           {events.length === 0 ? (
-            <li className="rounded-lg bg-zinc-50 p-3 text-sm text-zinc-600">No audit events yet.</li>
+            <li className=" bg-[hsl(var(--muted))] p-3 text-sm text-[hsl(var(--muted-foreground))]">No audit events yet.</li>
           ) : (
             events.map((event) => (
-              <li key={event.id} className="rounded-lg bg-zinc-50 p-3 text-sm text-zinc-700">
-                <p className="font-medium text-zinc-900">{event.action}</p>
+              <li key={event.id} className=" bg-[hsl(var(--muted))] p-3 text-sm text-[hsl(var(--muted-foreground))]">
+                <p className="font-medium text-[hsl(var(--foreground))]">{event.action}</p>
                 <p>{event.details}</p>
-                <p className="mt-1 text-xs text-zinc-500">
+                <p className="mt-1 text-xs text-[hsl(var(--muted-foreground))]">
                   {event.actor} · {new Date(event.happenedAt).toLocaleString()}
                 </p>
               </li>

@@ -22,36 +22,36 @@ export function DealHealth({ deal, contacts, signals }: DealHealthProps) {
         </Link>
       </CardHeader>
       <CardContent>
-        <div className="grid gap-2 text-sm text-zinc-700">
+        <div className="grid gap-2 text-sm text-[hsl(var(--muted-foreground))]">
           <p>
-            <span className="font-semibold text-zinc-900">Stage:</span>{" "}
+            <span className="font-semibold text-[hsl(var(--foreground))]">Stage:</span>{" "}
             <Link href="/pipeline" className="text-[hsl(var(--primary))] hover:underline">
               {deal.stage}
             </Link>
           </p>
           <p>
-            <span className="font-semibold text-zinc-900">Confidence:</span> {Math.round(deal.confidence * 100)}%
+            <span className="font-semibold text-[hsl(var(--foreground))]">Confidence:</span> {Math.round(deal.confidence * 100)}%
           </p>
           <p>
-            <span className="font-semibold text-zinc-900">Risk:</span> {deal.riskSummary}
+            <span className="font-semibold text-[hsl(var(--foreground))]">Risk:</span> {deal.riskSummary}
           </p>
         </div>
 
         <div className="mt-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-500">Stakeholders</h3>
+            <h3 className="text-xs font-semibold uppercase tracking-[0.16em] text-[hsl(var(--muted-foreground))]">Stakeholders</h3>
             <Link href="/contacts" className="text-xs text-[hsl(var(--primary))] hover:underline">
               View All
             </Link>
           </div>
-          <ul className="mt-2 space-y-1 text-sm text-zinc-700">
+          <ul className="mt-2 space-y-1 text-sm text-[hsl(var(--muted-foreground))]">
             {contacts.map((contact) => (
-              <li key={contact.id} className="rounded px-1 py-0.5 transition-colors hover:bg-zinc-50">
+              <li key={contact.id} className="rounded px-1 py-0.5 transition-colors hover:bg-[hsl(var(--muted))]">
                 <Link
                   href={`/contacts/${contact.id}` as "/contacts"}
                   className="hover:text-[hsl(var(--primary))]"
                 >
-                  <span className="font-medium text-zinc-900">{contact.fullName}</span>
+                  <span className="font-medium text-[hsl(var(--foreground))]">{contact.fullName}</span>
                 </Link>
                 {" · "}{contact.title} · {contact.role}
               </li>
@@ -61,15 +61,15 @@ export function DealHealth({ deal, contacts, signals }: DealHealthProps) {
 
         <div className="mt-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-500">Signals</h3>
+            <h3 className="text-xs font-semibold uppercase tracking-[0.16em] text-[hsl(var(--muted-foreground))]">Signals</h3>
             <Link href="/intelligence" className="text-xs text-[hsl(var(--primary))] hover:underline">
               View All
             </Link>
           </div>
           <ul className="mt-2 space-y-2">
             {signals.map((signal) => (
-              <li key={signal.id} className="flex items-center justify-between gap-2 rounded-lg bg-zinc-50 p-2 transition-colors hover:bg-zinc-100">
-                <Link href="/intelligence" className="text-sm text-zinc-700 hover:text-[hsl(var(--primary))]">
+              <li key={signal.id} className="flex items-center justify-between gap-2  bg-[hsl(var(--muted))] p-2 transition-colors hover:bg-[hsl(var(--muted))]">
+                <Link href="/intelligence" className="text-sm text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--primary))]">
                   {signal.summary}
                 </Link>
                 <ScorePill score={signal.score} />

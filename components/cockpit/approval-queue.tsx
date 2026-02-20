@@ -19,16 +19,16 @@ export function ApprovalQueue({ approvals }: ApprovalQueueProps) {
       <CardContent>
         <ul className="space-y-3">
           {approvals.length === 0 ? (
-            <li className="rounded-lg bg-zinc-50 p-3 text-sm text-zinc-600">No approval requests yet.</li>
+            <li className=" bg-[hsl(var(--muted))] p-3 text-sm text-[hsl(var(--muted-foreground))]">No approval requests yet.</li>
           ) : (
             approvals.map((approval) => (
-              <li key={approval.id} className="rounded-xl border border-zinc-100 bg-zinc-50 p-3">
+              <li key={approval.id} className=" border border-zinc-100 bg-[hsl(var(--muted))] p-3">
                 <div className="mb-1 flex items-start justify-between gap-2">
-                  <p className="font-medium text-zinc-900">{approval.subject}</p>
+                  <p className="font-medium text-[hsl(var(--foreground))]">{approval.subject}</p>
                   <Badge variant="outline">{approval.status}</Badge>
                 </div>
-                <p className="text-sm text-zinc-700">{approval.body}</p>
-                <p className="mt-1 text-xs text-zinc-500">
+                <p className="text-sm text-[hsl(var(--muted-foreground))]">{approval.body}</p>
+                <p className="mt-1 text-xs text-[hsl(var(--muted-foreground))]">
                   Requested by {approval.requestedBy} via {approval.channel} on {new Date(approval.createdAt).toLocaleString()}
                 </p>
                 {approval.status === "pending" ? (

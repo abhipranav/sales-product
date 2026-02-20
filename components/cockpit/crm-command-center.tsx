@@ -33,9 +33,9 @@ export function CrmCommandCenter({ account, deal }: CrmCommandCenterProps) {
         <CardTitle className="font-['Sora',sans-serif]">CRM Command Center</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <form action={updateAccountAction} className="grid gap-2 rounded-xl border border-zinc-200 bg-zinc-50 p-3 dark:border-zinc-800 dark:bg-zinc-900">
+        <form action={updateAccountAction} className="grid gap-2  border border-[hsl(var(--border))] bg-[hsl(var(--muted))] p-3 dark:border-[hsl(var(--border))] dark:bg-[hsl(var(--foreground))]">
           <input type="hidden" name="accountId" value={account.id} />
-          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-zinc-500 dark:text-zinc-400">Update Account</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[hsl(var(--muted-foreground))] dark:text-[hsl(var(--muted-foreground))]">Update Account</p>
           <div className="grid gap-2 md:grid-cols-2">
             <Input name="name" defaultValue={account.name} />
             <NativeSelect name="segment" defaultValue={account.segment}>
@@ -53,9 +53,9 @@ export function CrmCommandCenter({ account, deal }: CrmCommandCenterProps) {
           </Button>
         </form>
 
-        <form action={createContactAction} className="grid gap-2 rounded-xl border border-zinc-200 bg-zinc-50 p-3 dark:border-zinc-800 dark:bg-zinc-900">
+        <form action={createContactAction} className="grid gap-2  border border-[hsl(var(--border))] bg-[hsl(var(--muted))] p-3 dark:border-[hsl(var(--border))] dark:bg-[hsl(var(--foreground))]">
           <input type="hidden" name="accountId" value={account.id} />
-          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-zinc-500 dark:text-zinc-400">Add Stakeholder</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[hsl(var(--muted-foreground))] dark:text-[hsl(var(--muted-foreground))]">Add Stakeholder</p>
           <div className="grid gap-2 md:grid-cols-2">
             <Input name="fullName" required minLength={2} placeholder="Full name" />
             <Input name="title" required minLength={2} placeholder="Title" />
@@ -73,9 +73,9 @@ export function CrmCommandCenter({ account, deal }: CrmCommandCenterProps) {
           <Button type="submit">Create Contact</Button>
         </form>
 
-        <form action={createDealAction} className="grid gap-2 rounded-xl border border-zinc-200 bg-zinc-50 p-3 dark:border-zinc-800 dark:bg-zinc-900">
+        <form action={createDealAction} className="grid gap-2  border border-[hsl(var(--border))] bg-[hsl(var(--muted))] p-3 dark:border-[hsl(var(--border))] dark:bg-[hsl(var(--foreground))]">
           <input type="hidden" name="accountId" value={account.id} />
-          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-zinc-500 dark:text-zinc-400">Create New Deal</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[hsl(var(--muted-foreground))] dark:text-[hsl(var(--muted-foreground))]">Create New Deal</p>
           <div className="grid gap-2 md:grid-cols-2">
             <Input name="name" required minLength={2} placeholder="Deal name" />
             <NativeSelect name="stage" defaultValue="discovery">
@@ -98,9 +98,9 @@ export function CrmCommandCenter({ account, deal }: CrmCommandCenterProps) {
           </Button>
         </form>
 
-        <form action={updateDealAction} className="grid gap-2 rounded-xl border border-zinc-200 bg-zinc-50 p-3 dark:border-zinc-800 dark:bg-zinc-900">
+        <form action={updateDealAction} className="grid gap-2  border border-[hsl(var(--border))] bg-[hsl(var(--muted))] p-3 dark:border-[hsl(var(--border))] dark:bg-[hsl(var(--foreground))]">
           <input type="hidden" name="dealId" value={deal.id} />
-          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-zinc-500 dark:text-zinc-400">Update Active Deal</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[hsl(var(--muted-foreground))] dark:text-[hsl(var(--muted-foreground))]">Update Active Deal</p>
           <div className="grid gap-2 md:grid-cols-2">
             <Input name="name" defaultValue={deal.name} />
             <NativeSelect name="stage" defaultValue={deal.stage}>

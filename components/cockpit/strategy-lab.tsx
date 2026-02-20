@@ -47,7 +47,7 @@ export function StrategyLab({ plays, dealId }: StrategyLabProps) {
       <CardContent>
         <ul className="space-y-4">
           {plays.map((play) => (
-            <li key={play.id} className="rounded-md border border-[hsl(var(--border))] p-4">
+            <li key={play.id} className=" border border-[hsl(var(--border))] p-4">
               <div className="flex items-start justify-between gap-3 mb-2">
                 <div className="flex-1">
                   <h4 className="font-semibold text-[hsl(var(--foreground))]">{play.title}</h4>
