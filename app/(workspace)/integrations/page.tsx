@@ -8,25 +8,25 @@ import { getCachedDashboardData } from "@/lib/services/dashboard-cache";
 
 export default async function IntegrationsPage() {
   const actor = await getActorFromServerContext();
-  const data = await getCachedDashboardData(actor, "/integrations");
+  const data = await getCachedDashboardData(actor, "/integrations", { includeStrategyPlays: false });
 
   return (
     <section className="mx-auto max-w-7xl py-2 md:py-4">
       <header className="mb-6">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">Integrations</p>
-        <h2 className="font-['Sora',sans-serif] text-3xl font-bold text-zinc-900">Integration Hub</h2>
-        <p className="mt-1 text-sm text-zinc-700">
+        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.12em] text-[hsl(var(--muted-foreground))]">INTEGRATIONS // DATA_FLOWS</p>
+        <h2 className="font-serif text-3xl font-bold text-[hsl(var(--foreground))]">Integration Hub</h2>
+        <p className="mt-1 text-sm text-[hsl(var(--muted-foreground))]">
           Control external data flows without leaving the workspace.{" · "}
           <Link
             href={`/pipeline/${data.deal.id}` as "/pipeline"}
-            className="text-[hsl(var(--primary))] hover:underline"
+            className="text-[hsl(var(--foreground))] font-bold hover:underline"
           >
             {data.deal.name}
           </Link>
           {" · "}
           <Link
             href={`/accounts/${data.account.id}` as "/accounts"}
-            className="text-[hsl(var(--primary))] hover:underline"
+            className="text-[hsl(var(--foreground))] font-bold hover:underline"
           >
             {data.account.name}
           </Link>
@@ -35,34 +35,34 @@ export default async function IntegrationsPage() {
 
       <section className="mb-4 grid gap-4 md:grid-cols-3">
         <Link href="/workspace" className="block">
-          <Card className="h-full transition-colors hover:border-[hsl(var(--primary)/0.3)] cursor-pointer">
+          <Card className="h-full transition-all duration-150 hover:bg-[hsl(var(--foreground))] hover:text-[hsl(var(--background))] cursor-pointer group">
             <CardHeader>
-              <CardTitle className="text-base">Workspace</CardTitle>
+              <CardTitle className="font-mono text-xs uppercase tracking-wider group-hover:text-[hsl(var(--background))]">WORKSPACE</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
               <Badge variant="secondary">{data.workspace.name}</Badge>
-              <p className="text-sm text-zinc-700">{data.workspace.actorEmail}</p>
+              <p className="font-mono text-[10px] uppercase tracking-wider text-[hsl(var(--muted-foreground))] group-hover:text-[hsl(var(--background))]/60">{data.workspace.actorEmail}</p>
             </CardContent>
           </Card>
         </Link>
         <Link href="/accounts" className="block">
-          <Card className="h-full transition-colors hover:border-[hsl(var(--primary)/0.3)] cursor-pointer">
+          <Card className="h-full transition-all duration-150 hover:bg-[hsl(var(--foreground))] hover:text-[hsl(var(--background))] cursor-pointer group">
             <CardHeader>
-              <CardTitle className="text-base">CRM Status</CardTitle>
+              <CardTitle className="font-mono text-xs uppercase tracking-wider group-hover:text-[hsl(var(--background))]">CRM_STATUS</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
-              <Badge variant="success">HubSpot Connected</Badge>
-              <p className="text-sm text-zinc-600">Payload-based upsert is active for account, contact, and deal entities.</p>
+              <Badge variant="success">HUBSPOT CONNECTED</Badge>
+              <p className="font-mono text-[10px] uppercase tracking-wider text-[hsl(var(--muted-foreground))] group-hover:text-[hsl(var(--background))]/60">Payload-based upsert is active for account, contact, and deal entities.</p>
             </CardContent>
           </Card>
         </Link>
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Calendar Status</CardTitle>
+            <CardTitle className="font-mono text-xs uppercase tracking-wider">CALENDAR_STATUS</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
-            <Badge variant="warning">Manual Ingest Mode</Badge>
-            <p className="text-sm text-zinc-600">Current mode uses manual ingest. Provider sync can be switched on later.</p>
+            <Badge variant="warning">MANUAL INGEST MODE</Badge>
+            <p className="font-mono text-[10px] uppercase tracking-wider text-[hsl(var(--muted-foreground))]">Current mode uses manual ingest. Provider sync can be switched on later.</p>
           </CardContent>
         </Card>
       </section>
