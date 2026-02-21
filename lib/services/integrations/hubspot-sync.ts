@@ -91,6 +91,41 @@ export function parseHubspotSyncPayload(payload: unknown) {
   return hubspotSyncPayloadSchema.parse(payload);
 }
 
+export async function getHubspotSyncStateSnapshot(actor?: ActorIdentity) {
+  const prisma = getPrismaClient();
+
+  if (!prisma) {
+    throw new HubspotSyncServiceUnavailableError();
+  }
+
+  const workspaceScope = await resolveWorkspaceScope(prisma, actor);
+
+  if (!workspaceScope) {
+    throw new HubspotSyncWorkspaceError();
+  }
+
+  const state = await prisma.integrationSyncState.findUnique({
+    where: {
+      workspaceId_provider: {
+        workspaceId: workspaceScope.workspaceId,
+        provider: "HUBSPOT"
+      }
+    }
+  });
+
+  return {
+    provider: "hubspot" as const,
+    workspace: {
+      slug: workspaceScope.workspaceSlug,
+      name: workspaceScope.workspaceName
+    },
+    cursor: state?.cursor ?? null,
+    status: state?.status ?? "idle",
+    lastRunAt: state?.lastRunAt?.toISOString(),
+    lastError: state?.lastError ?? null
+  };
+}
+
 export async function getHubspotSyncState(actor?: ActorIdentity) {
   const prisma = getPrismaClient();
 

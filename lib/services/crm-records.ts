@@ -2,6 +2,7 @@ import { z } from "zod";
 import { getPrismaClient } from "@/lib/db/prisma";
 import type { ActorIdentity } from "@/lib/auth/actor";
 import { resolveWorkspaceScope } from "@/lib/services/workspace";
+import { getDashboardSnapshot } from "@/lib/mock/dashboard";
 
 const accountSegmentMap = {
   startup: "STARTUP",
@@ -183,6 +184,440 @@ export function parseUpdateDealInput(payload: unknown) {
   return updateDealSchema.parse(payload);
 }
 
+type AccountListItem = {
+  id: string;
+  name: string;
+  segment: "startup" | "mid-market" | "enterprise";
+  website: string | null;
+  employeeBand: string | null;
+  contactCount: number;
+  dealCount: number;
+  createdAt: Date;
+};
+
+type ContactListItem = {
+  id: string;
+  fullName: string;
+  title: string;
+  email: string | null;
+  linkedIn: string | null;
+  role: "champion" | "approver" | "blocker" | "influencer";
+  accountId: string;
+  accountName: string;
+  createdAt: Date;
+};
+
+type DealListItem = {
+  id: string;
+  name: string;
+  stage: "discovery" | "evaluation" | "proposal" | "procurement" | "closed-won" | "closed-lost";
+  amount: number;
+  confidence: number;
+  closeDate: Date;
+  riskSummary: string;
+  accountId: string;
+  accountName: string;
+  taskCount: number;
+  activityCount: number;
+  createdAt: Date;
+};
+
+type MockSnapshot = ReturnType<typeof getDashboardSnapshot>;
+
+const mockCreatedAt = new Date("2026-02-01T00:00:00.000Z");
+
+function getMockSnapshot(): MockSnapshot {
+  return getDashboardSnapshot();
+}
+
+function sortItems<T extends Record<string, unknown>>(items: T[], sort: SortInput): T[] {
+  const direction = sort.order === "asc" ? 1 : -1;
+  const field = sort.field;
+
+  return [...items].sort((a, b) => {
+    const aValue = a[field];
+    const bValue = b[field];
+
+    if (aValue instanceof Date && bValue instanceof Date) {
+      return (aValue.getTime() - bValue.getTime()) * direction;
+    }
+
+    if (typeof aValue === "number" && typeof bValue === "number") {
+      return (aValue - bValue) * direction;
+    }
+
+    return String(aValue ?? "").localeCompare(String(bValue ?? "")) * direction;
+  });
+}
+
+function paginateItems<T extends { id: string }>(
+  items: T[],
+  pagination: PaginationInput
+): PaginatedResult<T> {
+  const limit = Math.min(pagination.limit ?? 20, 100);
+  const offset = pagination.offset ?? 0;
+  const sliced = items.slice(offset, offset + limit + 1);
+  const hasMore = sliced.length > limit;
+  const pageItems = sliced.slice(0, limit);
+
+  return {
+    items: pageItems,
+    total: items.length,
+    hasMore,
+    nextCursor: hasMore ? pageItems[pageItems.length - 1]?.id : undefined
+  };
+}
+
+function buildMockAccountList(snapshot: MockSnapshot): AccountListItem[] {
+  return [
+    {
+      id: snapshot.account.id,
+      name: snapshot.account.name,
+      segment: snapshot.account.segment,
+      website: snapshot.account.website ?? null,
+      employeeBand: snapshot.account.employeeBand ?? null,
+      contactCount: snapshot.contacts.length,
+      dealCount: 1,
+      createdAt: mockCreatedAt
+    }
+  ];
+}
+
+function buildMockContactList(snapshot: MockSnapshot): ContactListItem[] {
+  return snapshot.contacts.map((contact) => ({
+    id: contact.id,
+    fullName: contact.fullName,
+    title: contact.title,
+    email: contact.email ?? null,
+    linkedIn: contact.linkedInUrl ?? null,
+    role: contact.role,
+    accountId: snapshot.account.id,
+    accountName: snapshot.account.name,
+    createdAt: mockCreatedAt
+  }));
+}
+
+function buildMockDealList(snapshot: MockSnapshot): DealListItem[] {
+  return [
+    {
+      id: snapshot.deal.id,
+      name: snapshot.deal.name,
+      stage: snapshot.deal.stage,
+      amount: snapshot.deal.amount,
+      confidence: snapshot.deal.confidence,
+      closeDate: new Date(snapshot.deal.closeDate),
+      riskSummary: snapshot.deal.riskSummary,
+      accountId: snapshot.account.id,
+      accountName: snapshot.account.name,
+      taskCount: snapshot.tasks.length,
+      activityCount: snapshot.recentActivities.length,
+      createdAt: mockCreatedAt
+    }
+  ];
+}
+
+function fallbackListAccounts(
+  filters: AccountFilters,
+  pagination: PaginationInput,
+  sort: SortInput
+): PaginatedResult<AccountListItem> {
+  const snapshot = getMockSnapshot();
+  const search = filters.search?.toLowerCase();
+
+  const filtered = buildMockAccountList(snapshot).filter((account) => {
+    if (filters.segment && account.segment !== filters.segment) {
+      return false;
+    }
+
+    if (search) {
+      const matchesName = account.name.toLowerCase().includes(search);
+      const matchesWebsite = account.website?.toLowerCase().includes(search) ?? false;
+      if (!matchesName && !matchesWebsite) {
+        return false;
+      }
+    }
+
+    return true;
+  });
+
+  return paginateItems(sortItems(filtered, sort), pagination);
+}
+
+function fallbackGetAccount(accountId: string) {
+  const snapshot = getMockSnapshot();
+  if (accountId !== snapshot.account.id) {
+    throw new CrmRecordNotFoundError("account", accountId);
+  }
+
+  return {
+    id: snapshot.account.id,
+    name: snapshot.account.name,
+    segment: snapshot.account.segment,
+    website: snapshot.account.website ?? null,
+    employeeBand: snapshot.account.employeeBand ?? null,
+    createdAt: mockCreatedAt,
+    updatedAt: mockCreatedAt,
+    contacts: snapshot.contacts.map((contact) => ({
+      id: contact.id,
+      fullName: contact.fullName,
+      title: contact.title,
+      email: contact.email ?? null,
+      linkedIn: contact.linkedInUrl ?? null,
+      role: contact.role
+    })),
+    deals: [
+      {
+        id: snapshot.deal.id,
+        name: snapshot.deal.name,
+        stage: snapshot.deal.stage,
+        amount: snapshot.deal.amount,
+        confidence: snapshot.deal.confidence,
+        closeDate: new Date(snapshot.deal.closeDate),
+        taskCount: snapshot.tasks.length,
+        activityCount: snapshot.recentActivities.length
+      }
+    ],
+    signals: snapshot.account.signals.map((signal) => ({
+      id: signal.id,
+      type: signal.type,
+      summary: signal.summary,
+      happenedAt: new Date(signal.happenedAt),
+      score: signal.score
+    })),
+    counts: {
+      contacts: snapshot.contacts.length,
+      deals: 1,
+      signals: snapshot.account.signals.length
+    }
+  };
+}
+
+function fallbackListContacts(
+  filters: ContactFilters,
+  pagination: PaginationInput,
+  sort: SortInput
+): PaginatedResult<ContactListItem> {
+  const snapshot = getMockSnapshot();
+  const search = filters.search?.toLowerCase();
+
+  const filtered = buildMockContactList(snapshot).filter((contact) => {
+    if (filters.accountId && filters.accountId !== contact.accountId) {
+      return false;
+    }
+
+    if (filters.role && filters.role !== contact.role) {
+      return false;
+    }
+
+    if (search) {
+      const matchesName = contact.fullName.toLowerCase().includes(search);
+      const matchesTitle = contact.title.toLowerCase().includes(search);
+      const matchesEmail = contact.email?.toLowerCase().includes(search) ?? false;
+      if (!matchesName && !matchesTitle && !matchesEmail) {
+        return false;
+      }
+    }
+
+    return true;
+  });
+
+  return paginateItems(sortItems(filtered, sort), pagination);
+}
+
+function fallbackGetContact(contactId: string) {
+  const snapshot = getMockSnapshot();
+  const contact = snapshot.contacts.find((entry) => entry.id === contactId);
+  if (!contact) {
+    throw new CrmRecordNotFoundError("contact", contactId);
+  }
+
+  return {
+    id: contact.id,
+    fullName: contact.fullName,
+    title: contact.title,
+    email: contact.email ?? null,
+    linkedIn: contact.linkedInUrl ?? null,
+    role: contact.role,
+    createdAt: mockCreatedAt,
+    updatedAt: mockCreatedAt,
+    account: {
+      id: snapshot.account.id,
+      name: snapshot.account.name,
+      segment: snapshot.account.segment
+    },
+    recentSequences: []
+  };
+}
+
+function fallbackListDeals(
+  filters: DealFilters,
+  pagination: PaginationInput,
+  sort: SortInput
+): PaginatedResult<DealListItem> {
+  const snapshot = getMockSnapshot();
+  const search = filters.search?.toLowerCase();
+
+  const filtered = buildMockDealList(snapshot).filter((deal) => {
+    if (filters.accountId && filters.accountId !== deal.accountId) {
+      return false;
+    }
+
+    if (filters.stage && filters.stage !== deal.stage) {
+      return false;
+    }
+
+    if (filters.stages && filters.stages.length > 0 && !filters.stages.includes(deal.stage)) {
+      return false;
+    }
+
+    if (filters.minAmount !== undefined && deal.amount < filters.minAmount) {
+      return false;
+    }
+
+    if (filters.maxAmount !== undefined && deal.amount > filters.maxAmount) {
+      return false;
+    }
+
+    if (search) {
+      const matchesName = deal.name.toLowerCase().includes(search);
+      const matchesRisk = deal.riskSummary.toLowerCase().includes(search);
+      if (!matchesName && !matchesRisk) {
+        return false;
+      }
+    }
+
+    return true;
+  });
+
+  return paginateItems(sortItems(filtered, sort), pagination);
+}
+
+function fallbackGetDeal(dealId: string) {
+  const snapshot = getMockSnapshot();
+  if (dealId !== snapshot.deal.id) {
+    throw new CrmRecordNotFoundError("deal", dealId);
+  }
+
+  return {
+    id: snapshot.deal.id,
+    name: snapshot.deal.name,
+    stage: snapshot.deal.stage,
+    amount: snapshot.deal.amount,
+    confidence: snapshot.deal.confidence,
+    closeDate: new Date(snapshot.deal.closeDate),
+    riskSummary: snapshot.deal.riskSummary,
+    createdAt: mockCreatedAt,
+    updatedAt: mockCreatedAt,
+    account: {
+      id: snapshot.account.id,
+      name: snapshot.account.name,
+      segment: snapshot.account.segment
+    },
+    tasks: snapshot.tasks.map((task) => ({
+      id: task.id,
+      title: task.title,
+      owner: task.owner,
+      priority: task.priority,
+      status: task.status,
+      dueAt: new Date(task.dueAt),
+      completedAt: null
+    })),
+    activities: snapshot.recentActivities.map((activity) => ({
+      id: activity.id,
+      type: activity.type,
+      summary: activity.summary,
+      happenedAt: new Date(activity.happenedAt)
+    })),
+    meetingBrief: {
+      primaryGoal: snapshot.meetingBrief.primaryGoal,
+      likelyObjections: snapshot.meetingBrief.likelyObjections,
+      recommendedNarrative: snapshot.meetingBrief.recommendedNarrative,
+      proofPoints: snapshot.meetingBrief.proofPoints
+    },
+    followUp: {
+      subject: snapshot.followUpDraft.subject,
+      body: snapshot.followUpDraft.body,
+      ask: snapshot.followUpDraft.ask,
+      ctaTimeWindow: snapshot.followUpDraft.ctaTimeWindow
+    },
+    counts: {
+      tasks: snapshot.tasks.length,
+      activities: snapshot.recentActivities.length,
+      calendarEvents: 0,
+      auditLogs: snapshot.auditTrail.length
+    }
+  };
+}
+
+function fallbackSearchCrmRecords(
+  query: string,
+  types: Array<"account" | "contact" | "deal">,
+  limit: number
+): SearchResult[] {
+  const snapshot = getMockSnapshot();
+  const normalized = query.toLowerCase();
+  const results: SearchResult[] = [];
+
+  if (types.includes("account")) {
+    if (
+      snapshot.account.name.toLowerCase().includes(normalized) ||
+      (snapshot.account.website ?? "").toLowerCase().includes(normalized)
+    ) {
+      results.push({
+        type: "account",
+        id: snapshot.account.id,
+        title: snapshot.account.name,
+        subtitle: snapshot.account.segment,
+        metadata: snapshot.account.website ? { website: snapshot.account.website } : undefined
+      });
+    }
+  }
+
+  if (types.includes("contact")) {
+    for (const contact of snapshot.contacts) {
+      if (
+        contact.fullName.toLowerCase().includes(normalized) ||
+        contact.title.toLowerCase().includes(normalized) ||
+        (contact.email ?? "").toLowerCase().includes(normalized)
+      ) {
+        results.push({
+          type: "contact",
+          id: contact.id,
+          title: contact.fullName,
+          subtitle: `${contact.title} at ${snapshot.account.name}`,
+          metadata: contact.email ? { email: contact.email } : undefined
+        });
+      }
+    }
+  }
+
+  if (types.includes("deal")) {
+    if (
+      snapshot.deal.name.toLowerCase().includes(normalized) ||
+      snapshot.deal.riskSummary.toLowerCase().includes(normalized)
+    ) {
+      results.push({
+        type: "deal",
+        id: snapshot.deal.id,
+        title: snapshot.deal.name,
+        subtitle: `${snapshot.account.name} · $${snapshot.deal.amount.toLocaleString()}`,
+        metadata: {
+          stage: snapshot.deal.stage,
+          confidence: `${Math.round(snapshot.deal.confidence * 100)}%`
+        }
+      });
+    }
+  }
+
+  results.sort((a, b) => {
+    const aExact = a.title.toLowerCase().startsWith(normalized) ? 0 : 1;
+    const bExact = b.title.toLowerCase().startsWith(normalized) ? 0 : 1;
+    return aExact - bExact;
+  });
+
+  return results.slice(0, limit);
+}
+
 async function resolveAccount(
   prisma: NonNullable<ReturnType<typeof getPrismaClient>>,
   accountId: string,
@@ -275,13 +710,13 @@ export async function listAccounts(
 }>> {
   const prisma = getPrismaClient();
   if (!prisma) {
-    throw new CrmServiceUnavailableError();
+    return fallbackListAccounts(filters, pagination, sort);
   }
 
   const workspaceScope = await resolveWorkspaceScope(prisma, actor);
   const workspaceId = workspaceScope?.workspaceId;
   if (!workspaceId) {
-    throw new CrmServiceUnavailableError();
+    return fallbackListAccounts(filters, pagination, sort);
   }
 
   const limit = Math.min(pagination.limit ?? 20, 100);
@@ -341,14 +776,18 @@ export async function listAccounts(
 export async function getAccount(accountId: string, actor?: ActorIdentity) {
   const prisma = getPrismaClient();
   if (!prisma) {
-    throw new CrmServiceUnavailableError();
+    return fallbackGetAccount(accountId);
   }
 
   const workspaceScope = await resolveWorkspaceScope(prisma, actor);
+  if (!workspaceScope?.workspaceId) {
+    return fallbackGetAccount(accountId);
+  }
+
   const account = await prisma.account.findFirst({
     where: {
       OR: [{ id: accountId }, { externalId: accountId }],
-      ...(workspaceScope?.workspaceId ? { workspaceId: workspaceScope.workspaceId } : {})
+      workspaceId: workspaceScope.workspaceId
     },
     include: {
       contacts: {
@@ -379,6 +818,11 @@ export async function getAccount(accountId: string, actor?: ActorIdentity) {
   });
 
   if (!account) {
+    const snapshot = getMockSnapshot();
+    if (accountId === snapshot.account.id) {
+      return fallbackGetAccount(accountId);
+    }
+
     throw new CrmRecordNotFoundError("account", accountId);
   }
 
@@ -532,13 +976,13 @@ export async function listContacts(
 }>> {
   const prisma = getPrismaClient();
   if (!prisma) {
-    throw new CrmServiceUnavailableError();
+    return fallbackListContacts(filters, pagination, sort);
   }
 
   const workspaceScope = await resolveWorkspaceScope(prisma, actor);
   const workspaceId = workspaceScope?.workspaceId;
   if (!workspaceId) {
-    throw new CrmServiceUnavailableError();
+    return fallbackListContacts(filters, pagination, sort);
   }
 
   const limit = Math.min(pagination.limit ?? 20, 100);
@@ -605,16 +1049,18 @@ export async function listContacts(
 export async function getContact(contactId: string, actor?: ActorIdentity) {
   const prisma = getPrismaClient();
   if (!prisma) {
-    throw new CrmServiceUnavailableError();
+    return fallbackGetContact(contactId);
   }
 
   const workspaceScope = await resolveWorkspaceScope(prisma, actor);
+  if (!workspaceScope?.workspaceId) {
+    return fallbackGetContact(contactId);
+  }
+
   const contact = await prisma.contact.findFirst({
     where: {
       OR: [{ id: contactId }, { externalId: contactId }],
-      ...(workspaceScope?.workspaceId
-        ? { account: { workspaceId: workspaceScope.workspaceId } }
-        : {})
+      account: { workspaceId: workspaceScope.workspaceId }
     },
     include: {
       account: {
@@ -628,6 +1074,11 @@ export async function getContact(contactId: string, actor?: ActorIdentity) {
   });
 
   if (!contact) {
+    const snapshot = getMockSnapshot();
+    if (snapshot.contacts.some((entry) => entry.id === contactId)) {
+      return fallbackGetContact(contactId);
+    }
+
     throw new CrmRecordNotFoundError("contact", contactId);
   }
 
@@ -780,13 +1231,13 @@ export async function listDeals(
 }>> {
   const prisma = getPrismaClient();
   if (!prisma) {
-    throw new CrmServiceUnavailableError();
+    return fallbackListDeals(filters, pagination, sort);
   }
 
   const workspaceScope = await resolveWorkspaceScope(prisma, actor);
   const workspaceId = workspaceScope?.workspaceId;
   if (!workspaceId) {
-    throw new CrmServiceUnavailableError();
+    return fallbackListDeals(filters, pagination, sort);
   }
 
   const limit = Math.min(pagination.limit ?? 20, 100);
@@ -868,16 +1319,18 @@ export async function listDeals(
 export async function getDeal(dealId: string, actor?: ActorIdentity) {
   const prisma = getPrismaClient();
   if (!prisma) {
-    throw new CrmServiceUnavailableError();
+    return fallbackGetDeal(dealId);
   }
 
   const workspaceScope = await resolveWorkspaceScope(prisma, actor);
+  if (!workspaceScope?.workspaceId) {
+    return fallbackGetDeal(dealId);
+  }
+
   const deal = await prisma.deal.findFirst({
     where: {
       OR: [{ id: dealId }, { externalId: dealId }],
-      ...(workspaceScope?.workspaceId
-        ? { account: { workspaceId: workspaceScope.workspaceId } }
-        : {})
+      account: { workspaceId: workspaceScope.workspaceId }
     },
     include: {
       account: {
@@ -900,6 +1353,11 @@ export async function getDeal(dealId: string, actor?: ActorIdentity) {
   });
 
   if (!deal) {
+    const snapshot = getMockSnapshot();
+    if (dealId === snapshot.deal.id) {
+      return fallbackGetDeal(dealId);
+    }
+
     throw new CrmRecordNotFoundError("deal", dealId);
   }
 
@@ -1038,13 +1496,13 @@ export async function searchCrmRecords(
 ): Promise<SearchResult[]> {
   const prisma = getPrismaClient();
   if (!prisma) {
-    throw new CrmServiceUnavailableError();
+    return fallbackSearchCrmRecords(query, types, limit);
   }
 
   const workspaceScope = await resolveWorkspaceScope(prisma, actor);
   const workspaceId = workspaceScope?.workspaceId;
   if (!workspaceId) {
-    throw new CrmServiceUnavailableError();
+    return fallbackSearchCrmRecords(query, types, limit);
   }
 
   const results: SearchResult[] = [];
@@ -1137,4 +1595,3 @@ export async function searchCrmRecords(
 
   return results.slice(0, limit);
 }
-

@@ -34,7 +34,8 @@ function getWorkspaceDefaults() {
     workspaceSlug: process.env.APP_WORKSPACE_SLUG?.trim() || "aurora-main",
     workspaceName: process.env.APP_WORKSPACE_NAME?.trim() || "Aurora Main Workspace",
     actorEmail: process.env.APP_ACTOR_EMAIL?.trim() || "rep@aurora.local",
-    actorName: process.env.APP_ACTOR_NAME?.trim() || "Default Rep"
+    actorName: process.env.APP_ACTOR_NAME?.trim() || "Default Rep",
+    autoProvisionMembers: process.env.APP_AUTO_PROVISION_MEMBERS !== "0"
   };
 }
 
@@ -105,13 +106,14 @@ export async function resolveWorkspaceScope(
     });
 
     if (!member) {
-      if (workspaceCreated || actorEmail === defaultActorEmail) {
+      const shouldAutoProvision = workspaceCreated || actorEmail === defaultActorEmail || defaults.autoProvisionMembers;
+      if (shouldAutoProvision) {
         member = await prisma.workspaceMember.create({
           data: {
             workspaceId: workspace.id,
             email: actorEmail,
             fullName: actorName,
-            role: "OWNER"
+            role: workspaceCreated || actorEmail === defaultActorEmail ? "OWNER" : "REP"
           }
         });
       } else {
