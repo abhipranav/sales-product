@@ -72,8 +72,13 @@ const priorityRank: Record<Task["priority"], number> = {
   low: 2
 };
 
-export async function getDashboardData(actor?: ActorIdentity): Promise<DashboardData> {
+interface DashboardDataOptions {
+  includeStrategyPlays?: boolean;
+}
+
+export async function getDashboardData(actor?: ActorIdentity, options?: DashboardDataOptions): Promise<DashboardData> {
   const prisma = getPrismaClient();
+  const includeStrategyPlays = options?.includeStrategyPlays ?? true;
 
   if (!prisma) {
     return getDashboardSnapshot();
@@ -218,6 +223,58 @@ export async function getDashboardData(actor?: ActorIdentity): Promise<Dashboard
         return new Date(a.dueAt).getTime() - new Date(b.dueAt).getTime();
       });
 
+    const mappedDeal = {
+      id: deal.externalId ?? deal.id,
+      accountId: deal.accountId,
+      name: deal.name,
+      stage: enumMap.dealStage[deal.stage],
+      amount: deal.amount,
+      confidence: deal.confidence,
+      closeDate: deal.closeDate.toISOString(),
+      riskSummary: deal.riskSummary
+    };
+
+    const mappedSignals = deal.account.signals.map((signal) => ({
+      id: signal.externalId ?? signal.id,
+      accountId: signal.accountId,
+      type: enumMap.signalType[signal.type],
+      summary: signal.summary,
+      happenedAt: signal.happenedAt.toISOString(),
+      score: signal.score
+    }));
+
+    const mappedApprovals = deal.outboundApprovals.map((approval) => ({
+      id: approval.id,
+      dealId: mappedDeal.id,
+      channel: enumMap.channel[approval.channel],
+      subject: approval.subject,
+      body: approval.body,
+      status: enumMap.approvalStatus[approval.status],
+      requestedBy: approval.requestedBy,
+      reviewedBy: approval.reviewedBy ?? undefined,
+      reviewedAt: approval.reviewedAt?.toISOString(),
+      rejectionReason: approval.rejectionReason ?? undefined,
+      createdAt: approval.createdAt.toISOString()
+    }));
+
+    const mappedRecentActivities = deal.activities.map((activity) => ({
+      id: activity.externalId ?? activity.id,
+      dealId: activity.dealId,
+      type: enumMap.activityType[activity.type],
+      happenedAt: activity.happenedAt.toISOString(),
+      summary: activity.summary
+    }));
+
+    const strategyPlays = includeStrategyPlays
+      ? await buildStrategyPlays({
+          deal: mappedDeal,
+          signals: mappedSignals,
+          tasks: mappedTasks,
+          approvals: mappedApprovals,
+          recentActivities: mappedRecentActivities
+        })
+      : [];
+
     return {
       workspace: {
         slug: workspaceScope?.workspaceSlug ?? "legacy",
@@ -232,14 +289,7 @@ export async function getDashboardData(actor?: ActorIdentity): Promise<Dashboard
         segment: enumMap.segment[deal.account.segment],
         website: deal.account.website ?? undefined,
         employeeBand: deal.account.employeeBand ?? undefined,
-        signals: deal.account.signals.map((signal) => ({
-          id: signal.externalId ?? signal.id,
-          accountId: signal.accountId,
-          type: enumMap.signalType[signal.type],
-          summary: signal.summary,
-          happenedAt: signal.happenedAt.toISOString(),
-          score: signal.score
-        }))
+        signals: mappedSignals
       },
       contacts: deal.account.contacts.map((contact) => ({
         id: contact.externalId ?? contact.id,
@@ -250,16 +300,7 @@ export async function getDashboardData(actor?: ActorIdentity): Promise<Dashboard
         linkedInUrl: contact.linkedIn ?? undefined,
         role: enumMap.contactRole[contact.role]
       })),
-      deal: {
-        id: deal.externalId ?? deal.id,
-        accountId: deal.accountId,
-        name: deal.name,
-        stage: enumMap.dealStage[deal.stage],
-        amount: deal.amount,
-        confidence: deal.confidence,
-        closeDate: deal.closeDate.toISOString(),
-        riskSummary: deal.riskSummary
-      },
+      deal: mappedDeal,
       pipelineMetrics: {
         openDeals: openDeals.length,
         openPipelineAmount,
@@ -268,68 +309,10 @@ export async function getDashboardData(actor?: ActorIdentity): Promise<Dashboard
         highPriorityTasks
       },
       tasks: mappedTasks,
-      recentActivities: deal.activities.map((activity) => ({
-        id: activity.externalId ?? activity.id,
-        dealId: activity.dealId,
-        type: enumMap.activityType[activity.type],
-        happenedAt: activity.happenedAt.toISOString(),
-        summary: activity.summary
-      })),
+      recentActivities: mappedRecentActivities,
       auditTrail,
-      approvals: deal.outboundApprovals.map((approval) => ({
-        id: approval.id,
-        dealId: deal.externalId ?? deal.id,
-        channel: enumMap.channel[approval.channel],
-        subject: approval.subject,
-        body: approval.body,
-        status: enumMap.approvalStatus[approval.status],
-        requestedBy: approval.requestedBy,
-        reviewedBy: approval.reviewedBy ?? undefined,
-        reviewedAt: approval.reviewedAt?.toISOString(),
-        rejectionReason: approval.rejectionReason ?? undefined,
-        createdAt: approval.createdAt.toISOString()
-      })),
-      strategyPlays: await buildStrategyPlays({
-        deal: {
-          id: deal.externalId ?? deal.id,
-          accountId: deal.accountId,
-          name: deal.name,
-          stage: enumMap.dealStage[deal.stage],
-          amount: deal.amount,
-          confidence: deal.confidence,
-          closeDate: deal.closeDate.toISOString(),
-          riskSummary: deal.riskSummary
-        },
-        signals: deal.account.signals.map((signal) => ({
-          id: signal.externalId ?? signal.id,
-          accountId: signal.accountId,
-          type: enumMap.signalType[signal.type],
-          summary: signal.summary,
-          happenedAt: signal.happenedAt.toISOString(),
-          score: signal.score
-        })),
-        tasks: mappedTasks,
-        approvals: deal.outboundApprovals.map((approval) => ({
-          id: approval.id,
-          dealId: deal.externalId ?? deal.id,
-          channel: enumMap.channel[approval.channel],
-          subject: approval.subject,
-          body: approval.body,
-          status: enumMap.approvalStatus[approval.status],
-          requestedBy: approval.requestedBy,
-          reviewedBy: approval.reviewedBy ?? undefined,
-          reviewedAt: approval.reviewedAt?.toISOString(),
-          rejectionReason: approval.rejectionReason ?? undefined,
-          createdAt: approval.createdAt.toISOString()
-        })),
-        recentActivities: deal.activities.map((activity) => ({
-          id: activity.externalId ?? activity.id,
-          dealId: activity.dealId,
-          type: enumMap.activityType[activity.type],
-          happenedAt: activity.happenedAt.toISOString(),
-          summary: activity.summary
-        }))
-      }),
+      approvals: mappedApprovals,
+      strategyPlays,
       meetingBrief: {
         accountName: deal.account.name,
         primaryGoal: deal.meetingBrief?.primaryGoal ?? "Align all stakeholders on next best action.",
@@ -350,7 +333,8 @@ export async function getDashboardData(actor?: ActorIdentity): Promise<Dashboard
     };
   } catch (error) {
     if (error instanceof WorkspaceAccessDeniedError) {
-      throw error;
+      console.warn("Actor does not have workspace access. Falling back to mock dashboard.", error);
+      return getDashboardSnapshot();
     }
 
     if (isPrismaConnectionError(error)) {

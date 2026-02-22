@@ -2,6 +2,8 @@ import type { Activity, Deal, OutboundApproval, Signal, StrategyPlay, Task } fro
 import { isAIConfigured, openaiProvider } from "@/lib/ai";
 import type { AIMessage } from "@/lib/ai";
 
+const AI_STRATEGY_TIMEOUT_MS = Number(process.env.APP_AI_STRATEGY_TIMEOUT_MS ?? 900);
+
 function hasKeyword(value: string, keywords: string[]): boolean {
   const lower = value.toLowerCase();
   return keywords.some((keyword) => lower.includes(keyword));
@@ -199,10 +201,17 @@ Generate 2-4 strategic plays tailored to this specific deal situation.`;
   ];
 
   try {
-    const response = await openaiProvider.generateJSON<AIPlaysResponse>(messages, {
+    const aiResponse = openaiProvider.generateJSON<AIPlaysResponse>(messages, {
       temperature: 0.7,
       maxTokens: 1500
     });
+
+    const response = await Promise.race([
+      aiResponse,
+      new Promise<AIPlaysResponse>((_, reject) => {
+        setTimeout(() => reject(new Error(`AI strategy timeout after ${AI_STRATEGY_TIMEOUT_MS}ms`)), AI_STRATEGY_TIMEOUT_MS);
+      })
+    ]);
 
     return response.plays.slice(0, 4).map((play, index) => ({
       id: `play-ai-${index + 1}-${Date.now()}`,
