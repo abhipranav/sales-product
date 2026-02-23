@@ -10,7 +10,7 @@ A docs-first, conversation-first AI sales execution platform focused on reducing
 - Data layer (planned in next iteration): PostgreSQL + Prisma + pgvector
 - Async/workflows (planned in next iteration): Redis + BullMQ workers
 - AI layer (planned in next iteration): provider abstraction for OpenAI/Anthropic
-- Auth and RBAC (planned in next iteration): Better Auth + row-level data scoping
+- Auth: Auth.js (JWT sessions) with Google/LinkedIn and optional dev credentials login
 - Observability (planned in next iteration): OpenTelemetry traces + structured audit logs
 
 ## Current state
@@ -34,7 +34,10 @@ This repository now includes:
   - calendar ingest control
 - Multi-page super-app shell with persistent navigation:
   - `/` (Marketing landing page)
+  - `/auth/signin` (custom branded sign-in)
   - `/workspace` (Super App Home)
+  - `/settings` (User account + notification preferences)
+  - `/setup` (Live readiness and integration checklist)
   - `/cockpit`
   - `/accounts`
   - `/pipeline`
@@ -57,8 +60,13 @@ This repository now includes:
 - Standard SaaS-style marketing landing page at `/` (hero, logos, problem, features, modules, integrations, pricing, testimonials, FAQ, CTA)
 - Workspace sidebar now routes to landing page via app logo (no separate landing nav item)
 - Route-level performance timing logs for dashboard fetches (enable with `APP_PERF_LOGS=1`)
+- Protected workspace + API routes via middleware and Auth.js session checks
 - API endpoints:
+  - `GET|POST /api/auth/[...nextauth]`
   - `GET /api/dashboard`
+  - `GET /api/system/status`
+  - `GET /api/settings/user`
+  - `PATCH /api/settings/user`
   - `GET /api/notifications`
   - `POST /api/notifications/:notificationId/ack`
   - `GET /api/sequences`
@@ -80,8 +88,11 @@ This repository now includes:
 ## Run locally
 
 1. Install dependencies: `npm install`
-2. Start dev server: `npm run dev`
-3. Open: `http://localhost:3000`
+2. Set `AUTH_SECRET` in `.env` (or copy from `.env.example`)
+3. Start dev server: `npm run dev`
+4. Open: `http://localhost:3000`
+5. Sign in: `http://localhost:3000/auth/signin`
+6. Open setup/readiness page: `http://localhost:3000/setup`
 
 ## Supabase integration (recommended)
 
@@ -92,11 +103,16 @@ This repository now includes:
 5. For `DATABASE_URL`, include `pgbouncer=true&connection_limit=1`.
 6. Add both values to `.env` using `.env.example` as template.
 7. Set workspace defaults in `.env`: `APP_WORKSPACE_SLUG`, `APP_WORKSPACE_NAME`, `APP_ACTOR_EMAIL`, `APP_ACTOR_NAME`.
-8. Run:
+8. Set public base URL for social previews: `APP_BASE_URL` (for LinkedIn/Open Graph cards).
+9. Set auth provider vars if using OAuth:
+   - `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`
+   - `AUTH_LINKEDIN_ID`, `AUTH_LINKEDIN_SECRET`
+10. Keep `APP_ENABLE_DEV_LOGIN=1` for local testing, set to `0` in production.
+11. Run:
    - `npm run db:generate`
    - `npm run db:push`
    - `npm run db:seed`
-9. Start app: `npm run dev`
+12. Start app: `npm run dev`
 
 ## Notes for Supabase + Prisma
 
@@ -108,10 +124,11 @@ This repository now includes:
 
 - Workspace scope is enforced via `Workspace` + `WorkspaceMember`.
 - Default actor is from `.env` (`APP_ACTOR_EMAIL`, `APP_ACTOR_NAME`).
+- New actor emails are auto-provisioned as `REP` by default (`APP_AUTO_PROVISION_MEMBERS=1`).
+- Set `APP_AUTO_PROVISION_MEMBERS=0` to require explicit membership provisioning.
 - API clients can override actor headers:
   - `x-actor-email`
   - `x-actor-name`
-- Non-member actors get `403` on scoped endpoints.
 
 ## Super-App Foundation
 
@@ -130,3 +147,9 @@ This repository now includes:
 - CRM delta sync jobs (incremental pulls + reconciliation logs)
 - Workspace RBAC expansion beyond single actor defaults
 - Outbound send adapters behind approval state transitions
+
+## Integration go-live playbook
+
+- See `docs/05-operations/integration-activation-playbook.md` for step-by-step production activation across HubSpot, calendar, AI, outbound channels, and LinkedIn readiness.
+- See `docs/05-operations/auth-integration-playbook.md` for free-tier auth provider options and a concrete implementation path.
+- See `docs/04-specs/account-settings-spec.md` for the researched SaaS baseline behind user account/settings implementation.

@@ -19,6 +19,11 @@
 15. Validate audit API: `GET /api/deals/:dealId/audit?limit=10`
 16. Validate access control: send `x-actor-email` for a non-member and confirm scoped routes return `403`
 
+## Integration activation
+
+- Use `docs/05-operations/integration-activation-playbook.md` for provider-by-provider go-live steps.
+- Validate runtime readiness with `GET /api/system/status` and confirm `mode: "live"`.
+
 ## Incident triage baseline
 
 - Capture failing endpoint and account/deal context

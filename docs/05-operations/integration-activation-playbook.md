@@ -1,0 +1,129 @@
+# Integration Activation Playbook
+
+This guide is for moving the current frontend from demo-style behavior to production-grade feature execution.
+
+## 1) What is already wired
+
+- Workspace-scoped persistence layer with Prisma + Postgres models.
+- CRM read/write APIs:
+  - `/api/accounts`
+  - `/api/contacts`
+  - `/api/deals`
+  - `/api/deals/:dealId/stage`
+- Workflow APIs:
+  - tasks, approvals, meeting-notes processing, activity logging
+- HubSpot payload sync endpoint:
+  - `GET /api/integrations/hubspot/sync`
+  - `POST /api/integrations/hubspot/sync`
+- Notification and search APIs.
+
+## 2) Why features feel non-working today
+
+If DB is not reachable or schema is not applied, many write paths skip persistence and the app falls back to snapshot/demo reads.
+
+Minimum required for real behavior:
+
+1. Valid `DATABASE_URL` and `DIRECT_URL`
+2. Prisma client generated
+3. Schema applied (`db:push`)
+4. Seed/live data present
+
+## 3) Production bootstrap sequence
+
+Run in this exact order:
+
+```bash
+npm install
+npm run db:generate
+npm run db:push
+npm run db:seed
+npm run dev
+```
+
+Then verify:
+
+```bash
+curl -s http://localhost:3000/api/system/status | jq
+```
+
+`mode` should be `live`.
+
+## 4) Integration checklist by provider
+
+### HubSpot CRM sync
+
+Current status:
+- Manual payload sync exists.
+- OAuth token lifecycle and scheduled incremental jobs are not yet implemented.
+
+Activation plan:
+1. Create a HubSpot private app and generate token.
+2. Build pull worker (contacts/companies/deals with cursor).
+3. Persist cursor in `IntegrationSyncState`.
+4. Call existing `syncHubspotData` service with normalized payload.
+5. Add retry + dead-letter handling for failed batches.
+
+### Calendar (Google/Microsoft)
+
+Current status:
+- Manual ingest exists via `/api/calendar/events/ingest`.
+- No OAuth/webhook ingestion yet.
+
+Activation plan:
+1. Implement provider OAuth callback + refresh token storage.
+2. Subscribe to change notifications (Google push / Microsoft Graph subscriptions).
+3. Transform events -> existing `ingestCalendarEvent` input.
+4. Persist external event IDs for idempotent upserts.
+
+### AI strategy provider
+
+Current status:
+- Works with rule-based fallback.
+- OpenAI path activates when `OPENAI_API_KEY` is set.
+
+Activation plan:
+1. Add `OPENAI_API_KEY`.
+2. Validate strategy execution creates tasks/approvals from generated plays.
+3. Add guardrails (max tasks per run, content moderation if required).
+
+### Outbound channel adapters (email/linkedin)
+
+Current status:
+- Approval queue exists.
+- Actual send adapters are not implemented.
+
+Activation plan:
+1. Trigger sender only on `APPROVED` state transition.
+2. Add provider adapters (Gmail/Graph first; LinkedIn last).
+3. Write send results (provider message id, status, errors) to audit logs.
+
+### LinkedIn
+
+Current status:
+- `linkedin` exists as a suggested channel enum.
+- No LinkedIn send API integration is implemented.
+
+Important:
+- LinkedIn APIs require strict app review and approved scopes.
+- Treat LinkedIn as phase-2 after email adapters are stable.
+
+## 5) Social sharing / LinkedIn preview
+
+To preview app links in LinkedIn posts:
+
+1. Set `APP_BASE_URL` to a public `https` domain.
+2. Ensure Open Graph metadata is reachable on that domain.
+3. Re-scrape using LinkedIn Post Inspector:
+   - [https://www.linkedin.com/post-inspector/](https://www.linkedin.com/post-inspector/)
+
+`localhost` links will not produce LinkedIn previews.
+
+## 6) Pre-launch hard requirements
+
+Before inviting external users:
+
+1. Auth + role enforcement beyond default actor headers.
+2. Background job runner for sync and retries.
+3. Error telemetry and uptime alerts.
+4. Rate limits + input validation on all public API routes.
+5. Data retention and PII handling policy for notes/transcripts.
