@@ -3,24 +3,24 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const badgeVariants = cva(
-  "inline-flex items-center rounded border px-2 py-0.5 text-[11px] font-medium tracking-wide",
+  "inline-flex items-center border-[2px] px-2 py-0.5 text-[10px] font-bold font-mono uppercase tracking-[0.08em]",
   {
     variants: {
       variant: {
         default:
-          "border-transparent bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))]",
+          "border-[hsl(var(--foreground))] bg-[hsl(var(--foreground))] text-[hsl(var(--background))]",
         secondary:
-          "border-transparent bg-[hsl(var(--muted))] text-[hsl(var(--muted-foreground))]",
+          "border-[hsl(var(--border))] bg-[hsl(var(--muted))] text-[hsl(var(--muted-foreground))]",
         outline:
           "border-[hsl(var(--border))] bg-transparent text-[hsl(var(--muted-foreground))]",
         success:
-          "border-transparent bg-[hsl(var(--success))] text-white",
+          "border-[hsl(var(--success))] bg-[hsl(var(--success))] text-[hsl(var(--background))]",
         warning:
-          "border-transparent bg-[hsl(var(--warning))] text-white",
+          "border-[hsl(var(--warning))] bg-[hsl(var(--warning))] text-[hsl(var(--background))]",
         destructive:
-          "border-transparent bg-[hsl(var(--destructive))] text-white",
+          "border-[hsl(var(--destructive))] bg-[hsl(var(--destructive))] text-[hsl(var(--background))]",
         accent:
-          "border-transparent bg-[hsl(var(--accent))] text-[hsl(var(--accent-foreground))]"
+          "border-[var(--ind-black)] bg-[var(--ind-yellow)] text-[var(--ind-black)]"
       }
     },
     defaultVariants: {

@@ -3,86 +3,99 @@
 @tailwind utilities;
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   THEME 1: CALM NEUTRAL WITH BLUE ACCENTS
-   Trust + Modern Serenity • Sleek Premium
+   INDUSTRIAL-EDITORIAL HYBRID THEME
+   Polymarketimes × Ankitkr0 Fusion
    
-   - Soft cream/beige base for readability
-   - Deep navy blues for trust and reliability
-   - Subtle warm accents for CTAs
+   - Light grey canvas inspired by industrial interfaces
+   - Deep black for high-contrast borders and text
+   - Caution yellow for status/accent elements
+   - Serif headlines + monospace labels + clean sans-serif body
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap');
+
 :root {
-  /* Base - Soft cream/off-white */
-  --background: 42 30% 97%;
-  --foreground: 210 40% 12%;
+  /* Base - Industrial light grey canvas */
+  --background: 36 14% 90%;
+  --foreground: 0 0% 7%;
   
-  /* Cards - Pure white with warmth */
-  --card: 40 20% 99%;
-  --card-foreground: 210 40% 12%;
+  /* Cards - Slightly lighter than canvas */
+  --card: 36 14% 94%;
+  --card-foreground: 0 0% 7%;
   
-  /* Muted - Warm grey */
-  --muted: 40 15% 94%;
-  --muted-foreground: 210 15% 40%;
+  /* Muted */
+  --muted: 36 10% 88%;
+  --muted-foreground: 0 0% 38%;
   
-  /* Borders - Subtle warm */
-  --border: 40 12% 88%;
+  /* Borders - Industrial black */
+  --border: 0 0% 12%;
   
-  /* Primary - Deep Navy Blue */
-  --primary: 210 70% 20%;
+  /* Primary - Pure black for industrial feel */
+  --primary: 0 0% 7%;
   --primary-foreground: 0 0% 100%;
   
-  /* Accent - Electric/Azure Blue */
-  --accent: 205 90% 45%;
-  --accent-foreground: 0 0% 100%;
+  /* Accent - Caution Yellow */
+  --accent: 60 100% 50%;
+  --accent-foreground: 0 0% 7%;
   
-  /* CTA - Warm amber/gold */
-  --cta: 35 90% 52%;
-  --cta-foreground: 210 70% 12%;
+  /* CTA - Inverted black */
+  --cta: 0 0% 7%;
+  --cta-foreground: 0 0% 100%;
   
   /* Ring focus */
-  --ring: 205 90% 50%;
+  --ring: 60 100% 50%;
   
   /* Semantic */
   --success: 160 55% 38%;
   --warning: 38 90% 50%;
   --destructive: 0 65% 50%;
+
+  /* Industrial specific */
+  --ind-border-width: 2px;
+  --ind-yellow: #FFFF00;
+  --ind-black: #111111;
+  --ind-canvas: #E3DFD8;
 }
 
 .dark {
-  /* Base - Deep navy slate */
-  --background: 215 35% 8%;
-  --foreground: 40 20% 95%;
+  /* Base - Deep industrial dark */
+  --background: 220 15% 8%;
+  --foreground: 36 14% 90%;
   
-  /* Cards - Slightly lighter navy */
-  --card: 215 30% 11%;
-  --card-foreground: 40 20% 95%;
+  /* Cards */
+  --card: 220 15% 11%;
+  --card-foreground: 36 14% 90%;
   
   /* Muted */
-  --muted: 215 25% 16%;
-  --muted-foreground: 210 15% 55%;
+  --muted: 220 12% 16%;
+  --muted-foreground: 220 8% 52%;
   
   /* Borders */
-  --border: 215 20% 22%;
+  --border: 36 14% 75%;
   
-  /* Primary - Brighter blue for dark mode */
-  --primary: 205 85% 55%;
-  --primary-foreground: 215 35% 8%;
+  /* Primary */
+  --primary: 36 14% 90%;
+  --primary-foreground: 220 15% 8%;
   
-  /* Accent */
-  --accent: 205 90% 60%;
-  --accent-foreground: 215 35% 8%;
+  /* Accent - Caution Yellow stays vivid */
+  --accent: 60 100% 50%;
+  --accent-foreground: 0 0% 7%;
   
   /* CTA */
-  --cta: 35 90% 55%;
-  --cta-foreground: 210 70% 8%;
+  --cta: 60 100% 50%;
+  --cta-foreground: 0 0% 7%;
   
   /* Ring */
-  --ring: 205 90% 55%;
+  --ring: 60 100% 50%;
   
   /* Semantic */
   --success: 160 55% 45%;
   --warning: 38 90% 55%;
   --destructive: 0 65% 55%;
+
+  --ind-yellow: #FFFF00;
+  --ind-black: #E3DFD8;
+  --ind-canvas: #141518;
 }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -102,14 +115,206 @@ body {
   min-height: 100dvh;
   color: hsl(var(--foreground));
   background: hsl(var(--background));
-  font-family: "Inter", "IBM Plex Sans", system-ui, sans-serif;
+  font-family: "Inter", "IBM Plex Sans", "Segoe UI", sans-serif;
   font-feature-settings: "cv11", "ss01";
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   SLEEK ANIMATIONS
+   INDUSTRIAL TYPOGRAPHY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+.font-serif {
+  font-family: Georgia, "Times New Roman", "Noto Serif", serif;
+}
+
+.font-mono-ind {
+  font-family: "Space Mono", "IBM Plex Mono", "Courier New", monospace;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   INDUSTRIAL CARD COMPONENTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+.ind-card {
+  border: var(--ind-border-width) solid hsl(var(--border));
+  background: hsl(var(--card));
+  padding: 1.25rem;
+  transition: background 180ms ease, color 180ms ease, border-color 180ms ease;
+}
+
+.ind-card-dashed {
+  border: var(--ind-border-width) dashed hsl(var(--border));
+  background: hsl(var(--card));
+  padding: 1.25rem;
+  transition: background 180ms ease, color 180ms ease;
+}
+
+/* Inverted hover effect — Ankitkr0 style */
+.ind-hover:hover {
+  background: hsl(var(--foreground));
+  color: hsl(var(--background));
+  border-color: hsl(var(--foreground));
+}
+
+.ind-hover:hover .ind-hover-invert {
+  color: hsl(var(--background));
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   INDUSTRIAL LABELS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+.ind-label {
+  font-family: "Space Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: hsl(var(--muted-foreground));
+}
+
+.ind-label-lg {
+  font-family: "Space Mono", monospace;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   CAUTION STRIPE — Ankitkr0 "hazard tape" pattern
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+.caution-stripe {
+  background: repeating-linear-gradient(
+    -45deg,
+    var(--ind-yellow),
+    var(--ind-yellow) 10px,
+    var(--ind-black) 10px,
+    var(--ind-black) 20px
+  );
+  height: 8px;
+  width: 100%;
+}
+
+.caution-stripe-thin {
+  background: repeating-linear-gradient(
+    -45deg,
+    var(--ind-yellow),
+    var(--ind-yellow) 6px,
+    var(--ind-black) 6px,
+    var(--ind-black) 12px
+  );
+  height: 5px;
+  width: 100%;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   STATUS BADGE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+.ind-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.6rem;
+  font-family: "Space Mono", monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: var(--ind-yellow);
+  color: var(--ind-black);
+  border: 2px solid var(--ind-black);
+  transform: rotate(-2deg);
+}
+
+.ind-badge-black {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.75rem;
+  font-family: "Space Mono", monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: hsl(var(--foreground));
+  color: hsl(var(--background));
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   INDUSTRIAL BUTTON
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+.ind-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.5rem;
+  font-family: "Space Mono", monospace;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border: var(--ind-border-width) solid hsl(var(--foreground));
+  background: hsl(var(--foreground));
+  color: hsl(var(--background));
+  cursor: pointer;
+  transition: all 180ms ease;
+}
+
+.ind-btn:hover {
+  background: var(--ind-yellow);
+  color: var(--ind-black);
+  border-color: var(--ind-black);
+}
+
+.ind-btn-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.5rem;
+  font-family: "Space Mono", monospace;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border: var(--ind-border-width) solid hsl(var(--foreground));
+  background: transparent;
+  color: hsl(var(--foreground));
+  cursor: pointer;
+  transition: all 180ms ease;
+}
+
+.ind-btn-outline:hover {
+  background: hsl(var(--foreground));
+  color: hsl(var(--background));
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   DIVIDERS — Newspaper column separators
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+.ind-divider-v {
+  width: 1px;
+  background: hsl(var(--border));
+  align-self: stretch;
+}
+
+.ind-divider-h {
+  height: 1px;
+  background: hsl(var(--border));
+  width: 100%;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   ANIMATIONS
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 @keyframes fade-in {
@@ -127,46 +332,85 @@ body {
 .reveal-delay-3 { animation-delay: 120ms; }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   LANDING PAGE - Subtle blue ambient
+   LANDING PAGE TICKER — Polymarketimes inspired
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-.landing-grid {
+@keyframes ticker-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+.pm-ticker {
+  overflow: hidden;
+  white-space: nowrap;
+  background: hsl(var(--foreground));
+  color: hsl(var(--background));
+}
+
+.pm-ticker-track {
+  display: inline-flex;
+  min-width: max-content;
+  animation: ticker-scroll 30s linear infinite;
+}
+
+.pm-ticker-item {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 1.5rem;
+  font-family: "Space Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.pm-ticker-item::after {
+  content: "◆";
+  margin-left: 1.5rem;
+  font-size: 6px;
+  color: var(--ind-yellow);
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   BARCODE DECORATOR
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+.ind-barcode {
+  font-family: 'Libre Barcode 39 Text', cursive;
+  font-size: 36px;
+  color: hsl(var(--foreground));
+  line-height: 1;
+  user-select: none;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   BG DECORATIVE - Faint crosses like Ankitkr0
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+.ind-grid-bg {
   background-image:
-    linear-gradient(to right, hsl(var(--border) / 0.5) 1px, transparent 1px),
-    linear-gradient(to bottom, hsl(var(--border) / 0.4) 1px, transparent 1px);
-  background-size: 72px 72px;
-  mask-image: radial-gradient(ellipse 50% 35% at 50% 15%, black 10%, transparent 55%);
+    radial-gradient(circle, hsl(var(--foreground) / 0.06) 1px, transparent 1px);
+  background-size: 24px 24px;
 }
 
-.landing-orb {
-  position: absolute;
-  border-radius: 9999px;
-  filter: blur(100px);
-  pointer-events: none;
-  opacity: 0.35;
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   ACCORDION — Side Projects expansion style
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+.ind-accordion-content {
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height 300ms ease;
 }
 
-.landing-orb-a {
-  left: -8%;
-  top: 8%;
-  height: 350px;
-  width: 380px;
-  background: hsl(205 90% 50% / 0.2);
-}
-
-.landing-orb-b {
-  right: 5%;
-  top: 25%;
-  height: 280px;
-  width: 320px;
-  background: hsl(35 90% 55% / 0.12);
+.ind-accordion-content.open {
+  max-height: 800px;
 }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    PREMIUM UTILITIES
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-/* Premium scrollbar */
 ::-webkit-scrollbar {
   width: 5px;
   height: 5px;
@@ -185,13 +429,11 @@ body {
   background: hsl(var(--muted-foreground) / 0.3);
 }
 
-/* Selection */
 ::selection {
-  background: hsl(var(--accent) / 0.15);
+  background: hsl(var(--accent) / 0.25);
   color: inherit;
 }
 
-/* Focus states */
 *:focus-visible {
   outline: 2px solid hsl(var(--ring));
   outline-offset: 2px;
@@ -212,6 +454,10 @@ body {
   
   .reveal {
     opacity: 1 !important;
+    animation: none !important;
+  }
+
+  .pm-ticker-track {
     animation: none !important;
   }
 }

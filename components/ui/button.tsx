@@ -4,32 +4,32 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--ring))] focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium font-mono uppercase tracking-wide transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--ring))] focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
   {
     variants: {
       variant: {
         default:
-          "bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] hover:bg-[hsl(var(--primary))]/90",
+          "border-[2px] border-[hsl(var(--foreground))] bg-[hsl(var(--foreground))] text-[hsl(var(--background))] hover:bg-[var(--ind-yellow)] hover:text-[var(--ind-black)] hover:border-[var(--ind-black)]",
         secondary:
-          "bg-[hsl(var(--muted))] text-[hsl(var(--foreground))] hover:bg-[hsl(var(--muted))]/80",
+          "border-[2px] border-[hsl(var(--border))] bg-[hsl(var(--muted))] text-[hsl(var(--foreground))] hover:bg-[hsl(var(--foreground))] hover:text-[hsl(var(--background))]",
         outline:
-          "border border-[hsl(var(--border))] bg-transparent text-[hsl(var(--foreground))] hover:bg-[hsl(var(--muted))]",
+          "border-[2px] border-[hsl(var(--border))] bg-transparent text-[hsl(var(--foreground))] hover:bg-[hsl(var(--foreground))] hover:text-[hsl(var(--background))]",
         ghost:
-          "text-[hsl(var(--foreground))] hover:bg-[hsl(var(--muted))]",
+          "border-[2px] border-transparent text-[hsl(var(--foreground))] hover:bg-[hsl(var(--muted))]",
         destructive:
-          "bg-[hsl(var(--destructive))] text-white hover:bg-[hsl(var(--destructive))]/90",
+          "border-[2px] border-[hsl(var(--destructive))] bg-[hsl(var(--destructive))] text-[hsl(var(--background))] hover:bg-transparent hover:text-[hsl(var(--destructive))]",
         success:
-          "bg-[hsl(var(--success))] text-white hover:bg-[hsl(var(--success))]/90",
+          "border-[2px] border-[hsl(var(--success))] bg-[hsl(var(--success))] text-[hsl(var(--background))] hover:bg-transparent hover:text-[hsl(var(--success))]",
         cta:
-          "bg-[hsl(var(--cta))] text-[hsl(var(--cta-foreground))] font-semibold hover:bg-[hsl(var(--cta))]/90",
+          "border-[2px] border-[var(--ind-black)] bg-[var(--ind-yellow)] text-[var(--ind-black)] font-bold hover:bg-[hsl(var(--foreground))] hover:text-[hsl(var(--background))] hover:border-[hsl(var(--foreground))]",
         accent:
-          "bg-[hsl(var(--accent))] text-[hsl(var(--accent-foreground))] hover:bg-[hsl(var(--accent))]/90"
+          "border-[2px] border-[hsl(var(--accent))] bg-[hsl(var(--accent))] text-[hsl(var(--accent-foreground))] hover:bg-transparent hover:text-[hsl(var(--foreground))]"
       },
       size: {
-        default: "h-9 px-4 py-2 rounded-md",
-        sm: "h-8 px-3 text-xs rounded-md",
-        lg: "h-10 px-5 text-sm rounded-md",
-        icon: "h-9 w-9 rounded-md"
+        default: "h-9 px-4 py-2",
+        sm: "h-8 px-3 text-[11px]",
+        lg: "h-10 px-5 text-sm",
+        icon: "h-9 w-9"
       }
     },
     defaultVariants: {

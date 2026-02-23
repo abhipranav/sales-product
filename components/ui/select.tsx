@@ -57,9 +57,10 @@ export function SelectTrigger({ className, children, ...props }: SelectTriggerPr
   return (
     <button
       type="button"
+      data-select-trigger
       onClick={() => setOpen(!open)}
       className={cn(
-        "flex h-9 w-full items-center justify-between rounded-md border border-[hsl(var(--border))] bg-transparent px-3 py-2 text-sm text-[hsl(var(--foreground))] shadow-sm transition-colors",
+        "flex h-9 w-full items-center justify-between border-[2px] border-[hsl(var(--border))] bg-transparent px-3 py-2 text-sm font-mono text-[hsl(var(--foreground))] transition-colors",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--ring))]",
         "disabled:cursor-not-allowed disabled:opacity-50",
         className
@@ -92,7 +93,7 @@ interface SelectValueProps {
 
 export function SelectValue({ placeholder }: SelectValueProps) {
   const { value } = useSelectContext();
-  return <span className={!value ? "text-[hsl(var(--muted-foreground))]" : ""}>{value || placeholder}</span>;
+  return <span className={cn("font-mono text-xs uppercase tracking-wider", !value && "text-[hsl(var(--muted-foreground))]")}>{value || placeholder}</span>;
 }
 
 // Select Content
@@ -121,7 +122,7 @@ export function SelectContent({ children }: SelectContentProps) {
   return (
     <div
       data-select-content
-      className="absolute z-50 mt-1 min-w-[8rem] w-full overflow-hidden rounded-md border border-[hsl(var(--border))] bg-[hsl(var(--card))] shadow-md animate-in fade-in-0 zoom-in-95"
+      className="absolute z-50 mt-1 min-w-[8rem] w-full overflow-hidden border-[2px] border-[hsl(var(--border))] bg-[hsl(var(--card))] animate-in fade-in-0 zoom-in-95"
     >
       <div className="p-1">{children}</div>
     </div>
@@ -145,9 +146,9 @@ export function SelectItem({ value, children }: SelectItemProps) {
         setOpen(false);
       }}
       className={cn(
-        "relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors",
-        "hover:bg-[hsl(var(--muted))]",
-        isSelected && "bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))]"
+        "relative flex cursor-pointer select-none items-center px-2 py-1.5 text-sm font-mono transition-colors",
+        "hover:bg-[hsl(var(--foreground))] hover:text-[hsl(var(--background))]",
+        isSelected && "bg-[hsl(var(--foreground))] text-[hsl(var(--background))]"
       )}
     >
       {children}

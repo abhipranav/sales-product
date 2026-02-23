@@ -27,7 +27,7 @@ export function Dialog({ open, onOpenChange, children }: DialogProps) {
     <div className="fixed inset-0 z-50">
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
         onClick={() => onOpenChange(false)}
       />
       {/* Content container */}
@@ -49,7 +49,7 @@ export function DialogContent({ children, className }: DialogContentProps) {
   return (
     <div
       className={cn(
-        "relative z-50 w-full max-w-lg rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-6 shadow-xl",
+        "relative z-50 w-full max-w-lg border-[2px] border-[hsl(var(--border))] bg-[hsl(var(--card))] p-6",
         "animate-in fade-in-0 zoom-in-95 duration-200",
         className
       )}
@@ -80,7 +80,7 @@ interface DialogTitleProps {
 
 export function DialogTitle({ children, className }: DialogTitleProps) {
   return (
-    <h2 className={cn("text-lg font-semibold text-[hsl(var(--foreground))]", className)}>
+    <h2 className={cn("text-lg font-bold font-mono uppercase tracking-wide text-[hsl(var(--foreground))]", className)}>
       {children}
     </h2>
   );
@@ -122,7 +122,7 @@ export function DialogClose({ onClose, className }: DialogCloseProps) {
     <button
       onClick={onClose}
       className={cn(
-        "absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+        "absolute right-4 top-4 opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--ring))] focus:ring-offset-2",
         className
       )}
     >
