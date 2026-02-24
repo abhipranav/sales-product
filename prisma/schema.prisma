@@ -122,11 +122,37 @@ model WorkspaceMember {
   email       String
   fullName    String
   role        WorkspaceMemberRole @default(REP)
+  preferences UserPreference?
   createdAt   DateTime            @default(now())
   updatedAt   DateTime            @updatedAt
 
   @@unique([workspaceId, email])
   @@index([workspaceId])
+}
+
+model UserPreference {
+  id                    String          @id @default(cuid())
+  workspaceMemberId     String          @unique
+  workspaceMember       WorkspaceMember @relation(fields: [workspaceMemberId], references: [id], onDelete: Cascade)
+  themePreference       String          @default("system")
+  timezone              String          @default("UTC")
+  locale                String          @default("en-US")
+  weekStartsOn          String          @default("monday")
+  compactMode           Boolean         @default(false)
+  reduceMotion          Boolean         @default(false)
+  emailNotifications    Boolean         @default(true)
+  desktopNotifications  Boolean         @default(true)
+  mentionNotifications  Boolean         @default(true)
+  pipelineAlerts        Boolean         @default(true)
+  approvalQueueAlerts   Boolean         @default(true)
+  dailyDigest           Boolean         @default(false)
+  digestHour            Int             @default(8)
+  loginAlerts           Boolean         @default(true)
+  productAnnouncements  Boolean         @default(true)
+  createdAt             DateTime        @default(now())
+  updatedAt             DateTime        @updatedAt
+
+  @@index([workspaceMemberId])
 }
 
 model Account {
