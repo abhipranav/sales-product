@@ -44,6 +44,8 @@ const hubspotSyncPayloadSchema = z.object({
     .default([])
 });
 
+export type HubspotSyncPayload = z.infer<typeof hubspotSyncPayloadSchema>;
+
 const segmentMap = {
   startup: "STARTUP",
   "mid-market": "MID_MARKET",
