@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { CalendarIngest } from "@/components/cockpit/calendar-ingest";
 import { CrmSyncPanel } from "@/components/cockpit/crm-sync-panel";
+import { IntegrationStatusCards } from "@/components/integrations/integration-status-cards";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getActorFromServerContext } from "@/lib/auth/actor";
@@ -32,6 +33,10 @@ export default async function IntegrationsPage() {
           </Link>
         </p>
       </header>
+
+      <section className="mb-6">
+        <IntegrationStatusCards />
+      </section>
 
       <section className="mb-4 grid gap-4 md:grid-cols-3">
         <Link href="/workspace" className="block">
