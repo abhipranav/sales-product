@@ -10,8 +10,6 @@ export interface AIMessage {
 
 export interface AIGenerateOptions {
   model?: string;
-  temperature?: number;
-  maxTokens?: number;
 }
 
 export interface AIProvider {
