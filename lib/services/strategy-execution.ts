@@ -200,7 +200,7 @@ export async function executeStrategyPlay(
       happenedAt: a.happenedAt.toISOString(),
       summary: a.summary
     }))
-  });
+  }, actor);
 
   const play = plays.find((p) => p.id === playId);
   if (!play) {

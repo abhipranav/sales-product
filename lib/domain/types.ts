@@ -68,7 +68,7 @@ export interface PipelineMetrics {
 
 export interface AuditEvent {
   id: string;
-  entityType: "task" | "calendar-event" | "activity";
+  entityType: "task" | "calendar-event" | "activity" | "strategy-play" | "outbound-send";
   entityId: string;
   action: string;
   actor: string;
@@ -121,6 +121,32 @@ export interface WorkspaceContextView {
   actorEmail: string;
   actorName: string;
   actorRole: "owner" | "manager" | "rep";
+}
+
+export interface PilotRecommendationMetrics {
+  strategyExecutions7d: number;
+  approvedApprovals7d: number;
+  rejectedApprovals7d: number;
+  approvalAcceptanceRate: number;
+}
+
+export interface PilotActionLatencyMetrics {
+  completedTasks7d: number;
+  avgTaskCompletionHours30d: number;
+  medianTaskCompletionHours30d: number;
+}
+
+export interface PilotOperationsMetrics {
+  meetingNotesProcessed7d: number;
+  reminderEvents24h: number;
+}
+
+export interface PilotMetricsSnapshot {
+  generatedAt: string;
+  windowDays: number;
+  recommendationSignals: PilotRecommendationMetrics;
+  actionLatency: PilotActionLatencyMetrics;
+  operations: PilotOperationsMetrics;
 }
 
 export interface DashboardData {

@@ -1,6 +1,6 @@
 import type { Activity, Deal, OutboundApproval, Signal, StrategyPlay, Task } from "@/lib/domain/types";
-import { isAIConfigured, openaiProvider } from "@/lib/ai";
-import type { AIMessage } from "@/lib/ai";
+import { createUserAwareProvider, type AIMessage } from "@/lib/ai";
+import type { ActorIdentity } from "@/lib/auth/actor";
 
 const AI_STRATEGY_TIMEOUT_MS = Number(process.env.APP_AI_STRATEGY_TIMEOUT_MS ?? 900);
 
@@ -147,7 +147,7 @@ async function buildAIGeneratedPlays(input: {
   tasks: Task[];
   approvals: OutboundApproval[];
   recentActivities: Activity[];
-}): Promise<StrategyPlay[]> {
+}, actor?: ActorIdentity): Promise<StrategyPlay[]> {
   const signalSummaries = input.signals.map((s) => `${s.type}: ${s.summary} (score: ${s.score})`).join("\n");
   const activitySummaries = input.recentActivities.map((a) => `${a.type}: ${a.summary}`).join("\n");
   const taskSummaries = input.tasks.map((t) => `${t.title} (${t.priority}, ${t.status})`).join("\n");
@@ -201,10 +201,8 @@ Generate 2-4 strategic plays tailored to this specific deal situation.`;
   ];
 
   try {
-    const aiResponse = openaiProvider.generateJSON<AIPlaysResponse>(messages, {
-      temperature: 0.7,
-      maxTokens: 1500
-    });
+    const provider = await createUserAwareProvider(actor);
+    const aiResponse = provider.generateJSON<AIPlaysResponse>(messages);
 
     const response = await Promise.race([
       aiResponse,
@@ -234,11 +232,13 @@ export async function buildStrategyPlays(input: {
   tasks: Task[];
   approvals: OutboundApproval[];
   recentActivities: Activity[];
-}): Promise<StrategyPlay[]> {
-  if (isAIConfigured()) {
-    return buildAIGeneratedPlays(input);
+}, actor?: ActorIdentity): Promise<StrategyPlay[]> {
+  try {
+    return await buildAIGeneratedPlays(input, actor);
+  } catch (error) {
+    console.error("AI strategy provider unavailable, falling back to rules.", error);
+    return buildRuleBasedPlays(input);
   }
-  return buildRuleBasedPlays(input);
 }
 
 // Legacy sync export for backward compatibility (uses rules only)
