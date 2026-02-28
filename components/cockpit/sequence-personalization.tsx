@@ -1,8 +1,12 @@
+"use client";
+
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { createSequenceExecutionAction } from "@/app/actions/sequences";
 import type { Contact, Deal, Signal } from "@/lib/domain/types";
 import { buildSequencePlans } from "@/lib/services/capabilities";
 
@@ -13,7 +17,50 @@ interface SequencePersonalizationProps {
 }
 
 export function SequencePersonalization({ contacts, deal, signals }: SequencePersonalizationProps) {
+  const router = useRouter();
+  const [launchingId, setLaunchingId] = useState<string | null>(null);
   const plans = buildSequencePlans(contacts, deal, signals);
+
+  async function handleLaunch(plan: (typeof plans)[number]) {
+    if (launchingId) {
+      return;
+    }
+
+    setLaunchingId(plan.id);
+    toast.loading("Launching sequence...", { id: `sequence-launch-${plan.id}` });
+
+    try {
+      const response = await fetch("/api/sequences", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          dealId: deal.id,
+          contactId: plan.contactId,
+          title: `${plan.contactName} · ${deal.stage} follow-up`,
+          channelMix: plan.channelMix,
+          steps: plan.steps.map((instruction, index) => ({
+            channel: plan.channelMix[index % plan.channelMix.length],
+            instruction
+          }))
+        })
+      });
+
+      const payload = await response.json().catch(() => null);
+      if (!response.ok) {
+        toast.error(payload?.error ?? "Failed to launch sequence.", { id: `sequence-launch-${plan.id}` });
+        return;
+      }
+
+      toast.success("Sequence launched.", { id: `sequence-launch-${plan.id}` });
+      router.refresh();
+    } catch {
+      toast.error("Failed to launch sequence.", { id: `sequence-launch-${plan.id}` });
+    } finally {
+      setLaunchingId(null);
+    }
+  }
 
   return (
     <Card>
@@ -41,25 +88,15 @@ export function SequencePersonalization({ contacts, deal, signals }: SequencePer
                   <li key={step}>• {step}</li>
                 ))}
               </ol>
-              <form action={createSequenceExecutionAction} className="mt-3">
-                <input type="hidden" name="dealId" value={deal.id} />
-                <input type="hidden" name="contactId" value={plan.contactId} />
-                <input type="hidden" name="title" value={`${plan.contactName} · ${deal.stage} follow-up`} />
-                <input type="hidden" name="channelMix" value={JSON.stringify(plan.channelMix)} />
-                <input
-                  type="hidden"
-                  name="steps"
-                  value={JSON.stringify(
-                    plan.steps.map((instruction, index) => ({
-                      channel: plan.channelMix[index % plan.channelMix.length],
-                      instruction
-                    }))
-                  )}
-                />
-                <Button type="submit" size="sm" className="w-full">
-                  Launch Sequence
-                </Button>
-              </form>
+              <Button
+                type="button"
+                size="sm"
+                className="mt-3 w-full"
+                disabled={launchingId !== null}
+                onClick={() => handleLaunch(plan)}
+              >
+                {launchingId === plan.id ? "Launching..." : "Launch Sequence"}
+              </Button>
             </li>
           ))}
         </ul>

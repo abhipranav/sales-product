@@ -1,7 +1,6 @@
 "use client";
 
 import type { FollowUpDraft } from "@/lib/domain/types";
-import { queueApprovalAction } from "@/app/actions/approvals";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -15,7 +14,9 @@ import {
   DialogHeader,
   DialogTitle
 } from "@/components/ui/dialog";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
 
 interface FollowUpComposerProps {
   dealId: string;
@@ -23,11 +24,86 @@ interface FollowUpComposerProps {
 }
 
 export function FollowUpComposer({ dealId, draft }: FollowUpComposerProps) {
+  const router = useRouter();
   const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isQueueing, setIsQueueing] = useState(false);
+  const [isRegenerating, setIsRegenerating] = useState(false);
   const [subject, setSubject] = useState(draft.subject);
   const [body, setBody] = useState(draft.body);
   const [ask, setAsk] = useState(draft.ask);
   const [ctaTimeWindow, setCtaTimeWindow] = useState(draft.ctaTimeWindow);
+
+  async function handleRegenerate() {
+    if (isRegenerating) {
+      return;
+    }
+
+    setIsRegenerating(true);
+    toast.loading("Generating follow-up draft...", { id: `followup-${dealId}` });
+
+    try {
+      const response = await fetch(`/api/followups/${dealId}/generate`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({})
+      });
+
+      const payload = await response.json().catch(() => null);
+      if (!response.ok || !payload?.draft) {
+        toast.error(payload?.error ?? "Failed to generate follow-up draft.", { id: `followup-${dealId}` });
+        return;
+      }
+
+      setSubject(payload.draft.subject);
+      setBody(payload.draft.body);
+      setAsk(payload.draft.ask);
+      setCtaTimeWindow(payload.draft.ctaTimeWindow);
+      toast.success(`Follow-up draft regenerated (${payload.source ?? "rule-based"}).`, { id: `followup-${dealId}` });
+    } catch {
+      toast.error("Failed to generate follow-up draft.", { id: `followup-${dealId}` });
+    } finally {
+      setIsRegenerating(false);
+    }
+  }
+
+  async function handleQueueApproval() {
+    if (isQueueing) {
+      return;
+    }
+
+    setIsQueueing(true);
+    toast.loading("Queueing approval...", { id: `approval-queue-${dealId}` });
+
+    try {
+      const response = await fetch("/api/approvals", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          dealId,
+          channel: "email",
+          subject,
+          body: `${body}\n\nAsk: ${ask}\nWindow: ${ctaTimeWindow}`
+        })
+      });
+
+      const payload = await response.json().catch(() => null);
+      if (!response.ok) {
+        toast.error(payload?.error ?? "Failed to queue approval.", { id: `approval-queue-${dealId}` });
+        return;
+      }
+
+      toast.success("Draft queued for approval.", { id: `approval-queue-${dealId}` });
+      router.refresh();
+    } catch {
+      toast.error("Failed to queue approval.", { id: `approval-queue-${dealId}` });
+    } finally {
+      setIsQueueing(false);
+    }
+  }
 
   return (
     <>
@@ -49,18 +125,17 @@ export function FollowUpComposer({ dealId, draft }: FollowUpComposerProps) {
             </p>
           </div>
 
-          <form action={queueApprovalAction} className="mt-4 flex gap-2">
-            <input type="hidden" name="dealId" value={dealId} />
-            <input type="hidden" name="channel" value="email" />
-            <input type="hidden" name="subject" value={subject} />
-            <input type="hidden" name="body" value={`${body}\n\nAsk: ${ask}\nWindow: ${ctaTimeWindow}`} />
-            <Button type="submit" variant="success">
-              Queue Approval
+          <div className="mt-4 flex gap-2">
+            <Button type="button" variant="success" onClick={handleQueueApproval} disabled={isQueueing}>
+              {isQueueing ? "Queueing..." : "Queue Approval"}
             </Button>
             <Button type="button" variant="outline" onClick={() => setIsEditOpen(true)}>
               Edit
             </Button>
-          </form>
+            <Button type="button" variant="outline" onClick={handleRegenerate} disabled={isRegenerating}>
+              {isRegenerating ? "Generating..." : "Regenerate"}
+            </Button>
+          </div>
         </CardContent>
       </Card>
 
