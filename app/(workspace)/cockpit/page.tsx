@@ -9,17 +9,35 @@ import { MeetingBriefCard } from "@/components/cockpit/meeting-brief";
 import { MeetingNotesCapture } from "@/components/cockpit/meeting-notes-capture";
 import { NextActions } from "@/components/cockpit/next-actions";
 import { PipelineMetricsStrip } from "@/components/cockpit/pipeline-metrics";
+import { PilotMetricsPanel } from "@/components/cockpit/pilot-metrics-panel";
 import { StrategyLab } from "@/components/cockpit/strategy-lab";
 import { BuyingSignalAlerts } from "@/components/cockpit/buying-signal-alerts";
 import { StakeholderMap } from "@/components/cockpit/stakeholder-map";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { getActorFromServerContext } from "@/lib/auth/actor";
+import { getPilotMetricsSnapshot } from "@/lib/mock/pilot-metrics";
 import { getCachedDashboardData } from "@/lib/services/dashboard-cache";
+import { PilotMetricsServiceUnavailableError, getPilotMetrics } from "@/lib/services/pilot-metrics";
+import { WorkspaceAccessDeniedError } from "@/lib/services/workspace";
 
 export default async function CockpitPage() {
   const actor = await getActorFromServerContext();
   const data = await getCachedDashboardData(actor, "/cockpit");
+  let pilotMetricsMode: "live" | "mock" = "mock";
+  let pilotMetrics = getPilotMetricsSnapshot();
+
+  try {
+    pilotMetrics = await getPilotMetrics(actor);
+    pilotMetricsMode = "live";
+  } catch (error) {
+    if (error instanceof PilotMetricsServiceUnavailableError || error instanceof WorkspaceAccessDeniedError) {
+      pilotMetricsMode = "mock";
+    } else {
+      console.error("Failed to resolve pilot metrics. Falling back to snapshot.", error);
+      pilotMetricsMode = "mock";
+    }
+  }
 
   return (
     <section className="mx-auto max-w-7xl py-2 md:py-4">
@@ -72,7 +90,7 @@ export default async function CockpitPage() {
             <NextActions dealId={data.deal.id} tasks={data.tasks} />
           </div>
           <div className="reveal reveal-delay-2">
-            <MeetingBriefCard brief={data.meetingBrief} />
+            <MeetingBriefCard dealId={data.deal.id} brief={data.meetingBrief} />
           </div>
           <div className="reveal reveal-delay-2">
             <FollowUpComposer dealId={data.deal.id} draft={data.followUpDraft} />
@@ -89,6 +107,10 @@ export default async function CockpitPage() {
         </div>
 
         <div className="space-y-5">
+          <div className="reveal reveal-delay-1">
+            <PilotMetricsPanel metrics={pilotMetrics} mode={pilotMetricsMode} />
+          </div>
+
           <div className="reveal reveal-delay-1">
             <DealHealth deal={data.deal} contacts={data.contacts} signals={data.account.signals} />
           </div>
