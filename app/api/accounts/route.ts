@@ -4,9 +4,10 @@ import {
   listAccounts,
   createAccount,
   parseCreateAccountInput,
-  CrmServiceUnavailableError
+  CrmServiceUnavailableError,
+  type AccountFilters,
+  type SortInput
 } from "@/lib/services/crm-records";
-import type { AccountFilters, SortInput } from "@/lib/services/crm-records";
 
 export async function GET(request: NextRequest) {
   try {

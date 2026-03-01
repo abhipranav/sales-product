@@ -5,9 +5,10 @@ import {
   createDeal,
   parseCreateDealInput,
   CrmServiceUnavailableError,
-  CrmRecordNotFoundError
+  CrmRecordNotFoundError,
+  type DealFilters,
+  type SortInput
 } from "@/lib/services/crm-records";
-import type { DealFilters, SortInput } from "@/lib/services/crm-records";
 
 export async function GET(request: NextRequest) {
   try {

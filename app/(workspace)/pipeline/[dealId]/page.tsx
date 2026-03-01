@@ -47,9 +47,11 @@ export default async function DealDetailPage({ params }: PageProps) {
     "closed-lost": "hsl(var(--destructive))"
   };
 
-  const isOverdue = new Date(deal.closeDate) < new Date();
+  const now = new Date();
+  const closeDate = new Date(deal.closeDate);
+  const isOverdue = closeDate < now;
   const daysUntilClose = Math.ceil(
-    (new Date(deal.closeDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+    (closeDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
   );
 
   return (

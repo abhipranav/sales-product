@@ -5,9 +5,10 @@ import {
   createContact,
   parseCreateContactInput,
   CrmServiceUnavailableError,
-  CrmRecordNotFoundError
+  CrmRecordNotFoundError,
+  type ContactFilters,
+  type SortInput
 } from "@/lib/services/crm-records";
-import type { ContactFilters, SortInput } from "@/lib/services/crm-records";
 
 export async function GET(request: NextRequest) {
   try {

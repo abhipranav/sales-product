@@ -9,6 +9,8 @@ import {
   DragEndEvent,
   closestCenter,
   PointerSensor,
+  useDraggable,
+  useDroppable,
   useSensor,
   useSensors
 } from "@dnd-kit/core";
@@ -109,7 +111,7 @@ export function PipelineBoard({ initialDeals }: PipelineBoardProps) {
   }, [deals]);
 
   const attentionScore = (deal: Deal) => {
-    const now = Date.now();
+    const now = new Date().getTime();
     const closeAt = new Date(deal.closeDate).getTime();
     const daysToClose = Math.ceil((closeAt - now) / (1000 * 60 * 60 * 24));
 
@@ -168,8 +170,6 @@ interface StageColumnProps {
   total: number;
 }
 
-import { useDroppable } from "@dnd-kit/core";
-
 function StageColumn({ stage, deals, total }: StageColumnProps) {
   const { isOver, setNodeRef } = useDroppable({
     id: stage.id
@@ -207,8 +207,6 @@ function StageColumn({ stage, deals, total }: StageColumnProps) {
   );
 }
 
-import { useDraggable } from "@dnd-kit/core";
-
 interface DraggableDealCardProps {
   deal: Deal;
 }
@@ -245,7 +243,7 @@ interface DealCardProps {
 function DealCard({ deal, isDragging }: DealCardProps) {
   const isOverdue = new Date(deal.closeDate) < new Date();
   const daysUntilClose = Math.ceil(
-    (new Date(deal.closeDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+    (new Date(deal.closeDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)
   );
 
   return (
