@@ -1,5 +1,9 @@
+"use client";
+
 import Link from "next/link";
-import { createSequenceExecutionAction, updateSequenceStepAction } from "@/app/actions/sequences";
+import { useRouter } from "next/navigation";
+import { type FormEvent, useState } from "react";
+import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -44,7 +48,125 @@ const sequenceTemplate = [
   "Share proof asset and book explicit next-step commitment."
 ].join("\n");
 
+const allowedChannels = new Set(["email", "phone", "linkedin", "meeting"]);
+
+function parseChannels(rawChannels: string) {
+  const channels = rawChannels
+    .split(",")
+    .map((channel) => channel.trim().toLowerCase())
+    .filter((channel) => allowedChannels.has(channel));
+
+  if (channels.length > 0) {
+    return channels;
+  }
+
+  return ["email", "phone", "linkedin"];
+}
+
+function parseSteps(rawStepsText: string, channels: string[]) {
+  const lines = rawStepsText
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0);
+
+  return lines.map((instruction, index) => ({
+    channel: channels[index % channels.length] ?? "email",
+    instruction
+  }));
+}
+
 export function SequenceExecutionBoard({ dealId, contacts, sequences }: SequenceExecutionBoardProps) {
+  const router = useRouter();
+  const [isCreating, setIsCreating] = useState(false);
+  const [busyStepId, setBusyStepId] = useState<string | null>(null);
+
+  async function handleCreateSequence(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (isCreating) {
+      return;
+    }
+
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+    const channels = parseChannels(String(formData.get("channels") ?? ""));
+    const steps = parseSteps(String(formData.get("stepsText") ?? ""), channels);
+
+    if (steps.length === 0) {
+      toast.error("Add at least one sequence step.");
+      return;
+    }
+
+    setIsCreating(true);
+    toast.loading("Creating sequence...", { id: "sequence-create" });
+
+    try {
+      const response = await fetch("/api/sequences", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          dealId: String(formData.get("dealId") ?? "").trim(),
+          contactId: String(formData.get("contactId") ?? "").trim() || undefined,
+          title: String(formData.get("title") ?? "").trim(),
+          channelMix: channels,
+          steps
+        })
+      });
+
+      const payload = await response.json().catch(() => null);
+      if (!response.ok) {
+        toast.error(payload?.error ?? "Failed to create sequence.", { id: "sequence-create" });
+        return;
+      }
+
+      toast.success("Sequence created.", { id: "sequence-create" });
+      form.reset();
+      router.refresh();
+    } catch {
+      toast.error("Failed to create sequence.", { id: "sequence-create" });
+    } finally {
+      setIsCreating(false);
+    }
+  }
+
+  async function handleUpdateStep(event: FormEvent<HTMLFormElement>, stepId: string) {
+    event.preventDefault();
+    if (busyStepId) {
+      return;
+    }
+
+    const formData = new FormData(event.currentTarget);
+    setBusyStepId(stepId);
+    toast.loading("Updating sequence step...", { id: `sequence-step-${stepId}` });
+
+    try {
+      const response = await fetch(`/api/sequences/steps/${stepId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          status: String(formData.get("status") ?? "").trim() || undefined,
+          outcome: String(formData.get("outcome") ?? "").trim() || undefined
+        })
+      });
+
+      const payload = await response.json().catch(() => null);
+      if (!response.ok) {
+        toast.error(payload?.error ?? "Failed to update sequence step.", { id: `sequence-step-${stepId}` });
+        return;
+      }
+
+      toast.success("Sequence step updated.", { id: `sequence-step-${stepId}` });
+      router.refresh();
+    } catch {
+      toast.error("Failed to update sequence step.", { id: `sequence-step-${stepId}` });
+    } finally {
+      setBusyStepId(null);
+    }
+  }
+
   return (
     <Card>
       <CardHeader className="flex-row items-center justify-between space-y-0">
@@ -52,7 +174,10 @@ export function SequenceExecutionBoard({ dealId, contacts, sequences }: Sequence
         <Badge variant="secondary">{sequences.length} active records</Badge>
       </CardHeader>
       <CardContent className="space-y-4">
-        <form action={createSequenceExecutionAction} className="grid gap-2  border border-[hsl(var(--border))] bg-[hsl(var(--muted))] p-3">
+        <form
+          onSubmit={handleCreateSequence}
+          className="grid gap-2 border border-[hsl(var(--border))] bg-[hsl(var(--muted))] p-3"
+        >
           <input type="hidden" name="dealId" value={dealId} />
           <Input name="title" required minLength={3} maxLength={180} placeholder="Sequence title..." />
           <div className="grid gap-2 md:grid-cols-2">
@@ -72,7 +197,9 @@ export function SequenceExecutionBoard({ dealId, contacts, sequences }: Sequence
             />
           </div>
           <Textarea name="stepsText" rows={4} defaultValue={sequenceTemplate} />
-          <Button type="submit">Create Sequence</Button>
+          <Button type="submit" disabled={isCreating}>
+            {isCreating ? "Creating..." : "Create Sequence"}
+          </Button>
         </form>
 
         {sequences.length === 0 ? (
@@ -120,9 +247,11 @@ export function SequenceExecutionBoard({ dealId, contacts, sequences }: Sequence
                       <p className="mt-1 text-xs text-[hsl(var(--muted-foreground))] dark:text-[hsl(var(--muted-foreground))]">
                         {step.completedAt ? `Completed ${new Date(step.completedAt).toLocaleString()}` : "Not completed"}
                       </p>
-                      <form action={updateSequenceStepAction} className="mt-2 grid gap-2 md:grid-cols-[0.8fr_1.2fr_auto]">
-                        <input type="hidden" name="stepId" value={step.id} />
-                        <NativeSelect name="status" defaultValue={step.status}>
+                      <form
+                        onSubmit={(event) => handleUpdateStep(event, step.id)}
+                        className="mt-2 grid gap-2 md:grid-cols-[0.8fr_1.2fr_auto]"
+                      >
+                        <NativeSelect name="status" defaultValue={step.status} disabled={busyStepId !== null}>
                           <option value="todo">todo</option>
                           <option value="in-progress">in-progress</option>
                           <option value="done">done</option>
@@ -133,8 +262,9 @@ export function SequenceExecutionBoard({ dealId, contacts, sequences }: Sequence
                           defaultValue={step.outcome ?? ""}
                           placeholder="Outcome note (optional)"
                           aria-label="Outcome note"
+                          disabled={busyStepId !== null}
                         />
-                        <Button type="submit" variant="outline">
+                        <Button type="submit" variant="outline" disabled={busyStepId !== null}>
                           Save
                         </Button>
                       </form>
