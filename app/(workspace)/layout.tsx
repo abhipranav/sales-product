@@ -45,7 +45,7 @@ export default async function WorkspaceLayout({ children }: WorkspaceLayoutProps
           {/* Actor */}
           <div className="mt-4 border-[2px] border-dashed border-[hsl(var(--border))] px-3 py-2">
             <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-[hsl(var(--foreground))]">{actorName}</p>
-            <p className="font-mono text-[9px] text-[hsl(var(--muted-foreground))] tracking-wider">{actorEmail}</p>
+            <p className="font-mono text-[9px] text-[hsl(var(--muted-foreground))] tracking-wider truncate" title={actorEmail}>{actorEmail}</p>
             <div className="mt-2 flex items-center gap-2">
               <Link
                 href="/settings"

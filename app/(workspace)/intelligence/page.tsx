@@ -76,7 +76,7 @@ export default async function IntelligencePage() {
       <section className="grid gap-4 xl:grid-cols-[1fr_1fr]">
         <div className="space-y-4">
           <BuyingSignalAlerts deal={data.deal} signals={data.account.signals} />
-          <MeetingBriefCard brief={data.meetingBrief} />
+          <MeetingBriefCard dealId={data.deal.id} brief={data.meetingBrief} />
           <MeetingNotesCapture dealId={data.deal.id} />
         </div>
         <div className="space-y-4">

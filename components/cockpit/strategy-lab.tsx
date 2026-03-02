@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { executeStrategyPlayAction } from "@/app/actions/strategy";
 import { toast } from "sonner";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 interface StrategyLabProps {
   plays: StrategyPlay[];
@@ -14,6 +15,7 @@ interface StrategyLabProps {
 }
 
 export function StrategyLab({ plays, dealId }: StrategyLabProps) {
+  const router = useRouter();
   const [executingId, setExecutingId] = useState<string | null>(null);
 
   async function handleExecute(playId: string, playTitle: string) {
@@ -28,6 +30,7 @@ export function StrategyLab({ plays, dealId }: StrategyLabProps) {
           `Play executed. Created ${result.tasksCreated} tasks${result.approvalsCreated > 0 ? ` and ${result.approvalsCreated} approval` : ""}.`,
           { id: playId }
         );
+        router.refresh();
       } else {
         toast.error(result.error ?? "Failed to execute play", { id: playId });
       }
