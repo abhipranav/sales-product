@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -18,8 +18,10 @@ export function CommandPalette() {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
-  const [loading, setLoading] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const normalizedQuery = query.trim();
+  const canSearch = normalizedQuery.length >= 2;
+  const visibleResults = canSearch ? results : [];
 
   // Handle Cmd+K to open
   useEffect(() => {
@@ -35,15 +37,13 @@ export function CommandPalette() {
 
   // Search on query change
   useEffect(() => {
-    if (!query || query.length < 2) {
-      setResults([]);
+    if (!canSearch) {
       return;
     }
 
     const controller = new AbortController();
-    setLoading(true);
 
-    fetch(`/api/search?q=${encodeURIComponent(query)}&limit=10`, { signal: controller.signal })
+    fetch(`/api/search?q=${encodeURIComponent(normalizedQuery)}&limit=10`, { signal: controller.signal })
       .then((res) => res.json())
       .then((data) => {
         setResults(data.results ?? []);
@@ -53,53 +53,46 @@ export function CommandPalette() {
         if (err.name !== "AbortError") {
           console.error("Search error:", err);
         }
-      })
-      .finally(() => setLoading(false));
+      });
 
     return () => controller.abort();
-  }, [query]);
+  }, [canSearch, normalizedQuery]);
 
-  const handleSelect = useCallback(
-    (result: SearchResult) => {
-      setOpen(false);
-      setQuery("");
-      let path: string;
-      switch (result.type) {
-        case "account":
-          path = `/accounts/${result.id}`;
-          break;
-        case "contact":
-          path = `/contacts/${result.id}`;
-          break;
-        case "deal":
-          path = `/pipeline/${result.id}`;
-          break;
-        default:
-          path = "/";
-      }
-      router.push(path as Parameters<typeof router.push>[0]);
-    },
-    [router]
-  );
+  function handleSelect(result: SearchResult) {
+    setOpen(false);
+    setQuery("");
+    let path: string;
+    switch (result.type) {
+      case "account":
+        path = `/accounts/${result.id}`;
+        break;
+      case "contact":
+        path = `/contacts/${result.id}`;
+        break;
+      case "deal":
+        path = `/pipeline/${result.id}`;
+        break;
+      default:
+        path = "/";
+    }
+    router.push(path as Parameters<typeof router.push>[0]);
+  }
 
   // Keyboard navigation
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent) => {
-      if (e.key === "ArrowDown") {
-        e.preventDefault();
-        setSelectedIndex((prev) => Math.min(prev + 1, results.length - 1));
-      } else if (e.key === "ArrowUp") {
-        e.preventDefault();
-        setSelectedIndex((prev) => Math.max(prev - 1, 0));
-      } else if (e.key === "Enter" && results[selectedIndex]) {
-        e.preventDefault();
-        handleSelect(results[selectedIndex]);
-      } else if (e.key === "Escape") {
-        setOpen(false);
-      }
-    },
-    [results, selectedIndex, handleSelect]
-  );
+  function handleKeyDown(e: React.KeyboardEvent) {
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setSelectedIndex((prev) => Math.min(prev + 1, visibleResults.length - 1));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setSelectedIndex((prev) => Math.max(prev - 1, 0));
+    } else if (e.key === "Enter" && visibleResults[selectedIndex]) {
+      e.preventDefault();
+      handleSelect(visibleResults[selectedIndex]);
+    } else if (e.key === "Escape") {
+      setOpen(false);
+    }
+  }
 
   const typeIcon = (type: string) => {
     switch (type) {
@@ -147,27 +140,21 @@ export function CommandPalette() {
         </div>
 
         <div className="max-h-80 overflow-y-auto">
-          {loading && (
-            <div className="p-4 text-center text-sm text-[hsl(var(--muted-foreground))]">
-              Searching...
-            </div>
-          )}
-
-          {!loading && query.length >= 2 && results.length === 0 && (
+          {canSearch && visibleResults.length === 0 && (
             <div className="p-4 text-center text-sm text-[hsl(var(--muted-foreground))]">
               No results found for &quot;{query}&quot;
             </div>
           )}
 
-          {!loading && query.length < 2 && (
+          {!canSearch && (
             <div className="p-4 text-center text-sm text-[hsl(var(--muted-foreground))]">
               Type at least 2 characters to search
             </div>
           )}
 
-          {results.length > 0 && (
+          {visibleResults.length > 0 && (
             <ul className="py-2">
-              {results.map((result, index) => (
+              {visibleResults.map((result, index) => (
                 <li key={`${result.type}-${result.id}`}>
                   <button
                     onClick={() => handleSelect(result)}

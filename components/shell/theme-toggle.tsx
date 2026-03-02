@@ -1,37 +1,32 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useTheme } from "next-themes";
+import { useEffect, useState } from "react";
 
 export function ThemeToggle() {
   const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     setMounted(true);
   }, []);
 
-  if (!mounted) {
-    return (
-      <button
-        type="button"
-        className="w-full border-[2px] border-[hsl(var(--border))] bg-transparent px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-wider text-[hsl(var(--muted-foreground))]"
-      >
-        THEME
-      </button>
-    );
-  }
-
-  const isDark = resolvedTheme === "dark";
+  const isDark = mounted && resolvedTheme === "dark";
+  const label = mounted
+    ? isDark
+      ? "◐ LIGHT_MODE"
+      : "◑ DARK_MODE"
+    : "THEME";
 
   return (
     <button
       type="button"
-      aria-label="Toggle theme"
+      aria-label={mounted ? "Toggle theme" : undefined}
       onClick={() => setTheme(isDark ? "light" : "dark")}
       className="w-full border-[2px] border-[hsl(var(--border))] bg-transparent px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-wider text-[hsl(var(--muted-foreground))] transition-all duration-150 hover:bg-[hsl(var(--foreground))] hover:text-[hsl(var(--background))]"
     >
-      {isDark ? "◐ LIGHT_MODE" : "◑ DARK_MODE"}
+      {label}
     </button>
   );
 }

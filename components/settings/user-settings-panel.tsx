@@ -46,6 +46,80 @@ interface UserSettingsResponse {
   source: "database" | "fallback";
 }
 
+interface UserAISettingsResponse {
+  hasApiKey: boolean;
+  maskedKey: string | null;
+  model: string;
+  source: "user" | "system" | "none";
+  dailyUsage: {
+    date: string;
+    timezone: "UTC";
+    resetAt: string;
+    selectedModel: string;
+    selectedModelTokens: number;
+    selectedModelDailyLimit: number | null;
+    selectedModelRemaining: number | null;
+    selectedModelPercentUsed: number | null;
+    models: Array<{
+      model: string;
+      totalTokens: number;
+      promptTokens: number;
+      completionTokens: number;
+      requestCount: number;
+      dailyLimit: number | null;
+      remaining: number | null;
+      percentUsed: number | null;
+    }>;
+  };
+}
+
+const RECOMMENDED_AI_MODELS = [
+  "gpt-5",
+  "gpt-5-mini",
+  "gpt-5-nano",
+  "gpt-5-codex"
+];
+
+function createDefaultAISettings(model = "gpt-5-mini"): UserAISettingsResponse {
+  const normalizedModel = model.trim().toLowerCase() || "gpt-5-mini";
+  const tomorrowUtc = new Date();
+  tomorrowUtc.setUTCHours(24, 0, 0, 0);
+
+  return {
+    hasApiKey: false,
+    maskedKey: null,
+    model: normalizedModel,
+    source: "none",
+    dailyUsage: {
+      date: new Date().toISOString().slice(0, 10),
+      timezone: "UTC",
+      resetAt: tomorrowUtc.toISOString(),
+      selectedModel: normalizedModel,
+      selectedModelTokens: 0,
+      selectedModelDailyLimit: normalizedModel.startsWith("gpt-5-mini")
+        ? 2_500_000
+        : normalizedModel === "gpt-5"
+          ? 250_000
+          : null,
+      selectedModelRemaining: normalizedModel.startsWith("gpt-5-mini")
+        ? 2_500_000
+        : normalizedModel === "gpt-5"
+          ? 250_000
+          : null,
+      selectedModelPercentUsed: 0,
+      models: []
+    }
+  };
+}
+
+function normalizeModelInput(model: string): string {
+  return model.trim().toLowerCase();
+}
+
+function formatTokens(value: number): string {
+  return new Intl.NumberFormat("en-US").format(value);
+}
+
 function RoleBadge({ role }: { role: UserSettingsResponse["profile"]["role"] }) {
   if (role === "owner") {
     return <Badge variant="accent">owner</Badge>;
@@ -93,20 +167,45 @@ function ToggleField({
 
 export function UserSettingsPanel() {
   const [settings, setSettings] = useState<UserSettingsResponse | null>(null);
+  const [aiSettings, setAISettings] = useState<UserAISettingsResponse>(createDefaultAISettings());
+  const [aiApiKeyInput, setAIApiKeyInput] = useState("");
+  const [aiModelInput, setAIModelInput] = useState("gpt-5-mini");
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isSavingAI, setIsSavingAI] = useState(false);
 
   useEffect(() => {
     async function loadSettings() {
       setIsLoading(true);
       try {
-        const response = await fetch("/api/settings/user");
-        if (!response.ok) {
+        const [settingsResponse, aiResponse] = await Promise.all([
+          fetch("/api/settings/user"),
+          fetch("/api/settings/user/ai")
+        ]);
+
+        if (!settingsResponse.ok) {
           throw new Error("Failed to load settings");
         }
 
-        const payload: UserSettingsResponse = await response.json();
+        const payload: UserSettingsResponse = await settingsResponse.json();
         setSettings(payload);
+
+        if (aiResponse.ok) {
+          const aiPayload = (await aiResponse.json()) as Partial<UserAISettingsResponse>;
+          const normalizedModel = normalizeModelInput(aiPayload.model ?? "gpt-5-mini");
+          const mergedAISettings: UserAISettingsResponse = {
+            ...createDefaultAISettings(normalizedModel),
+            ...aiPayload,
+            model: normalizedModel,
+            dailyUsage: aiPayload.dailyUsage ?? createDefaultAISettings(normalizedModel).dailyUsage
+          };
+          setAISettings(mergedAISettings);
+          setAIModelInput(normalizedModel);
+        } else {
+          const fallbackAISettings = createDefaultAISettings();
+          setAISettings(fallbackAISettings);
+          setAIModelInput(fallbackAISettings.model);
+        }
       } catch (error) {
         console.error(error);
         toast.error("Could not load account settings.");
@@ -122,6 +221,20 @@ export function UserSettingsPanel() {
   const canSave = useMemo(
     () => !isLoading && !!settings && !isSaving && settings.source === "database",
     [isLoading, settings, isSaving]
+  );
+  const canSaveAI = useMemo(
+    () => !isLoading && !isSavingAI && !!aiModelInput.trim(),
+    [isLoading, isSavingAI, aiModelInput]
+  );
+  const selectedUsagePercent = aiSettings.dailyUsage.selectedModelPercentUsed ?? 0;
+  const selectedUsageLimit = aiSettings.dailyUsage.selectedModelDailyLimit;
+  const canClearPersonalKey = aiSettings.source === "user" && !isSavingAI;
+  const modelSuggestions = useMemo(
+    () =>
+      Array.from(new Set([...RECOMMENDED_AI_MODELS, aiSettings.model, normalizeModelInput(aiModelInput)])).filter(
+        (value) => value.length > 0
+      ),
+    [aiSettings.model, aiModelInput]
   );
 
   async function saveSettings() {
@@ -159,6 +272,76 @@ export function UserSettingsPanel() {
       toast.error("Could not save settings.");
     } finally {
       setIsSaving(false);
+    }
+  }
+
+  async function saveAISettings() {
+    const normalizedModel = normalizeModelInput(aiModelInput);
+    if (!normalizedModel) {
+      toast.error("Model is required.");
+      return;
+    }
+
+    setIsSavingAI(true);
+    try {
+      const payload: { model: string; apiKey?: string } = { model: normalizedModel };
+      const normalizedApiKey = aiApiKeyInput.trim();
+      if (normalizedApiKey.length > 0) {
+        payload.apiKey = normalizedApiKey;
+      }
+
+      const response = await fetch("/api/settings/user/ai", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+        const errorPayload = await response.json().catch(() => null);
+        throw new Error(errorPayload?.error ?? "Failed to save AI settings");
+      }
+
+      const nextSettings: UserAISettingsResponse = await response.json();
+      setAISettings(nextSettings);
+      setAIModelInput(nextSettings.model);
+      setAIApiKeyInput("");
+      toast.success("AI settings saved.");
+    } catch (error) {
+      console.error(error);
+      toast.error("Could not save AI settings.");
+    } finally {
+      setIsSavingAI(false);
+    }
+  }
+
+  async function clearPersonalAIKey() {
+    setIsSavingAI(true);
+    try {
+      const response = await fetch("/api/settings/user/ai", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ apiKey: null })
+      });
+
+      if (!response.ok) {
+        const errorPayload = await response.json().catch(() => null);
+        throw new Error(errorPayload?.error ?? "Failed to clear AI key");
+      }
+
+      const nextSettings: UserAISettingsResponse = await response.json();
+      setAISettings(nextSettings);
+      setAIModelInput(nextSettings.model);
+      setAIApiKeyInput("");
+      toast.success("Personal AI key removed.");
+    } catch (error) {
+      console.error(error);
+      toast.error("Could not clear personal AI key.");
+    } finally {
+      setIsSavingAI(false);
     }
   }
 
@@ -565,6 +748,156 @@ export function UserSettingsPanel() {
                 }
               />
             </div>
+          </CardContent>
+        </Card>
+      </section>
+
+      <section className="grid gap-4 xl:grid-cols-[1fr_1fr]">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="font-mono text-xs uppercase tracking-wider">AI CONFIGURATION</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge variant={aiSettings.source === "user" ? "success" : "outline"}>
+                {aiSettings.source === "user" ? "personal key active" : "personal key inactive"}
+              </Badge>
+              <Badge variant={aiSettings.source === "system" ? "warning" : "outline"}>
+                {aiSettings.source === "system" ? "using workspace/system key" : "no workspace/system fallback"}
+              </Badge>
+              <Badge variant={aiSettings.hasApiKey ? "accent" : "destructive"}>
+                {aiSettings.hasApiKey ? "ai enabled" : "ai unavailable"}
+              </Badge>
+            </div>
+
+            <div className="space-y-1">
+              <Label htmlFor="ai-api-key">OpenAI API key (optional override)</Label>
+              <Input
+                id="ai-api-key"
+                type="password"
+                placeholder="sk-..."
+                value={aiApiKeyInput}
+                onChange={(event) => setAIApiKeyInput(event.target.value)}
+                autoComplete="off"
+              />
+              <p className="text-xs text-[hsl(var(--muted-foreground))]">
+                {aiSettings.maskedKey
+                  ? `Saved personal key: ${aiSettings.maskedKey}`
+                  : "No personal key saved. Workspace/system key will be used if configured."}
+              </p>
+            </div>
+
+            <div className="space-y-1">
+              <Label htmlFor="ai-model">Model</Label>
+              <Input
+                id="ai-model"
+                value={aiModelInput}
+                onChange={(event) => setAIModelInput(event.target.value)}
+                placeholder="gpt-5-mini"
+              />
+              <div className="flex flex-wrap gap-2 pt-1">
+                {modelSuggestions.map((model) => (
+                  <Button
+                    key={model}
+                    type="button"
+                    size="sm"
+                    variant={normalizeModelInput(aiModelInput) === model ? "accent" : "outline"}
+                    onClick={() => setAIModelInput(model)}
+                    disabled={isSavingAI}
+                  >
+                    {model}
+                  </Button>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex flex-wrap gap-2 pt-1">
+              <Button type="button" onClick={saveAISettings} disabled={!canSaveAI} variant="cta">
+                {isSavingAI ? "Saving..." : "Save AI Settings"}
+              </Button>
+              <Button
+                type="button"
+                onClick={clearPersonalAIKey}
+                disabled={!canClearPersonalKey}
+                variant="outline"
+              >
+                Clear Personal Key
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="font-mono text-xs uppercase tracking-wider">DAILY TOKEN USAGE</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="border-[2px] border-[hsl(var(--border))] bg-[hsl(var(--muted))] p-3">
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-sm font-semibold text-[hsl(var(--foreground))]">
+                  {aiSettings.dailyUsage.selectedModel}
+                </p>
+                <Badge variant="outline">{aiSettings.dailyUsage.date} UTC</Badge>
+              </div>
+              <p className="mt-1 text-xs text-[hsl(var(--muted-foreground))]">
+                Total used today: {formatTokens(aiSettings.dailyUsage.selectedModelTokens)} tokens
+              </p>
+              {selectedUsageLimit !== null ? (
+                <>
+                  <p className="mt-1 text-xs text-[hsl(var(--muted-foreground))]">
+                    Limit: {formatTokens(selectedUsageLimit)} | Remaining:{" "}
+                    {formatTokens(aiSettings.dailyUsage.selectedModelRemaining ?? 0)}
+                  </p>
+                  <div className="mt-2 h-2 w-full overflow-hidden border border-[hsl(var(--border))] bg-[hsl(var(--background))]">
+                    <div
+                      className="h-full bg-[hsl(var(--accent))] transition-all duration-150"
+                      style={{ width: `${Math.min(100, Math.max(0, selectedUsagePercent))}%` }}
+                    />
+                  </div>
+                </>
+              ) : (
+                <p className="mt-1 text-xs text-[hsl(var(--muted-foreground))]">
+                  No daily cap configured for this model.
+                </p>
+              )}
+              <p className="mt-2 text-xs text-[hsl(var(--muted-foreground))]">
+                Resets at {new Date(aiSettings.dailyUsage.resetAt).toLocaleString()} ({aiSettings.dailyUsage.timezone})
+              </p>
+            </div>
+
+            {aiSettings.dailyUsage.models.length > 0 ? (
+              <div className="space-y-2">
+                {aiSettings.dailyUsage.models.slice(0, 6).map((usageRow) => (
+                  <div
+                    key={usageRow.model}
+                    className="flex items-center justify-between gap-2 border-[2px] border-[hsl(var(--border))] bg-[hsl(var(--muted))] p-2"
+                  >
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-wider text-[hsl(var(--foreground))]">
+                        {usageRow.model}
+                      </p>
+                      <p className="text-xs text-[hsl(var(--muted-foreground))]">
+                        Requests: {usageRow.requestCount}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xs font-semibold text-[hsl(var(--foreground))]">
+                        {formatTokens(usageRow.totalTokens)}
+                      </p>
+                      <p className="text-xs text-[hsl(var(--muted-foreground))]">
+                        {usageRow.dailyLimit !== null
+                          ? `${usageRow.percentUsed ?? 0}% of ${formatTokens(usageRow.dailyLimit)}`
+                          : "uncapped"}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-xs text-[hsl(var(--muted-foreground))]">
+                Usage appears after the first successful AI response.
+              </p>
+            )}
           </CardContent>
         </Card>
       </section>
