@@ -1,6 +1,7 @@
 import type { ActorIdentity } from "@/lib/auth/actor";
 import { getPrismaClient } from "@/lib/db/prisma";
 import { logAuditEvent } from "@/lib/services/audit";
+import { dispatchApprovedOutbound } from "@/lib/services/outbound-dispatch";
 import { resolveWorkspaceScope } from "@/lib/services/workspace";
 import { z } from "zod";
 
@@ -174,6 +175,7 @@ export async function reviewApprovalRequest(
   }
 
   const workspaceScope = await resolveWorkspaceScope(prisma, actor);
+  const actorEmail = workspaceScope?.actorEmail ?? "system";
 
   const approval = await prisma.outboundApproval.findFirst({
     where: {
@@ -208,7 +210,7 @@ export async function reviewApprovalRequest(
     },
     data: {
       status: statusMap[payload.decision],
-      reviewedBy: workspaceScope?.actorEmail ?? "system",
+      reviewedBy: actorEmail,
       reviewedAt: new Date(),
       rejectionReason: payload.decision === "rejected" ? payload.rejectionReason ?? null : null
     }
@@ -219,14 +221,57 @@ export async function reviewApprovalRequest(
     entityType: "activity",
     entityId: updated.id,
     action: `approval.${payload.decision}`,
-    actor: workspaceScope?.actorEmail ?? "system",
+    actor: actorEmail,
     details:
       payload.decision === "rejected"
         ? `Outbound approval rejected: ${payload.rejectionReason ?? "No reason provided."}`
         : "Outbound approval approved."
   });
 
-  return mapApproval(updated, approval.deal.externalId);
+  const mappedApproval = mapApproval(updated, approval.deal.externalId);
+
+  if (payload.decision !== "approved") {
+    return mappedApproval;
+  }
+
+  try {
+    const dispatch = await dispatchApprovedOutbound({
+      dealId: approval.deal.id,
+      approvalId: updated.id,
+      channel: updated.channel,
+      subject: updated.subject,
+      body: updated.body,
+      actor: actorEmail
+    });
+
+    return {
+      ...mappedApproval,
+      dispatch
+    };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown outbound dispatch failure.";
+
+    try {
+      await logAuditEvent({
+        dealId: approval.deal.id,
+        entityType: "outbound-send",
+        entityId: updated.id,
+        action: "outbound.failed",
+        actor: actorEmail,
+        details: message
+      });
+    } catch (logError) {
+      console.error("Failed to write outbound failure audit event", logError);
+    }
+
+    return {
+      ...mappedApproval,
+      dispatch: {
+        status: "failed",
+        error: message
+      }
+    };
+  }
 }
 
 export async function listApprovalRequests(

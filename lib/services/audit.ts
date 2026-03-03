@@ -3,7 +3,7 @@ import { getPrismaClient } from "@/lib/db/prisma";
 
 interface LogAuditEventInput {
   dealId: string;
-  entityType: "task" | "calendar-event" | "activity";
+  entityType: "task" | "calendar-event" | "activity" | "strategy-play" | "outbound-send";
   entityId: string;
   action: string;
   actor: string;
