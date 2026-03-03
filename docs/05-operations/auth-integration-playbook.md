@@ -15,6 +15,15 @@ Add production-grade authentication to this Next.js + Prisma app with low or zer
 - Config entrypoint: `auth.ts`.
 - Actor mapping: middleware injects `x-actor-email` and `x-actor-name` from session for existing workspace services.
 
+## Current rollout values
+
+- Production URL: `https://sales-product-beta.vercel.app/`
+- Target providers: Google + LinkedIn
+- Temporary rollout flag: `APP_ENABLE_DEV_LOGIN=1`
+- Required callback URLs:
+  - `https://sales-product-beta.vercel.app/api/auth/callback/google`
+  - `https://sales-product-beta.vercel.app/api/auth/callback/linkedin`
+
 ## Free-first options
 
 ### 1) Auth.js (NextAuth v5) + Prisma (recommended for this repo)

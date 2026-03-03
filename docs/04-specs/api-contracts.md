@@ -61,6 +61,22 @@ Marks a task as completed.
 - `task.status` (`done`)
 - `task.completedAt` (ISO datetime)
 
+## `POST /api/tasks/reminders/run`
+
+Runs SLA reminder generation for open tasks due within a configurable window.
+
+### Request body
+
+- `windowHours?` (1-168, default `24`)
+- `includeOverdue?` (boolean, default `true`)
+
+### Response shape
+
+- `triggeredAt`
+- `windowHours`
+- `remindersCreated`
+- `reminders[]` (`taskId`, `dealId`, `dealName`, `title`, `dueAt`, `priority`, `reminderType`)
+
 ## `POST /api/calendar/events/ingest`
 
 Ingests a calendar event into `calendar_events`, creates a meeting activity, and writes an audit log.
@@ -118,6 +134,41 @@ Upserts account, contacts, and deals from a HubSpot-style payload into the activ
 
 Returns current workspace sync checkpoint for HubSpot delta runs.
 
+## `POST /api/integrations/hubspot/sync/delta`
+
+Runs one incremental HubSpot delta batch using the persisted sync cursor (`IntegrationSyncState`).
+
+### Request body
+
+- `dryRun?` (boolean, default `false`)
+- `syncReason?` (string)
+
+### Response shape
+
+- `status` (`preview` | `synced` | `no-op`)
+- `currentCursor`
+- `nextCursor`
+- `mode` (`dry-run` | `apply`)
+
+## `POST /api/integrations/hubspot/sync/delta/cadence`
+
+Runs multiple incremental delta batches in one cadence trigger until no new batches remain or `maxBatches` is reached.
+
+### Request body
+
+- `maxBatches?` (1-25, default `5`)
+- `syncReason?` (string)
+
+### Response shape
+
+- `trigger` (`cadence`)
+- `syncReason`
+- `totalRuns`
+- `totalSyncedBatches`
+- `finalCursor`
+- `stoppedReason` (`no-new-delta` | `cursor-not-advanced` | `max-batches-reached` | `completed` | `preview-only`)
+- `runs[]` (`index`, `status`, `currentCursor`, `nextCursor`)
+
 ## `GET /api/approvals`
 
 Lists approval requests in workspace scope.
@@ -147,6 +198,16 @@ Reviews an approval request.
 
 - `decision` (`approved` | `rejected`)
 - `rejectionReason?` (required when decision is `rejected`)
+
+### Response shape
+
+- `approval` (updated approval payload)
+- `approval.dispatch?` (present on approve path)
+- `approval.dispatch.status` (`sent` | `already-sent` | `failed`)
+- `approval.dispatch.provider?`
+- `approval.dispatch.providerMessageId?`
+- `approval.dispatch.sentAt?`
+- `approval.dispatch.error?`
 
 ## `GET /api/notifications`
 
@@ -196,6 +257,80 @@ Updates step status/outcome and auto-reconciles parent execution state.
 - `status?` (`todo` | `in-progress` | `done` | `skipped`)
 - `outcome?` (string)
 
+## `POST /api/followups/:dealId/generate`
+
+Generates and persists a follow-up draft for a deal.
+
+### Request body
+
+- `notes?` (string, optional context override)
+- `tone?` (`concise` | `consultative` | `executive`)
+
+### Response shape
+
+- `dealId`
+- `draft.subject`
+- `draft.body`
+- `draft.ask`
+- `draft.ctaTimeWindow`
+- `source` (`ai` | `rule-based`)
+- `generatedAt` (ISO datetime)
+
+## `POST /api/briefs/:dealId/generate`
+
+Generates and persists a meeting prep brief for a deal.
+
+### Request body
+
+- `notes?` (string, optional context override)
+- `focus?` (string, optional emphasis)
+
+### Response shape
+
+- `dealId`
+- `brief.primaryGoal`
+- `brief.likelyObjections[]`
+- `brief.recommendedNarrative`
+- `brief.proofPoints[]`
+- `source` (`ai` | `rule-based`)
+- `generatedAt` (ISO datetime)
+
+## `POST /api/strategy/execute`
+
+Executes a strategy play for a deal, creating task bundles and approval records.
+
+### Request body
+
+- `playId`
+- `dealId`
+
+### Response shape
+
+- `tasksCreated`
+- `approvalsCreated`
+
+## `GET /api/metrics/pilot`
+
+Returns recommendation acceptance and action-latency pilot metrics.
+
+### Response shape
+
+- `mode` (`live` | `mock`)
+- `metrics.generatedAt`
+- `metrics.windowDays`
+- `metrics.recommendationSignals`
+  - `strategyExecutions7d`
+  - `approvedApprovals7d`
+  - `rejectedApprovals7d`
+  - `approvalAcceptanceRate`
+- `metrics.actionLatency`
+  - `completedTasks7d`
+  - `avgTaskCompletionHours30d`
+  - `medianTaskCompletionHours30d`
+- `metrics.operations`
+  - `meetingNotesProcessed7d`
+  - `reminderEvents24h`
+
 ## Actor Headers
 
 All scoped API routes support actor override headers:
@@ -204,8 +339,3 @@ All scoped API routes support actor override headers:
 - `x-actor-name`
 
 Non-member actors receive `403`.
-
-## Upcoming endpoints
-
-- `POST /api/followups/:dealId/generate`
-- `POST /api/briefs/:dealId/generate`

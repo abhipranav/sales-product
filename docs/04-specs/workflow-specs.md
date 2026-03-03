@@ -4,7 +4,7 @@
 
 1. Create task from meeting action item.
 2. Set owner, due date, priority, and channel recommendation.
-3. Trigger reminder notices at configured intervals.
+3. Trigger reminder notices at configured intervals (`POST /api/tasks/reminders/run`).
 4. Mark task complete when action is sent/logged.
 
 ## Follow-up approval workflow
@@ -12,7 +12,7 @@
 1. Generate draft from last activity + deal stage.
 2. Show editable draft in cockpit.
 3. Require explicit human approval for outbound send.
-4. Log final sent artifact for audit and learning.
+4. On approve, dispatch outbound artifact and log `outbound.sent` (or `outbound.failed`) in audit trail.
 
 ## Calendar ingest workflow
 

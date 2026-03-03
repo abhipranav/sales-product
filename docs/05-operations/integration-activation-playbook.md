@@ -54,13 +54,16 @@ curl -s http://localhost:3000/api/system/status | jq
 
 Current status:
 - Manual payload sync exists.
-- OAuth token lifecycle and scheduled incremental jobs are not yet implemented.
+- Incremental delta batch endpoint exists: `POST /api/integrations/hubspot/sync/delta`.
+- Multi-batch cadence endpoint exists: `POST /api/integrations/hubspot/sync/delta/cadence`.
+- Optional external delta source is supported via `APP_HUBSPOT_DELTA_URL` (+ `HUBSPOT_PRIVATE_APP_TOKEN` header passthrough).
+- OAuth token lifecycle is not yet implemented.
 
 Activation plan:
 1. Create a HubSpot private app and generate token.
-2. Build pull worker (contacts/companies/deals with cursor).
-3. Persist cursor in `IntegrationSyncState`.
-4. Call existing `syncHubspotData` service with normalized payload.
+2. Point `APP_HUBSPOT_DELTA_URL` to a service that returns normalized delta batch payloads (`cursor`, `account`, `contacts`, `deals`).
+3. Persist cursor in `IntegrationSyncState` (already wired by sync service).
+4. Trigger cadence endpoint from scheduler/cron with `APP_CRON_SECRET`.
 5. Add retry + dead-letter handling for failed batches.
 
 ### Calendar (Google/Microsoft)
@@ -90,7 +93,8 @@ Activation plan:
 
 Current status:
 - Approval queue exists.
-- Actual send adapters are not implemented.
+- Approval state transition now triggers outbound dispatch service with audit artifacts (`outbound.sent` / `outbound.failed`).
+- Dispatch provider is currently mock-backed; real Gmail/Graph/LinkedIn adapters are not yet implemented.
 
 Activation plan:
 1. Trigger sender only on `APPROVED` state transition.
