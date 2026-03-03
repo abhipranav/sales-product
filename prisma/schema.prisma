@@ -123,6 +123,7 @@ model WorkspaceMember {
   fullName    String
   role        WorkspaceMemberRole @default(REP)
   preferences UserPreference?
+  aiUsageDaily AiUsageDaily[]
   createdAt   DateTime            @default(now())
   updatedAt   DateTime            @updatedAt
 
@@ -149,6 +150,8 @@ model UserPreference {
   digestHour            Int             @default(8)
   loginAlerts           Boolean         @default(true)
   productAnnouncements  Boolean         @default(true)
+  aiApiKey              String?
+  aiModel               String          @default("gpt-5-mini")
   createdAt             DateTime        @default(now())
   updatedAt             DateTime        @updatedAt
 
@@ -420,4 +423,21 @@ model SequenceStep {
 
   @@unique([executionId, order])
   @@index([status, createdAt])
+}
+
+model AiUsageDaily {
+  id                String          @id @default(cuid())
+  workspaceMemberId String
+  workspaceMember   WorkspaceMember @relation(fields: [workspaceMemberId], references: [id], onDelete: Cascade)
+  date              DateTime
+  model             String
+  totalTokens       Int             @default(0)
+  promptTokens      Int             @default(0)
+  completionTokens  Int             @default(0)
+  requestCount      Int             @default(0)
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  @@unique([workspaceMemberId, date, model])
+  @@index([workspaceMemberId, date])
 }

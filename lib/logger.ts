@@ -73,11 +73,9 @@ function emit(level: LogLevel, message: string, context?: LogContext, error?: un
 
     const errorStr = error ? ` | ${serializeError(error).message}` : "";
 
-    // eslint-disable-next-line no-console
     console[level === "debug" ? "log" : level](`${prefix} ${message}${meta}${errorStr}`);
   } else {
     const method = level === "debug" ? "log" : level;
-    // eslint-disable-next-line no-console
     console[method](JSON.stringify(entry));
   }
 }
