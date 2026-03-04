@@ -9,7 +9,7 @@ A docs-first, conversation-first AI sales execution platform focused on reducing
 - Backend: Next.js Route Handlers + server-side domain services
 - Data layer (planned in next iteration): PostgreSQL + Prisma + pgvector
 - Async/workflows (planned in next iteration): Redis + BullMQ workers
-- AI layer (planned in next iteration): provider abstraction for OpenAI/Anthropic
+- AI layer: OpenAI provider abstraction with per-user key/model preferences and daily usage accounting
 - Auth: Auth.js (JWT sessions) with Google/LinkedIn and optional dev credentials login
 - Observability (planned in next iteration): OpenTelemetry traces + structured audit logs
 
@@ -27,6 +27,7 @@ This repository now includes:
 - Initial Rep Cockpit UI (`/app/(workspace)/cockpit/page.tsx`) with:
   - prioritized next actions
   - pipeline metrics strip
+  - pilot metrics panel (recommendation acceptance + action latency)
   - meeting prep brief
   - follow-up draft
   - deal health panel
@@ -64,15 +65,22 @@ This repository now includes:
 - API endpoints:
   - `GET|POST /api/auth/[...nextauth]`
   - `GET /api/dashboard`
+  - `GET /api/metrics/pilot`
   - `GET /api/system/status`
   - `GET /api/settings/user`
   - `PATCH /api/settings/user`
+  - `GET /api/settings/user/ai`
+  - `PATCH /api/settings/user/ai`
   - `GET /api/notifications`
   - `POST /api/notifications/:notificationId/ack`
+  - `POST /api/followups/:dealId/generate`
+  - `POST /api/briefs/:dealId/generate`
+  - `POST /api/strategy/execute`
   - `GET /api/sequences`
   - `POST /api/sequences`
   - `PATCH /api/sequences/steps/:stepId`
   - `POST /api/tasks`
+  - `POST /api/tasks/reminders/run`
   - `PATCH /api/tasks/:taskId`
   - `DELETE /api/tasks/:taskId`
   - `POST /api/tasks/:taskId/complete`
@@ -80,6 +88,8 @@ This repository now includes:
   - `POST /api/meetings/process`
   - `GET /api/integrations/hubspot/sync`
   - `POST /api/integrations/hubspot/sync`
+  - `POST /api/integrations/hubspot/sync/delta`
+  - `POST /api/integrations/hubspot/sync/delta/cadence`
   - `GET /api/approvals`
   - `POST /api/approvals`
   - `POST /api/approvals/:approvalId/review`
@@ -114,11 +124,41 @@ This repository now includes:
    - `npm run db:seed`
 12. Start app: `npm run dev`
 
+## AI settings and daily token caps
+
+- Each workspace member can configure:
+  - personal OpenAI API key (encrypted at rest)
+  - preferred model (default: `gpt-5-mini`)
+- Daily model token caps are enforced per user (UTC day):
+  - `gpt-5-mini`: `2,500,000` total tokens/day
+  - `gpt-5`: `250,000` total tokens/day
+- Usage is recorded from provider response usage (`total_tokens`) and shown in account settings.
+- Daily counters reset at `00:00 UTC`.
+
 ## Notes for Supabase + Prisma
 
 - `DATABASE_URL` is used by the running app (pooler).
 - `DIRECT_URL` is used for schema operations (`db:push`, seed, migrations).
 - If your network cannot reach direct DB host, use Supabase session pooler as `DIRECT_URL` temporarily.
+
+## Auth provider setup (Vercel)
+
+- Production URL: `https://sales-product-beta.vercel.app/`
+- Keep `APP_ENABLE_DEV_LOGIN=1` during rollout (switch to `0` later).
+- Set these Vercel Environment Variables:
+  - `AUTH_SECRET` (generate: `openssl rand -base64 32`)
+  - `AUTH_GOOGLE_ID`
+  - `AUTH_GOOGLE_SECRET`
+  - `AUTH_LINKEDIN_ID`
+  - `AUTH_LINKEDIN_SECRET`
+  - `APP_BASE_URL=https://sales-product-beta.vercel.app/`
+  - `APP_ENABLE_DEV_LOGIN=1`
+- OAuth callback URLs:
+  - Google: `https://sales-product-beta.vercel.app/api/auth/callback/google`
+  - LinkedIn: `https://sales-product-beta.vercel.app/api/auth/callback/linkedin`
+- Local callback URLs:
+  - Google: `http://localhost:3000/api/auth/callback/google`
+  - LinkedIn: `http://localhost:3000/api/auth/callback/linkedin`
 
 ## Actor + Workspace Access
 
@@ -146,7 +186,7 @@ This repository now includes:
 
 - CRM delta sync jobs (incremental pulls + reconciliation logs)
 - Workspace RBAC expansion beyond single actor defaults
-- Outbound send adapters behind approval state transitions
+- Production outbound channel adapters (Gmail/Graph/LinkedIn) replacing mock dispatch provider
 
 ## Integration go-live playbook
 

@@ -3,7 +3,6 @@
 ## What exists now
 
 - Clean Next.js + TypeScript application skeleton
-- Multi-page super-app shell with persistent navigation and module routes (home, cockpit, accounts, pipeline, intelligence, integrations, workflows)
 - Multi-page super-app shell with persistent navigation and module routes (home, workspace, cockpit, accounts, pipeline, intelligence, notifications, integrations, workflows)
 - Initial cockpit experience centered on rep workflow execution
 - Domain models for account/contact/deal/task/activity/signal
@@ -16,7 +15,10 @@
 - Workspace tenancy baseline (`Workspace` + `WorkspaceMember`) applied across dashboard/task/calendar/meeting services
 - HubSpot-style CRM sync endpoint with upsert behavior for account/contact/deal records
 - HubSpot sync checkpoint state per workspace (`IntegrationSyncState`) for delta-ready ingestion
+- Incremental HubSpot delta batch runner with cursor progression (`POST /api/integrations/hubspot/sync/delta`)
+- Multi-batch HubSpot delta cadence trigger (`POST /api/integrations/hubspot/sync/delta/cadence`)
 - Outbound approval queue (`/api/approvals*`) and cockpit controls for approve/reject workflow
+- Approval review now auto-dispatches outbound artifacts and logs `outbound.sent` / `outbound.failed`
 - Header-based actor overrides (`x-actor-email`, `x-actor-name`) with workspace membership checks (`403` on violation)
 - AI Strategy Lab in cockpit for first-principles play generation per deal context
 - shadcn/ui-style local design system baseline with shared primitives (`components/ui`) and cockpit-wide adoption
@@ -26,9 +28,21 @@
 - Implemented planned capability modules (v0): lead enrichment + dedupe, buying-signal alerts, sequence personalization, stakeholder mapping
 - Sequence execution board with persistent records and step-level status updates
 - Buying-signal notifications service + inbox module with acknowledgment flow
+- Dedicated generation APIs for follow-up drafts and meeting briefs (`/api/followups/:dealId/generate`, `/api/briefs/:dealId/generate`)
+- Strategy-play execution API route (`/api/strategy/execute`) for external/automation triggers
+- Task SLA reminder runner endpoint (`/api/tasks/reminders/run`) with daily idempotent reminder events
 - CRM command-center forms for account/contact/deal create-update
+- Pilot metrics service + cockpit panel for recommendation acceptance and action latency (`GET /api/metrics/pilot`)
+- UX feedback toasts for strategy execution, meeting-note processing, follow-up + brief regeneration, task mutations, approval review, calendar ingest, and sequence mutations
 - Polyglot super-app scaffolding with shared contracts, Go ingestion starter, and Python intelligence starter
 - Documentation architecture for continuity across AI agents
+- Cron-callable task reminder endpoint (`POST /api/cron/reminders`) protected with CRON_SECRET bearer token
+- Cron-callable HubSpot delta sync cadence endpoint (`POST /api/cron/crm-sync`) for automated incremental sync
+- Integration connection health API (`GET /api/integrations/status`) returning real-time HubSpot + Calendar connectivity
+- Integration health status cards component on the Integrations page showing live connection state
+- Calendar OAuth provider integration stub (Google Calendar scopes, auth URL builder, token lifecycle) awaiting credentials
+- HubSpot OAuth integration stub (auth URL, token exchange) with private-app-token fallback and live connection test
+- RBAC role-permission matrix service (`owner > manager > rep`) with `enforcePermission` and `enforceMinRole` utilities
 
 ## Risks
 

@@ -53,3 +53,24 @@ Next:
 - Add outbound sender connectors (email/LinkedIn) gated by approval state
 - Add analytics events for sequence and notification conversion impact
 - Add durable background workers for high-volume signal processing
+
+## Sprint 2 (2026-03-02)
+
+Completed:
+
+- Cron-callable task SLA reminder endpoint (`POST /api/cron/reminders`) with CRON_SECRET auth
+- Cron-callable CRM delta sync cadence endpoint (`POST /api/cron/crm-sync`) for automated HubSpot incremental sync
+- Integration connection health API (`GET /api/integrations/status`) with live HubSpot + Calendar connectivity checks
+- Integration health status cards component on the Integrations page
+- Google Calendar OAuth integration stub (auth URL builder, token exchange/refresh interfaces, connection test)
+- HubSpot OAuth integration stub (auth URL, token lifecycle) with private-app-token fallback
+- RBAC role-permission matrix (`lib/services/rbac.ts`) with `enforcePermission` and `enforceMinRole` utilities
+- Updated capability matrix with accurate v0/v1 implementation statuses
+- Feature audit verified many pre-existing features the docs understated
+
+Next:
+
+- Wire RBAC enforcement into sensitive operations (member management, settings updates)
+- Replace header-based actor identity with OAuth-backed authentication sessions
+- Connect Calendar OAuth stub to live Google Calendar API when credentials are available
+- Add durable background workers (Redis + BullMQ) for high-volume CRM and signal processing
