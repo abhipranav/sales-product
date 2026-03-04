@@ -272,7 +272,7 @@ export async function getDashboardData(actor?: ActorIdentity, options?: Dashboar
           tasks: mappedTasks,
           approvals: mappedApprovals,
           recentActivities: mappedRecentActivities
-        })
+        }, actor)
       : [];
 
     return {
