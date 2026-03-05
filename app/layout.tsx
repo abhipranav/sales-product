@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Providers } from "@/app/providers";
 import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 function getMetadataBase() {
   const configured = process.env.APP_BASE_URL ?? process.env.NEXT_PUBLIC_APP_URL;
@@ -60,6 +61,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
       <body className="min-h-screen antialiased">
         <Providers>{children}</Providers>
         <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
