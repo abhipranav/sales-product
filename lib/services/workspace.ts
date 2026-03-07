@@ -7,6 +7,9 @@ const roleMap = {
 } as const;
 
 let warnedMissingWorkspaceSchema = false;
+const WORKSPACE_SCOPE_CACHE_TTL_MS = 30_000;
+const workspaceScopeCache = new Map<string, { value: WorkspaceScope; expiresAt: number }>();
+const workspaceScopeInFlight = new Map<string, Promise<WorkspaceScope | null>>();
 
 export interface WorkspaceScope {
   workspaceId: string;
@@ -37,6 +40,10 @@ function getWorkspaceDefaults() {
     actorName: process.env.APP_ACTOR_NAME?.trim() || "Default Rep",
     autoProvisionMembers: process.env.APP_AUTO_PROVISION_MEMBERS !== "0"
   };
+}
+
+function getWorkspaceScopeCacheKey(actorEmail: string, workspaceSlug: string) {
+  return `${workspaceSlug}:${actorEmail}`;
 }
 
 function normalizeEmail(value: string | undefined): string | null {
@@ -77,8 +84,21 @@ export async function resolveWorkspaceScope(
   const defaultActorEmail = normalizeEmail(defaults.actorEmail) ?? "rep@aurora.local";
   const actorEmail = normalizeEmail(actor?.email) ?? defaultActorEmail;
   const actorName = normalizeName(actor?.name) ?? defaults.actorName;
+  const cacheKey = getWorkspaceScopeCacheKey(actorEmail, defaults.workspaceSlug);
+  const now = Date.now();
+  const cached = workspaceScopeCache.get(cacheKey);
 
-  try {
+  if (cached && cached.expiresAt > now) {
+    return cached.value;
+  }
+
+  const inFlight = workspaceScopeInFlight.get(cacheKey);
+  if (inFlight) {
+    return inFlight;
+  }
+
+  const promise = (async () => {
+    try {
     let workspaceCreated = false;
     let workspace = await prisma.workspace.findUnique({
       where: {
@@ -129,16 +149,33 @@ export async function resolveWorkspaceScope(
       actorName: member.fullName,
       actorRole: roleMap[member.role]
     };
-  } catch (error) {
-    if (isMissingWorkspaceSchemaError(error)) {
-      if (!warnedMissingWorkspaceSchema) {
-        console.warn("Workspace schema not available yet. Run `npm run db:push` before enabling tenancy features.");
-        warnedMissingWorkspaceSchema = true;
+    } catch (error) {
+      if (isMissingWorkspaceSchemaError(error)) {
+        if (!warnedMissingWorkspaceSchema) {
+          console.warn("Workspace schema not available yet. Run `npm run db:push` before enabling tenancy features.");
+          warnedMissingWorkspaceSchema = true;
+        }
+
+        return null;
       }
 
-      return null;
+      throw error;
     }
+  })()
+    .then((scope) => {
+      if (scope) {
+        workspaceScopeCache.set(cacheKey, {
+          value: scope,
+          expiresAt: Date.now() + WORKSPACE_SCOPE_CACHE_TTL_MS
+        });
+      }
 
-    throw error;
-  }
+      return scope;
+    })
+    .finally(() => {
+      workspaceScopeInFlight.delete(cacheKey);
+    });
+
+  workspaceScopeInFlight.set(cacheKey, promise);
+  return promise;
 }

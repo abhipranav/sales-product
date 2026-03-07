@@ -18,26 +18,35 @@ import { Card, CardContent } from "@/components/ui/card";
 import { getActorFromServerContext } from "@/lib/auth/actor";
 import { getPilotMetricsSnapshot } from "@/lib/mock/pilot-metrics";
 import { getCachedDashboardData } from "@/lib/services/dashboard-cache";
-import { PilotMetricsServiceUnavailableError, getPilotMetrics } from "@/lib/services/pilot-metrics";
+import { getCachedPilotMetrics } from "@/lib/services/pilot-metrics-cache";
+import { PilotMetricsServiceUnavailableError } from "@/lib/services/pilot-metrics";
 import { WorkspaceAccessDeniedError } from "@/lib/services/workspace";
 
 export default async function CockpitPage() {
   const actor = await getActorFromServerContext();
-  const data = await getCachedDashboardData(actor, "/cockpit");
-  let pilotMetricsMode: "live" | "mock" = "mock";
-  let pilotMetrics = getPilotMetricsSnapshot();
+  const [data, pilotMetricsResult] = await Promise.all([
+    getCachedDashboardData(actor, "/cockpit"),
+    getCachedPilotMetrics(actor, "/cockpit")
+      .then((metrics) => ({
+        metrics,
+        mode: "live" as const
+      }))
+      .catch((error) => {
+        if (error instanceof PilotMetricsServiceUnavailableError || error instanceof WorkspaceAccessDeniedError) {
+          return {
+            metrics: getPilotMetricsSnapshot(),
+            mode: "mock" as const
+          };
+        }
 
-  try {
-    pilotMetrics = await getPilotMetrics(actor);
-    pilotMetricsMode = "live";
-  } catch (error) {
-    if (error instanceof PilotMetricsServiceUnavailableError || error instanceof WorkspaceAccessDeniedError) {
-      pilotMetricsMode = "mock";
-    } else {
-      console.error("Failed to resolve pilot metrics. Falling back to snapshot.", error);
-      pilotMetricsMode = "mock";
-    }
-  }
+        return {
+          metrics: getPilotMetricsSnapshot(),
+          mode: "mock" as const
+        };
+      })
+  ]);
+  const pilotMetrics = pilotMetricsResult.metrics;
+  const pilotMetricsMode = pilotMetricsResult.mode;
 
   return (
     <section className="mx-auto max-w-7xl py-2 md:py-4">

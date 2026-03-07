@@ -5,11 +5,15 @@ import { IntegrationStatusCards } from "@/components/integrations/integration-st
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getActorFromServerContext } from "@/lib/auth/actor";
-import { getCachedDashboardData } from "@/lib/services/dashboard-cache";
+import { getIntegrationStatus } from "@/lib/services/integrations/status";
+import { getCachedWorkspaceSummary } from "@/lib/services/workspace-summary-cache";
 
 export default async function IntegrationsPage() {
   const actor = await getActorFromServerContext();
-  const data = await getCachedDashboardData(actor, "/integrations", { includeStrategyPlays: false });
+  const [summary, integrationStatus] = await Promise.all([
+    getCachedWorkspaceSummary(actor, "/integrations"),
+    getIntegrationStatus()
+  ]);
 
   return (
     <section className="mx-auto max-w-7xl py-2 md:py-4">
@@ -19,23 +23,23 @@ export default async function IntegrationsPage() {
         <p className="mt-1 text-sm text-[hsl(var(--muted-foreground))]">
           Control external data flows without leaving the workspace.{" · "}
           <Link
-            href={`/pipeline/${data.deal.id}` as "/pipeline"}
+            href={`/pipeline/${summary.deal.id}` as "/pipeline"}
             className="text-[hsl(var(--foreground))] font-bold hover:underline"
           >
-            {data.deal.name}
+            {summary.deal.name}
           </Link>
           {" · "}
           <Link
-            href={`/accounts/${data.account.id}` as "/accounts"}
+            href={`/accounts/${summary.account.id}` as "/accounts"}
             className="text-[hsl(var(--foreground))] font-bold hover:underline"
           >
-            {data.account.name}
+            {summary.account.name}
           </Link>
         </p>
       </header>
 
       <section className="mb-6">
-        <IntegrationStatusCards />
+        <IntegrationStatusCards status={integrationStatus} />
       </section>
 
       <section className="mb-4 grid gap-4 md:grid-cols-3">
@@ -45,8 +49,8 @@ export default async function IntegrationsPage() {
               <CardTitle className="font-mono text-xs uppercase tracking-wider group-hover:text-[hsl(var(--background))]">WORKSPACE</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
-              <Badge variant="secondary">{data.workspace.name}</Badge>
-              <p className="font-mono text-[10px] uppercase tracking-wider text-[hsl(var(--muted-foreground))] group-hover:text-[hsl(var(--background))]/60">{data.workspace.actorEmail}</p>
+              <Badge variant="secondary">{summary.workspace.name}</Badge>
+              <p className="font-mono text-[10px] uppercase tracking-wider text-[hsl(var(--muted-foreground))] group-hover:text-[hsl(var(--background))]/60">{summary.workspace.actorEmail}</p>
             </CardContent>
           </Card>
         </Link>
@@ -74,7 +78,7 @@ export default async function IntegrationsPage() {
 
       <section className="grid gap-4 xl:grid-cols-[1fr_1fr]">
         <CrmSyncPanel />
-        <CalendarIngest dealId={data.deal.id} />
+        <CalendarIngest dealId={summary.deal.id} />
       </section>
     </section>
   );

@@ -1,14 +1,15 @@
 import { getActorFromRequest } from "@/lib/auth/actor";
 import { isPrismaConnectionError } from "@/lib/db/prisma";
 import { getPilotMetricsSnapshot } from "@/lib/mock/pilot-metrics";
-import { PilotMetricsServiceUnavailableError, getPilotMetrics } from "@/lib/services/pilot-metrics";
+import { getCachedPilotMetrics } from "@/lib/services/pilot-metrics-cache";
+import { PilotMetricsServiceUnavailableError } from "@/lib/services/pilot-metrics";
 import { WorkspaceAccessDeniedError } from "@/lib/services/workspace";
 import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {
   try {
     const actor = getActorFromRequest(request);
-    const metrics = await getPilotMetrics(actor);
+    const metrics = await getCachedPilotMetrics(actor, "/api/metrics/pilot");
     return NextResponse.json({ mode: "live", metrics });
   } catch (error) {
     if (error instanceof WorkspaceAccessDeniedError) {

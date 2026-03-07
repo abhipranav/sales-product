@@ -1,7 +1,9 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
+import { toast } from "sonner";
+import { useDebouncedValue } from "@/lib/hooks/use-debounced-value";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -44,19 +46,28 @@ export function ContactsTable({ initialData, accountId, onCreateClick }: Contact
   const [search, setSearch] = useState("");
   const [role, setRole] = useState<string>("all");
   const [offset, setOffset] = useState(0);
+  const abortRef = useRef<AbortController | null>(null);
+  const debouncedSearch = useDebouncedValue(search, 220);
+  const normalizedSearch = debouncedSearch.trim();
   const limit = 20;
 
   const fetchContacts = useCallback(async () => {
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+
     setLoading(true);
     try {
       const params = new URLSearchParams();
       params.set("limit", limit.toString());
       params.set("offset", offset.toString());
-      if (search) params.set("search", search);
+      if (normalizedSearch) params.set("search", normalizedSearch);
       if (role !== "all") params.set("role", role);
       if (accountId) params.set("accountId", accountId);
 
-      const res = await fetch(`/api/contacts?${params.toString()}`);
+      const res = await fetch(`/api/contacts?${params.toString()}`, {
+        signal: controller.signal
+      });
       if (res.ok) {
         const data = await res.json();
         setContacts(data.items);
@@ -64,17 +75,28 @@ export function ContactsTable({ initialData, accountId, onCreateClick }: Contact
         setHasMore(data.hasMore);
       }
     } catch (error) {
-      console.error("Error fetching contacts:", error);
+      if (!(error instanceof DOMException && error.name === "AbortError")) {
+        toast.error("Failed to load contacts.");
+      }
     } finally {
-      setLoading(false);
+      if (abortRef.current === controller) {
+        abortRef.current = null;
+        setLoading(false);
+      }
     }
-  }, [search, role, offset, accountId]);
+  }, [normalizedSearch, role, offset, accountId]);
 
   useEffect(() => {
-    if (!initialData || search || role !== "all" || offset > 0) {
+    if (!initialData || normalizedSearch || role !== "all" || offset > 0) {
       fetchContacts();
     }
-  }, [fetchContacts, initialData, search, role, offset]);
+  }, [fetchContacts, initialData, normalizedSearch, role, offset]);
+
+  useEffect(() => {
+    return () => {
+      abortRef.current?.abort();
+    };
+  }, []);
 
   const roleColor = (r: string) => {
     switch (r) {

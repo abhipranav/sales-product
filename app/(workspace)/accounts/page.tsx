@@ -1,53 +1,21 @@
-"use client";
+import { AccountsPageClient } from "@/app/(workspace)/accounts/page-client";
+import { getActorFromServerContext } from "@/lib/auth/actor";
+import { listAccounts } from "@/lib/services/crm-records";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { AccountsTable } from "@/components/crm/accounts-table";
-import { AccountForm } from "@/components/crm/account-form";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogClose
-} from "@/components/ui/dialog";
-
-export default function AccountsPage() {
-  const router = useRouter();
-  const [createOpen, setCreateOpen] = useState(false);
+export default async function AccountsPage() {
+  const actor = await getActorFromServerContext();
+  const initialData = await listAccounts({}, { limit: 20, offset: 0 }, { field: "name", order: "asc" }, actor);
 
   return (
-    <section className="mx-auto max-w-7xl py-2 md:py-4">
-      <header className="mb-6">
-        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.12em] text-[hsl(var(--muted-foreground))]">
-          CRM // ACCOUNTS
-        </p>
-        <h2 className="font-serif text-3xl font-bold text-[hsl(var(--foreground))]">
-          Accounts
-        </h2>
-        <p className="mt-1 text-sm text-[hsl(var(--muted-foreground))]">
-          Manage your company accounts and track relationships.
-        </p>
-      </header>
-
-      <AccountsTable onCreateClick={() => setCreateOpen(true)} />
-
-      <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-        <DialogContent>
-          <DialogClose onClose={() => setCreateOpen(false)} />
-          <DialogHeader>
-            <DialogTitle>CREATE ACCOUNT</DialogTitle>
-          </DialogHeader>
-          <AccountForm
-            mode="create"
-            onSuccess={(result) => {
-              setCreateOpen(false);
-              router.push(`/accounts/${result.id}`);
-            }}
-            onCancel={() => setCreateOpen(false)}
-          />
-        </DialogContent>
-      </Dialog>
-    </section>
+    <AccountsPageClient
+      initialData={{
+        items: initialData.items.map((account) => ({
+          ...account,
+          createdAt: account.createdAt.toISOString()
+        })),
+        total: initialData.total,
+        hasMore: initialData.hasMore
+      }}
+    />
   );
 }

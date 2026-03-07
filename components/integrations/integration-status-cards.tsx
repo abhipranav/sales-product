@@ -1,64 +1,13 @@
-"use client";
-
-import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import type { IntegrationStatusSnapshot } from "@/lib/services/integrations/status";
 
-interface ConnectionStatus {
-  connected: boolean;
-  authMode?: string;
-  provider?: string;
-  lastSyncAt: string | null;
-  scopeGranted: string[];
-  error?: string;
+interface IntegrationStatusCardsProps {
+  status: IntegrationStatusSnapshot;
 }
 
-interface IntegrationStatusData {
-  hubspot: ConnectionStatus;
-  calendar: ConnectionStatus;
-  checkedAt: string;
-}
-
-export function IntegrationStatusCards() {
-  const [status, setStatus] = useState<IntegrationStatusData | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    async function fetchStatus() {
-      try {
-        const response = await fetch("/api/integrations/status");
-        if (response.ok) {
-          const data = await response.json();
-          setStatus(data);
-        }
-      } catch {
-        // Ignore fetch errors
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchStatus();
-  }, []);
-
-  if (loading) {
-    return (
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card className="animate-pulse">
-          <CardContent className="p-6">
-            <div className="h-4 w-24 rounded bg-[hsl(var(--muted))]" />
-          </CardContent>
-        </Card>
-        <Card className="animate-pulse">
-          <CardContent className="p-6">
-            <div className="h-4 w-24 rounded bg-[hsl(var(--muted))]" />
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
+export function IntegrationStatusCards({ status }: IntegrationStatusCardsProps) {
   return (
     <div className="grid gap-4 md:grid-cols-2">
       <Card>

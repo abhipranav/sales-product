@@ -2,9 +2,10 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import { WorkspaceNav } from "@/components/shell/workspace-nav";
 import { ThemeToggle } from "@/components/shell/theme-toggle";
-import { CommandPalette } from "@/components/shell/command-palette";
+import { CommandPaletteMount } from "@/components/shell/command-palette-mount";
 import { SystemReadinessBanner } from "@/components/shell/system-readiness-banner";
 import { getActorFromServerContext } from "@/lib/auth/actor";
+import { getSystemReadiness } from "@/lib/services/system-readiness";
 import { signOut } from "@/auth";
 
 interface WorkspaceLayoutProps {
@@ -18,6 +19,7 @@ export default async function WorkspaceLayout({ children }: WorkspaceLayoutProps
   }
 
   const actor = await getActorFromServerContext();
+  const readiness = await getSystemReadiness(actor);
   const actorEmail = actor.email ?? process.env.APP_ACTOR_EMAIL ?? "rep@local";
   const actorName = actor.name ?? process.env.APP_ACTOR_NAME ?? "Default Rep";
   const workspaceName = process.env.APP_WORKSPACE_NAME ?? "Sales Workspace";
@@ -87,12 +89,12 @@ export default async function WorkspaceLayout({ children }: WorkspaceLayoutProps
 
       {/* Main Content */}
       <main className="min-w-0 flex-1">
-        <SystemReadinessBanner />
+        <SystemReadinessBanner readiness={readiness} />
         {children}
       </main>
 
       {/* Global Command Palette */}
-      <CommandPalette />
+      <CommandPaletteMount />
     </div>
   );
 }

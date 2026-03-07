@@ -1,33 +1,8 @@
-"use client";
-
-import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-
-interface ReadinessCheck {
-  id: string;
-  label: string;
-  level: "ready" | "needs-action" | "warning";
-  detail: string;
-  action?: {
-    label: string;
-    command?: string;
-    href?: string;
-  };
-}
-
-interface ReadinessResponse {
-  mode: "live" | "demo";
-  summary: string;
-  checks: ReadinessCheck[];
-  stats: {
-    accounts: number;
-    contacts: number;
-    deals: number;
-  };
-}
+import type { SystemReadiness } from "@/lib/services/system-readiness";
 
 function levelToBadge(level: "ready" | "needs-action" | "warning") {
   if (level === "ready") {
@@ -41,51 +16,36 @@ function levelToBadge(level: "ready" | "needs-action" | "warning") {
   return "warning" as const;
 }
 
-export function SystemReadinessBanner() {
-  const [readiness, setReadiness] = useState<ReadinessResponse | null>(null);
+interface SystemReadinessBannerProps {
+  readiness: SystemReadiness;
+}
 
-  useEffect(() => {
-    const controller = new AbortController();
-
-    async function loadReadiness() {
-      try {
-        const response = await fetch("/api/system/status", {
-          signal: controller.signal,
-          cache: "no-store"
-        });
-
-        if (!response.ok) {
-          return;
-        }
-
-        const payload: ReadinessResponse = await response.json();
-        setReadiness(payload);
-      } catch {
-        // Keep banner hidden if readiness probe fails.
-      }
-    }
-
-    loadReadiness();
-    return () => controller.abort();
-  }, []);
-
-  const blockers = useMemo(
-    () => readiness?.checks.filter((check) => check.level !== "ready") ?? [],
-    [readiness]
-  );
-
-  if (!readiness) {
-    return null;
-  }
+export function SystemReadinessBanner({ readiness }: SystemReadinessBannerProps) {
+  const blockers = readiness.checks.filter((check) => check.level !== "ready");
+  const aiBadgeLabel =
+    readiness.ai.source === "user"
+      ? "AI: PERSONAL KEY"
+      : readiness.ai.source === "system"
+        ? "AI: SYSTEM KEY"
+        : readiness.ai.systemKeyStatus === "pending-restart"
+          ? "AI: RESTART REQUIRED"
+          : "AI: UNAVAILABLE";
+  const aiBadgeVariant =
+    readiness.ai.hasApiKey
+      ? "success"
+      : readiness.ai.systemKeyStatus === "pending-restart"
+        ? "warning"
+        : "destructive";
 
   if (readiness.mode === "live" && blockers.length === 0) {
     return (
       <Card className="mb-4">
         <CardContent className="flex flex-wrap items-center justify-between gap-3 p-3">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Badge variant="success">LIVE MODE</Badge>
+            <Badge variant={aiBadgeVariant}>{aiBadgeLabel}</Badge>
             <p className="text-sm text-[hsl(var(--muted-foreground))]">
-              Workspace is fully wired: {readiness.stats.deals} deals, {readiness.stats.accounts} accounts.
+              Workspace is fully wired: {readiness.stats.deals} deals, {readiness.stats.accounts} accounts. {readiness.ai.statusNote}
             </p>
           </div>
           <Button asChild size="sm" variant="outline">
@@ -105,9 +65,12 @@ export function SystemReadinessBanner() {
               <Badge variant={readiness.mode === "live" ? "warning" : "destructive"}>
                 {readiness.mode === "live" ? "LIVE (ATTENTION)" : "DEMO MODE"}
               </Badge>
+              <Badge variant={aiBadgeVariant}>{aiBadgeLabel}</Badge>
               <Badge variant="outline">{blockers.length} ACTIONS NEEDED</Badge>
             </div>
-            <p className="mt-2 text-sm text-[hsl(var(--muted-foreground))]">{readiness.summary}</p>
+            <p className="mt-2 text-sm text-[hsl(var(--muted-foreground))]">
+              {readiness.summary} {readiness.ai.statusNote}
+            </p>
           </div>
           <div className="flex items-center gap-2">
             <Button asChild size="sm" variant="cta">

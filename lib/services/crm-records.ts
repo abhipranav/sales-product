@@ -1494,102 +1494,112 @@ export async function searchCrmRecords(
   limit: number = 10,
   actor?: ActorIdentity
 ): Promise<SearchResult[]> {
+  const normalizedQuery = query.trim();
   const prisma = getPrismaClient();
   if (!prisma) {
-    return fallbackSearchCrmRecords(query, types, limit);
+    return fallbackSearchCrmRecords(normalizedQuery, types, limit);
   }
 
   const workspaceScope = await resolveWorkspaceScope(prisma, actor);
   const workspaceId = workspaceScope?.workspaceId;
   if (!workspaceId) {
-    return fallbackSearchCrmRecords(query, types, limit);
+    return fallbackSearchCrmRecords(normalizedQuery, types, limit);
   }
 
-  const results: SearchResult[] = [];
   const perTypeLimit = Math.ceil(limit / types.length);
+  const lookups: Array<Promise<SearchResult[]>> = [];
 
   if (types.includes("account")) {
-    const accounts = await prisma.account.findMany({
-      where: {
-        workspaceId,
-        OR: [
-          { name: { contains: query, mode: "insensitive" } },
-          { website: { contains: query, mode: "insensitive" } }
-        ]
-      },
-      take: perTypeLimit,
-      orderBy: { name: "asc" }
-    });
-
-    results.push(
-      ...accounts.map((a) => ({
-        type: "account" as const,
-        id: a.externalId ?? a.id,
-        title: a.name,
-        subtitle: reverseAccountSegmentMap[a.segment as keyof typeof reverseAccountSegmentMap],
-        metadata: a.website ? { website: a.website } : undefined
-      }))
+    lookups.push(
+      prisma.account
+        .findMany({
+          where: {
+            workspaceId,
+            OR: [
+              { name: { contains: normalizedQuery, mode: "insensitive" } },
+              { website: { contains: normalizedQuery, mode: "insensitive" } }
+            ]
+          },
+          take: perTypeLimit,
+          orderBy: { name: "asc" }
+        })
+        .then((accounts) =>
+          accounts.map((account) => ({
+            type: "account" as const,
+            id: account.externalId ?? account.id,
+            title: account.name,
+            subtitle: reverseAccountSegmentMap[account.segment as keyof typeof reverseAccountSegmentMap],
+            metadata: account.website ? { website: account.website } : undefined
+          }))
+        )
     );
   }
 
   if (types.includes("contact")) {
-    const contacts = await prisma.contact.findMany({
-      where: {
-        account: { workspaceId },
-        OR: [
-          { fullName: { contains: query, mode: "insensitive" } },
-          { title: { contains: query, mode: "insensitive" } },
-          { email: { contains: query, mode: "insensitive" } }
-        ]
-      },
-      include: { account: { select: { name: true } } },
-      take: perTypeLimit,
-      orderBy: { fullName: "asc" }
-    });
-
-    results.push(
-      ...contacts.map((c) => ({
-        type: "contact" as const,
-        id: c.externalId ?? c.id,
-        title: c.fullName,
-        subtitle: `${c.title} at ${c.account.name}`,
-        metadata: c.email ? { email: c.email } : undefined
-      }))
+    lookups.push(
+      prisma.contact
+        .findMany({
+          where: {
+            account: { workspaceId },
+            OR: [
+              { fullName: { contains: normalizedQuery, mode: "insensitive" } },
+              { title: { contains: normalizedQuery, mode: "insensitive" } },
+              { email: { contains: normalizedQuery, mode: "insensitive" } }
+            ]
+          },
+          include: { account: { select: { name: true } } },
+          take: perTypeLimit,
+          orderBy: { fullName: "asc" }
+        })
+        .then((contacts) =>
+          contacts.map((contact) => ({
+            type: "contact" as const,
+            id: contact.externalId ?? contact.id,
+            title: contact.fullName,
+            subtitle: `${contact.title} at ${contact.account.name}`,
+            metadata: contact.email ? { email: contact.email } : undefined
+          }))
+        )
     );
   }
 
   if (types.includes("deal")) {
-    const deals = await prisma.deal.findMany({
-      where: {
-        account: { workspaceId },
-        OR: [
-          { name: { contains: query, mode: "insensitive" } },
-          { riskSummary: { contains: query, mode: "insensitive" } }
-        ]
-      },
-      include: { account: { select: { name: true } } },
-      take: perTypeLimit,
-      orderBy: { createdAt: "desc" }
-    });
-
-    results.push(
-      ...deals.map((d) => ({
-        type: "deal" as const,
-        id: d.externalId ?? d.id,
-        title: d.name,
-        subtitle: `${d.account.name} · $${d.amount.toLocaleString()}`,
-        metadata: {
-          stage: reverseDealStageMap[d.stage as keyof typeof reverseDealStageMap],
-          confidence: `${Math.round(d.confidence * 100)}%`
-        }
-      }))
+    lookups.push(
+      prisma.deal
+        .findMany({
+          where: {
+            account: { workspaceId },
+            OR: [
+              { name: { contains: normalizedQuery, mode: "insensitive" } },
+              { riskSummary: { contains: normalizedQuery, mode: "insensitive" } }
+            ]
+          },
+          include: { account: { select: { name: true } } },
+          take: perTypeLimit,
+          orderBy: { createdAt: "desc" }
+        })
+        .then((deals) =>
+          deals.map((deal) => ({
+            type: "deal" as const,
+            id: deal.externalId ?? deal.id,
+            title: deal.name,
+            subtitle: `${deal.account.name} · $${deal.amount.toLocaleString()}`,
+            metadata: {
+              stage: reverseDealStageMap[deal.stage as keyof typeof reverseDealStageMap],
+              confidence: `${Math.round(deal.confidence * 100)}%`
+            }
+          }))
+        )
     );
   }
 
+  const results = (await Promise.all(lookups)).flat();
+
   // Sort results by relevance (exact match first)
   results.sort((a, b) => {
-    const aExact = a.title.toLowerCase().startsWith(query.toLowerCase()) ? 0 : 1;
-    const bExact = b.title.toLowerCase().startsWith(query.toLowerCase()) ? 0 : 1;
+    const lowerQuery = normalizedQuery.toLowerCase();
+    const aExact = a.title.toLowerCase().startsWith(lowerQuery) ? 0 : 1;
+    const bExact = b.title.toLowerCase().startsWith(lowerQuery) ? 0 : 1;
     return aExact - bExact;
   });
 

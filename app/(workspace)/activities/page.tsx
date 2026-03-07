@@ -2,16 +2,16 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getActorFromServerContext } from "@/lib/auth/actor";
-import { getCachedDashboardData } from "@/lib/services/dashboard-cache";
 import { listRecentActivities, ActivityServiceUnavailableError } from "@/lib/services/activities";
 import { WorkspaceAccessDeniedError } from "@/lib/services/workspace";
 import { logger } from "@/lib/logger";
+import { getCachedWorkspaceSummary } from "@/lib/services/workspace-summary-cache";
 
 type ActivityRow = Awaited<ReturnType<typeof listRecentActivities>>[number];
 
 export default async function ActivityFeedPage() {
   const actor = await getActorFromServerContext();
-  const data = await getCachedDashboardData(actor, "/activities", { includeStrategyPlays: false });
+  const summary = await getCachedWorkspaceSummary(actor, "/activities");
 
   let activities: ActivityRow[] = [];
   try {
@@ -47,17 +47,17 @@ export default async function ActivityFeedPage() {
         <p className="mt-1 text-sm text-[hsl(var(--muted-foreground))]">
           Unified timeline across all deals.{" · "}
           <Link
-            href={`/pipeline/${data.deal.id}` as "/pipeline"}
+            href={`/pipeline/${summary.deal.id}` as "/pipeline"}
             className="text-[hsl(var(--foreground))] font-bold hover:underline"
           >
-            {data.deal.name}
+            {summary.deal.name}
           </Link>
           {" · "}
           <Link
-            href={`/accounts/${data.account.id}` as "/accounts"}
+            href={`/accounts/${summary.account.id}` as "/accounts"}
             className="text-[hsl(var(--foreground))] font-bold hover:underline"
           >
-            {data.account.name}
+            {summary.account.name}
           </Link>
         </p>
       </header>

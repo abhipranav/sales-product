@@ -1,28 +1,46 @@
+function LoadingBlock({ className }: { className: string }) {
+  return <div className={`animate-pulse bg-[hsl(var(--muted))] ${className}`} />;
+}
+
 export default function WorkspaceLoading() {
   return (
-    <div className="mx-auto w-full max-w-7xl py-4">
-      <div className="mb-6 animate-pulse space-y-2">
-        <div className="h-3 w-40 bg-[hsl(var(--muted))]" />
-        <div className="h-8 w-72 bg-[hsl(var(--muted))]" />
-        <div className="h-4 w-96 bg-[hsl(var(--muted))]" />
+    <section className="mx-auto max-w-7xl py-2 md:py-4">
+      <div className="mb-4 border-[2px] border-[hsl(var(--border))] bg-[hsl(var(--card))] p-4">
+        <LoadingBlock className="h-3 w-40" />
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
-        <div className="h-28 animate-pulse border-[2px] border-[hsl(var(--border))] bg-[hsl(var(--card))]" />
-        <div className="h-28 animate-pulse border-[2px] border-[hsl(var(--border))] bg-[hsl(var(--card))]" />
-        <div className="h-28 animate-pulse border-[2px] border-[hsl(var(--border))] bg-[hsl(var(--card))]" />
+      <div className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
+        <div className="border-[2px] border-[hsl(var(--border))] bg-[hsl(var(--card))] p-5 md:p-6">
+          <LoadingBlock className="h-3 w-28" />
+          <LoadingBlock className="mt-4 h-10 w-3/4" />
+          <LoadingBlock className="mt-3 h-4 w-1/2" />
+          <div className="mt-4 flex gap-2">
+            <LoadingBlock className="h-6 w-24" />
+            <LoadingBlock className="h-6 w-20" />
+            <LoadingBlock className="h-6 w-24" />
+          </div>
+        </div>
+
+        <div className="border-[2px] border-[hsl(var(--border))] bg-[hsl(var(--card))] p-6">
+          <LoadingBlock className="h-4 w-32" />
+          <div className="mt-4 space-y-3">
+            <LoadingBlock className="h-12 w-full" />
+            <LoadingBlock className="h-12 w-full" />
+            <LoadingBlock className="h-12 w-full" />
+          </div>
+        </div>
       </div>
 
-      <div className="mt-4 grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
-        <div className="space-y-4">
-          <div className="h-64 animate-pulse border-[2px] border-[hsl(var(--border))] bg-[hsl(var(--card))]" />
-          <div className="h-56 animate-pulse border-[2px] border-[hsl(var(--border))] bg-[hsl(var(--card))]" />
-        </div>
-        <div className="space-y-4">
-          <div className="h-72 animate-pulse border-[2px] border-[hsl(var(--border))] bg-[hsl(var(--card))]" />
-          <div className="h-48 animate-pulse border-[2px] border-[hsl(var(--border))] bg-[hsl(var(--card))]" />
-        </div>
+      <div className="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+        {Array.from({ length: 8 }).map((_, index) => (
+          <div key={index} className="border-[2px] border-[hsl(var(--border))] bg-[hsl(var(--card))] p-6">
+            <LoadingBlock className="h-3 w-16" />
+            <LoadingBlock className="mt-4 h-6 w-2/3" />
+            <LoadingBlock className="mt-3 h-4 w-full" />
+            <LoadingBlock className="mt-2 h-4 w-5/6" />
+          </div>
+        ))}
       </div>
-    </div>
+    </section>
   );
 }

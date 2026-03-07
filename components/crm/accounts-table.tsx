@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { toast } from "sonner";
 import Link from "next/link";
+import { useDebouncedValue } from "@/lib/hooks/use-debounced-value";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -45,6 +46,9 @@ export function AccountsTable({ initialData, onCreateClick }: AccountsTableProps
   const [offset, setOffset] = useState(0);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkSegment, setBulkSegment] = useState<string>("");
+  const abortRef = useRef<AbortController | null>(null);
+  const debouncedSearch = useDebouncedValue(search, 220);
+  const normalizedSearch = debouncedSearch.trim();
   const limit = 20;
 
   const allSelected = useMemo(
@@ -71,36 +75,36 @@ export function AccountsTable({ initialData, onCreateClick }: AccountsTableProps
 
   const handleBulkUpdateSegment = async () => {
     if (!bulkSegment || selectedIds.size === 0) return;
-    let updated = 0;
-    for (const id of selectedIds) {
-      try {
-        const res = await fetch(`/api/accounts/${id}`, {
+
+    const results = await Promise.allSettled(
+      Array.from(selectedIds).map((id) =>
+        fetch(`/api/accounts/${id}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ segment: bulkSegment }),
-        });
-        if (res.ok) updated++;
-      } catch { /* skip */ }
-    }
+          body: JSON.stringify({ segment: bulkSegment })
+        })
+      )
+    );
+
+    const updated = results.filter((result) => result.status === "fulfilled" && result.value.ok).length;
     toast.success(`Updated segment for ${updated} account(s)`);
     setSelectedIds(new Set());
     setBulkSegment("");
-    fetchAccounts();
+    await fetchAccounts();
   };
 
   const handleBulkDelete = async () => {
     if (selectedIds.size === 0) return;
     if (!confirm(`Delete ${selectedIds.size} account(s)? This cannot be undone.`)) return;
-    let deleted = 0;
-    for (const id of selectedIds) {
-      try {
-        const res = await fetch(`/api/accounts/${id}`, { method: "DELETE" });
-        if (res.ok) deleted++;
-      } catch { /* skip */ }
-    }
+
+    const results = await Promise.allSettled(
+      Array.from(selectedIds).map((id) => fetch(`/api/accounts/${id}`, { method: "DELETE" }))
+    );
+
+    const deleted = results.filter((result) => result.status === "fulfilled" && result.value.ok).length;
     toast.success(`Deleted ${deleted} account(s)`);
     setSelectedIds(new Set());
-    fetchAccounts();
+    await fetchAccounts();
   };
 
   const handleBulkExport = () => {
@@ -126,15 +130,21 @@ export function AccountsTable({ initialData, onCreateClick }: AccountsTableProps
   };
 
   const fetchAccounts = useCallback(async () => {
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+
     setLoading(true);
     try {
       const params = new URLSearchParams();
       params.set("limit", limit.toString());
       params.set("offset", offset.toString());
-      if (search) params.set("search", search);
+      if (normalizedSearch) params.set("search", normalizedSearch);
       if (segment !== "all") params.set("segment", segment);
 
-      const res = await fetch(`/api/accounts?${params.toString()}`);
+      const res = await fetch(`/api/accounts?${params.toString()}`, {
+        signal: controller.signal
+      });
       if (res.ok) {
         const data = await res.json();
         setAccounts(data.items);
@@ -142,17 +152,28 @@ export function AccountsTable({ initialData, onCreateClick }: AccountsTableProps
         setHasMore(data.hasMore);
       }
     } catch (error) {
-      console.error("Error fetching accounts:", error);
+      if (!(error instanceof DOMException && error.name === "AbortError")) {
+        toast.error("Failed to load accounts.");
+      }
     } finally {
-      setLoading(false);
+      if (abortRef.current === controller) {
+        abortRef.current = null;
+        setLoading(false);
+      }
     }
-  }, [search, segment, offset]);
+  }, [normalizedSearch, segment, offset]);
 
   useEffect(() => {
-    if (!initialData || search || segment !== "all" || offset > 0) {
+    if (!initialData || normalizedSearch || segment !== "all" || offset > 0) {
       fetchAccounts();
     }
-  }, [fetchAccounts, initialData, search, segment, offset]);
+  }, [fetchAccounts, initialData, normalizedSearch, segment, offset]);
+
+  useEffect(() => {
+    return () => {
+      abortRef.current?.abort();
+    };
+  }, []);
 
   const segmentColor = (seg: string) => {
     switch (seg) {

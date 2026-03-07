@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useDebouncedValue } from "@/lib/hooks/use-debounced-value";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -13,50 +14,86 @@ interface SearchResult {
   subtitle: string | null;
 }
 
+const resultCache = new Map<string, SearchResult[]>();
+
+function rememberResults(query: string, results: SearchResult[]) {
+  resultCache.set(query, results);
+
+  if (resultCache.size <= 25) {
+    return;
+  }
+
+  const oldestKey = resultCache.keys().next().value;
+  if (oldestKey) {
+    resultCache.delete(oldestKey);
+  }
+}
+
 export function CommandPalette() {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const normalizedQuery = query.trim();
-  const canSearch = normalizedQuery.length >= 2;
-  const visibleResults = canSearch ? results : [];
+  const debouncedQuery = useDebouncedValue(query.trim(), 180);
+  const canSearch = debouncedQuery.length >= 2;
+  const cachedResults = open && canSearch ? resultCache.get(debouncedQuery.toLowerCase()) ?? null : null;
+  const visibleResults = open && canSearch ? cachedResults ?? results : [];
+  const activeSelectedIndex = visibleResults.length === 0 ? 0 : Math.min(selectedIndex, visibleResults.length - 1);
+
+  function handleOpenChange(nextOpen: boolean) {
+    setOpen(nextOpen);
+
+    if (nextOpen) {
+      return;
+    }
+
+    setQuery("");
+    setResults([]);
+    setSelectedIndex(0);
+  }
 
   // Handle Cmd+K to open
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
         e.preventDefault();
-        setOpen((prev) => !prev);
+        handleOpenChange(!open);
       }
     }
+
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
+  }, [open]);
 
   // Search on query change
   useEffect(() => {
-    if (!canSearch) {
+    if (!open || !canSearch) {
+      return;
+    }
+
+    if (cachedResults) {
       return;
     }
 
     const controller = new AbortController();
 
-    fetch(`/api/search?q=${encodeURIComponent(normalizedQuery)}&limit=10`, { signal: controller.signal })
+    fetch(`/api/search?q=${encodeURIComponent(debouncedQuery)}&limit=10`, { signal: controller.signal })
       .then((res) => res.json())
       .then((data) => {
-        setResults(data.results ?? []);
+        const nextResults = data.results ?? [];
+        rememberResults(debouncedQuery.toLowerCase(), nextResults);
+        setResults(nextResults);
         setSelectedIndex(0);
       })
       .catch((err) => {
         if (err.name !== "AbortError") {
-          console.error("Search error:", err);
+          setResults([]);
         }
       });
 
     return () => controller.abort();
-  }, [canSearch, normalizedQuery]);
+  }, [cachedResults, canSearch, debouncedQuery, open]);
 
   function handleSelect(result: SearchResult) {
     setOpen(false);
@@ -86,11 +123,11 @@ export function CommandPalette() {
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
       setSelectedIndex((prev) => Math.max(prev - 1, 0));
-    } else if (e.key === "Enter" && visibleResults[selectedIndex]) {
+    } else if (e.key === "Enter" && visibleResults[activeSelectedIndex]) {
       e.preventDefault();
-      handleSelect(visibleResults[selectedIndex]);
+      handleSelect(visibleResults[activeSelectedIndex]);
     } else if (e.key === "Escape") {
-      setOpen(false);
+      handleOpenChange(false);
     }
   }
 
@@ -108,7 +145,7 @@ export function CommandPalette() {
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-lg p-0 gap-0 overflow-hidden">
         <div className="flex items-center border-b border-[hsl(var(--border))] px-4">
           <svg
@@ -160,7 +197,7 @@ export function CommandPalette() {
                     onClick={() => handleSelect(result)}
                     className={`
                       w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors
-                      ${index === selectedIndex ? "bg-[hsl(var(--muted))]" : "hover:bg-[hsl(var(--muted)/0.5)]"}
+                      ${index === activeSelectedIndex ? "bg-[hsl(var(--muted))]" : "hover:bg-[hsl(var(--muted)/0.5)]"}
                     `}
                     onMouseEnter={() => setSelectedIndex(index)}
                   >

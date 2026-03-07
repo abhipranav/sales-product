@@ -3,15 +3,15 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getActorFromServerContext } from "@/lib/auth/actor";
-import { getCachedDashboardData } from "@/lib/services/dashboard-cache";
 import { logger } from "@/lib/logger";
 import { NotificationServiceUnavailableError, listSignalNotifications } from "@/lib/services/notifications";
+import { getCachedWorkspaceSummary } from "@/lib/services/workspace-summary-cache";
 import { WorkspaceAccessDeniedError } from "@/lib/services/workspace";
 import Link from "next/link";
 
 export default async function NotificationsPage() {
   const actor = await getActorFromServerContext();
-  const data = await getCachedDashboardData(actor, "/notifications", { includeStrategyPlays: false });
+  const summary = await getCachedWorkspaceSummary(actor, "/notifications");
   let notifications: Awaited<ReturnType<typeof listSignalNotifications>> = [];
 
   try {
@@ -62,18 +62,18 @@ export default async function NotificationsPage() {
           </CardHeader>
           <CardContent className="space-y-2 text-sm text-[hsl(var(--muted-foreground))]">
             <Link
-              href={`/pipeline/${data.deal.id}` as "/pipeline"}
+              href={`/pipeline/${summary.deal.id}` as "/pipeline"}
               className="block font-bold text-[hsl(var(--foreground))] group-hover:text-[hsl(var(--background))] hover:underline"
             >
-              {data.deal.name}
+              {summary.deal.name}
             </Link>
             <Link
-              href={`/accounts/${data.account.id}` as "/accounts"}
+              href={`/accounts/${summary.account.id}` as "/accounts"}
               className="block text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))] hover:underline"
             >
-              {data.account.name}
+              {summary.account.name}
             </Link>
-            <Badge variant="outline">{data.deal.stage}</Badge>
+            <Badge variant="outline">{summary.deal.stage}</Badge>
           </CardContent>
         </Card>
       </section>
