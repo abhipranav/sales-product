@@ -4,6 +4,7 @@
 
 - Clean Next.js + TypeScript application skeleton
 - Multi-page super-app shell with persistent navigation and module routes (home, workspace, cockpit, accounts, pipeline, intelligence, notifications, integrations, workflows)
+- Additional workspace routes for contacts, activities, settings, setup, and branded sign-in
 - Initial cockpit experience centered on rep workflow execution
 - Domain models for account/contact/deal/task/activity/signal
 - Prisma schema for canonical persistent objects
@@ -19,7 +20,8 @@
 - Multi-batch HubSpot delta cadence trigger (`POST /api/integrations/hubspot/sync/delta/cadence`)
 - Outbound approval queue (`/api/approvals*`) and cockpit controls for approve/reject workflow
 - Approval review now auto-dispatches outbound artifacts and logs `outbound.sent` / `outbound.failed`
-- Header-based actor overrides (`x-actor-email`, `x-actor-name`) with workspace membership checks (`403` on violation)
+- Auth.js JWT session runtime with branded sign-in page and middleware protection for workspace routes + APIs
+- Middleware-to-service actor bridge via `x-actor-email` / `x-actor-name` headers with workspace membership checks (`403` on violation)
 - AI Strategy Lab in cockpit for first-principles play generation per deal context
 - shadcn/ui-style local design system baseline with shared primitives (`components/ui`) and cockpit-wide adoption
 - Native dark mode support (system + manual toggle) across app shell and UI primitives
@@ -32,7 +34,10 @@
 - Strategy-play execution API route (`/api/strategy/execute`) for external/automation triggers
 - Task SLA reminder runner endpoint (`/api/tasks/reminders/run`) with daily idempotent reminder events
 - CRM command-center forms for account/contact/deal create-update
+- Accounts and Contacts index pages now hydrate with server-preloaded initial data instead of client-only loading states
 - Pilot metrics service + cockpit panel for recommendation acceptance and action latency (`GET /api/metrics/pilot`)
+- Cached pilot metrics, integration health snapshots, and lightweight workspace summary lookups for lower-latency page transitions
+- Debounced command palette search with cached client results and parallel CRM entity lookups
 - UX feedback toasts for strategy execution, meeting-note processing, follow-up + brief regeneration, task mutations, approval review, calendar ingest, and sequence mutations
 - Polyglot super-app scaffolding with shared contracts, Go ingestion starter, and Python intelligence starter
 - Documentation architecture for continuity across AI agents
@@ -47,8 +52,9 @@
 ## Risks
 
 - Database is optional at runtime, so mock fallback can hide missing setup if not monitored
-- Actor identity is header/env based, not yet backed by full auth provider session
+- Domain services still consume an injected actor-header bridge instead of reading Auth.js session state directly
 - Calendar ingest currently manual trigger only (not provider-synced)
+- RBAC helpers exist, but broad sensitive-route enforcement is not fully wired yet
 
 ## Current mitigation
 

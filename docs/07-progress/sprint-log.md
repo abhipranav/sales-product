@@ -74,3 +74,22 @@ Next:
 - Replace header-based actor identity with OAuth-backed authentication sessions
 - Connect Calendar OAuth stub to live Google Calendar API when credentials are available
 - Add durable background workers (Redis + BullMQ) for high-volume CRM and signal processing
+
+## Sprint 3 (2026-03-07)
+
+Completed:
+
+- Shipped Auth.js JWT session baseline with branded `/auth/signin`, middleware protection, and signed actor propagation into existing workspace services
+- Fixed typecheck regressions around auth/session handling and removed broken root-layout telemetry imports
+- Replaced network-dependent custom font loading with zero-network local font stacks for reliable production builds
+- Added lightweight workspace summary cache for notifications, integrations, and activities pages to avoid over-fetching full dashboard state
+- Added cached pilot metrics and integration-health lookups to reduce repeated expensive runtime work
+- Debounced command palette search and parallelized CRM entity search queries
+- Server-preloaded Accounts and Contacts index pages to eliminate client-only loading spinners on first paint
+- Audited docs for implementation drift and updated route/API/auth status to match the shipped codebase
+
+Next:
+
+- Add Prisma-backed Auth.js adapter tables and reduce the remaining actor-header bridge inside domain services
+- Enforce RBAC helpers on sensitive mutations and admin-only flows
+- Replace mock outbound channel adapters with real provider integrations

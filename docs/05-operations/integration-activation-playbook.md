@@ -126,7 +126,7 @@ To preview app links in LinkedIn posts:
 
 Before inviting external users:
 
-1. Auth + role enforcement beyond default actor headers.
+1. Harden the shipped Auth.js session layer with Prisma-backed user/account/session tables and reduce the remaining actor-header bridge.
 2. Background job runner for sync and retries.
 3. Error telemetry and uptime alerts.
 4. Rate limits + input validation on all public API routes.

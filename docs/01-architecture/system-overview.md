@@ -21,13 +21,19 @@ Hybrid super-app architecture:
 ## Product route map
 
 - `/`: marketing landing page
+- `/auth/signin`: branded authentication entrypoint
 - `/workspace`: super-app home with module-level status and launch actions
 - `/cockpit`: rep execution cockpit (tasks, briefs, approvals, audit, ingestion)
 - `/accounts`: account + stakeholder context with live signals
+- `/contacts`: contact directory and stakeholder relationship management
 - `/pipeline`: revenue metrics, stage progression, and risked execution work
 - `/intelligence`: strategy plays, briefing, and notes-to-actions workflows
+- `/notifications`: buying-signal inbox and acknowledgment workflow
 - `/integrations`: CRM and calendar integration control surface
 - `/workflows`: orchestration layer for tasks, approvals, and operational audit
+- `/activities`: unified cross-deal activity timeline
+- `/settings`: account, notification, AI, and workspace preferences
+- `/setup`: system readiness and activation checklist
 
 ## Data flow
 

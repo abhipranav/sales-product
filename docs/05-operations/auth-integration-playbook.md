@@ -4,7 +4,7 @@ Last updated: 2026-02-24
 
 ## Goal
 
-Add production-grade authentication to this Next.js + Prisma app with low or zero platform cost.
+Harden the current production-grade authentication baseline in this Next.js + Prisma app while keeping platform cost low.
 
 ## Current implementation in this repo
 
@@ -17,12 +17,18 @@ Add production-grade authentication to this Next.js + Prisma app with low or zer
 
 ## Current rollout values
 
-- Production URL: `https://sales-product-beta.vercel.app/`
+- Production URL: `https://www.salescortex.me/`
 - Target providers: Google + LinkedIn
 - Temporary rollout flag: `APP_ENABLE_DEV_LOGIN=1`
 - Required callback URLs:
-  - `https://sales-product-beta.vercel.app/api/auth/callback/google`
-  - `https://sales-product-beta.vercel.app/api/auth/callback/linkedin`
+   - `https://www.salescortex.me/api/auth/callback/google`
+   - `https://www.salescortex.me/api/auth/callback/linkedin`
+
+## Production auth pitfalls
+
+- OAuth callbacks must match the final public host exactly. If the Vercel default domain or apex domain redirects to `https://www.salescortex.me`, register the `www` callback URLs at Google and LinkedIn.
+- In the Vercel environment variable UI, do not paste surrounding quotes from `.env`. Values such as `"client-id"` will be stored with literal quotes and can break provider auth in production.
+- Set `AUTH_SECRET` or `NEXTAUTH_SECRET` in production. The runtime accepts either name.
 
 ## Free-first options
 
@@ -69,31 +75,23 @@ For this project, choose one of these:
 
 ## Recommended implementation plan (Auth.js + Prisma)
 
-1. Add Auth.js packages and Prisma adapter.
-2. Add auth models to `prisma/schema.prisma` (`User`, `Account`, `Session`, `VerificationToken`).
-3. Run `npm run db:generate` and `npm run db:push`.
-4. Create `auth.ts` with providers:
-   - Email magic link (Resend/Nodemailer)
-   - Google
-   - LinkedIn
-5. Add App Router route handler:
-   - `app/api/auth/[...nextauth]/route.ts`
-6. Protect workspace routes:
-   - add middleware/route checks for `(workspace)` group
-   - redirect unauthenticated users to sign in
-7. Replace actor-header fallback:
-   - derive actor email/name from session user
+1. Add Prisma adapter support and auth models to `prisma/schema.prisma` (`User`, `Account`, `Session`, `VerificationToken`).
+2. Run `npm run db:generate` and `npm run db:push`.
+3. Keep current providers in `auth.ts` and decide whether to add email magic links (Resend/Nodemailer).
+4. Reduce the current header bridge:
+   - derive actor email/name from session user where possible
    - keep `APP_AUTO_PROVISION_MEMBERS=1` during migration
-8. Update settings:
+5. Update settings:
    - show authenticated identity
    - wire password/session/security controls to real auth source
-9. Add role sync:
+6. Add role sync:
    - map signed-in user email to `workspaceMember`
    - owner/manager/rep gates from DB role
-10. Add basic auth tests:
+7. Add basic auth tests:
    - unauthenticated route redirect
    - authenticated workspace access
    - settings read/write under real session
+8. Add login audit events and provider error telemetry.
 
 ## Launch checklist
 

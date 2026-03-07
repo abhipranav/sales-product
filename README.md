@@ -7,11 +7,11 @@ A docs-first, conversation-first AI sales execution platform focused on reducing
 - Product architecture: modular monolith (single deployable app, clean domain boundaries)
 - Frontend: Next.js App Router + React + TypeScript + Tailwind CSS + shadcn/ui primitives
 - Backend: Next.js Route Handlers + server-side domain services
-- Data layer (planned in next iteration): PostgreSQL + Prisma + pgvector
+- Data layer: PostgreSQL + Prisma with workspace-scoped fallback-aware services
 - Async/workflows (planned in next iteration): Redis + BullMQ workers
 - AI layer: OpenAI provider abstraction with per-user key/model preferences and daily usage accounting
-- Auth: Auth.js (JWT sessions) with Google/LinkedIn and optional dev credentials login
-- Observability (planned in next iteration): OpenTelemetry traces + structured audit logs
+- Auth: Auth.js (JWT sessions) with middleware protection, Google/LinkedIn, and optional dev credentials login
+- Observability: route timing logs, system readiness probes, and structured logger baseline
 
 ## Current state
 
@@ -41,11 +41,13 @@ This repository now includes:
   - `/setup` (Live readiness and integration checklist)
   - `/cockpit`
   - `/accounts`
+  - `/contacts`
   - `/pipeline`
   - `/intelligence`
   - `/notifications`
   - `/integrations`
   - `/workflows`
+  - `/activities`
 - Shared UI primitives and cockpit migration to shadcn-style components:
   - `Button`, `Card`, `Input`, `Textarea`, `Select`, `Badge`, `Separator`
   - `cn` utility with `clsx` + `tailwind-merge`
@@ -62,11 +64,23 @@ This repository now includes:
 - Workspace sidebar now routes to landing page via app logo (no separate landing nav item)
 - Route-level performance timing logs for dashboard fetches (enable with `APP_PERF_LOGS=1`)
 - Protected workspace + API routes via middleware and Auth.js session checks
+- Debounced command palette search with cached results and parallel CRM search lookups
+- Server-preloaded Accounts and Contacts index pages to avoid post-hydration loading spinners
+- Cached pilot metrics, workspace summary lookups, and integration health snapshots for faster page loads
 - API endpoints:
   - `GET|POST /api/auth/[...nextauth]`
+  - `GET|POST /api/accounts`
+  - `GET|PATCH|DELETE /api/accounts/:id`
+  - `GET|POST /api/contacts`
+  - `GET|PATCH|DELETE /api/contacts/:id`
+  - `GET|POST /api/deals`
+  - `GET|PATCH|DELETE /api/deals/:dealId`
+  - `POST /api/deals/:dealId/stage`
   - `GET /api/dashboard`
   - `GET /api/metrics/pilot`
   - `GET /api/system/status`
+  - `GET /api/integrations/status`
+  - `GET /api/search`
   - `GET /api/settings/user`
   - `PATCH /api/settings/user`
   - `GET /api/settings/user/ai`
@@ -86,6 +100,8 @@ This repository now includes:
   - `POST /api/tasks/:taskId/complete`
   - `POST /api/calendar/events/ingest`
   - `POST /api/meetings/process`
+  - `POST /api/cron/reminders`
+  - `POST /api/cron/crm-sync`
   - `GET /api/integrations/hubspot/sync`
   - `POST /api/integrations/hubspot/sync`
   - `POST /api/integrations/hubspot/sync/delta`
@@ -143,30 +159,33 @@ This repository now includes:
 
 ## Auth provider setup (Vercel)
 
-- Production URL: `https://sales-product-beta.vercel.app/`
+- Production URL: `https://www.salescortex.me/`
 - Keep `APP_ENABLE_DEV_LOGIN=1` during rollout (switch to `0` later).
 - Set these Vercel Environment Variables:
-  - `AUTH_SECRET` (generate: `openssl rand -base64 32`)
+  - `AUTH_SECRET` or `NEXTAUTH_SECRET` (generate: `openssl rand -base64 32`)
   - `AUTH_GOOGLE_ID`
   - `AUTH_GOOGLE_SECRET`
   - `AUTH_LINKEDIN_ID`
   - `AUTH_LINKEDIN_SECRET`
-  - `APP_BASE_URL=https://sales-product-beta.vercel.app/`
+  - `APP_BASE_URL=https://www.salescortex.me`
   - `APP_ENABLE_DEV_LOGIN=1`
+- In the Vercel dashboard, paste raw values only. Do not include surrounding quotes from `.env`.
 - OAuth callback URLs:
-  - Google: `https://sales-product-beta.vercel.app/api/auth/callback/google`
-  - LinkedIn: `https://sales-product-beta.vercel.app/api/auth/callback/linkedin`
+  - Google: `https://www.salescortex.me/api/auth/callback/google`
+  - LinkedIn: `https://www.salescortex.me/api/auth/callback/linkedin`
 - Local callback URLs:
   - Google: `http://localhost:3000/api/auth/callback/google`
   - LinkedIn: `http://localhost:3000/api/auth/callback/linkedin`
+- If `salescortex.me` or `sales-product-beta.vercel.app` redirect to `www.salescortex.me`, register the `www` callback URLs with the providers because OAuth redirect URIs must match the final host exactly.
 
 ## Actor + Workspace Access
 
 - Workspace scope is enforced via `Workspace` + `WorkspaceMember`.
-- Default actor is from `.env` (`APP_ACTOR_EMAIL`, `APP_ACTOR_NAME`).
+- Default actor is from `.env` (`APP_ACTOR_EMAIL`, `APP_ACTOR_NAME`) when no signed-in identity is available.
 - New actor emails are auto-provisioned as `REP` by default (`APP_AUTO_PROVISION_MEMBERS=1`).
 - Set `APP_AUTO_PROVISION_MEMBERS=0` to require explicit membership provisioning.
-- API clients can override actor headers:
+- Middleware injects signed actor headers from the active Auth.js session for existing workspace services.
+- Direct API clients can still override actor headers:
   - `x-actor-email`
   - `x-actor-name`
 

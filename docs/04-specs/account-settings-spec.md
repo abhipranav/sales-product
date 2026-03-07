@@ -76,12 +76,14 @@ Reference patterns:
 - New user settings API:
   - `GET /api/settings/user`
   - `PATCH /api/settings/user`
+- Authenticated identity now flows through Auth.js middleware into workspace-scoped settings reads/writes
 - Persistence model:
   - `UserPreference` linked to `WorkspaceMember`
 
 ## Not yet implemented (explicit gap)
 
-- True authentication/session provider (currently actor-scoped)
+- Prisma-backed auth tables / adapter for long-lived user-account persistence
 - Real MFA enrollment and verification flows
 - Password/session management UI with revocation
 - Billing provider integration and seat checkout flows
+- Direct service-layer session consumption without the current header bridge

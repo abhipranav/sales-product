@@ -17,6 +17,39 @@ Returns a rep cockpit snapshot for the active account/deal context.
 - `meetingBrief`
 - `followUpDraft`
 
+## Additional implemented platform routes
+
+- `GET|POST /api/auth/[...nextauth]`
+  - Auth.js provider runtime for sign-in, callbacks, and session handling.
+- `GET|POST /api/accounts`
+  - Lists or creates account records in workspace scope.
+- `GET|PATCH|DELETE /api/accounts/:id`
+  - Reads, updates, or deletes a single account.
+- `GET|POST /api/contacts`
+  - Lists or creates contact records in workspace scope.
+- `GET|PATCH|DELETE /api/contacts/:id`
+  - Reads, updates, or deletes a single contact.
+- `GET|POST /api/deals`
+  - Lists or creates deal records in workspace scope.
+- `GET|PATCH|DELETE /api/deals/:dealId`
+  - Reads, updates, or deletes a single deal.
+- `POST /api/deals/:dealId/stage`
+  - Moves a deal to a new stage with validation + persistence.
+- `GET /api/system/status`
+  - Returns readiness checks, mode (`live` | `demo`), dataset counts, and sync summary.
+- `GET /api/integrations/status`
+  - Returns cached HubSpot + Calendar connectivity health.
+- `GET /api/search`
+  - Cross-entity CRM search (`account`, `contact`, `deal`) for command palette and quick navigation.
+- `GET|PATCH /api/settings/user`
+  - Reads and updates user/workspace preference fields.
+- `GET|PATCH /api/settings/user/ai`
+  - Reads and updates per-user AI provider preferences and usage context.
+- `POST /api/cron/reminders`
+  - Cron-protected reminder runner wrapper around task reminder generation.
+- `POST /api/cron/crm-sync`
+  - Cron-protected cadence trigger for incremental HubSpot delta sync.
+
 ## `POST /api/tasks`
 
 Creates a task for a deal.
