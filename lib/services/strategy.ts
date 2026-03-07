@@ -3,6 +3,7 @@ import { createUserAwareProvider, type AIMessage } from "@/lib/ai";
 import type { ActorIdentity } from "@/lib/auth/actor";
 
 const AI_STRATEGY_TIMEOUT_MS = Number(process.env.APP_AI_STRATEGY_TIMEOUT_MS ?? 900);
+const ENABLE_AI_STRATEGY_PLAYS = process.env.APP_ENABLE_AI_STRATEGY_PLAYS === "1";
 
 function hasKeyword(value: string, keywords: string[]): boolean {
   const lower = value.toLowerCase();
@@ -212,7 +213,7 @@ Generate 2-4 strategic plays tailored to this specific deal situation.`;
     ]);
 
     return response.plays.slice(0, 4).map((play, index) => ({
-      id: `play-ai-${index + 1}-${Date.now()}`,
+      id: `play-ai-${index + 1}-${play.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "untitled"}`,
       title: play.title,
       thesis: play.thesis,
       trigger: play.trigger,
@@ -233,6 +234,10 @@ export async function buildStrategyPlays(input: {
   approvals: OutboundApproval[];
   recentActivities: Activity[];
 }, actor?: ActorIdentity): Promise<StrategyPlay[]> {
+  if (!ENABLE_AI_STRATEGY_PLAYS) {
+    return buildRuleBasedPlays(input);
+  }
+
   try {
     return await buildAIGeneratedPlays(input, actor);
   } catch (error) {
