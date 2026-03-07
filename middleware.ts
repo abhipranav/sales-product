@@ -1,6 +1,14 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { getToken } from "next-auth/jwt";
-import { AUTH_SECRET } from "@/lib/auth/secret";
+import { auth } from "@/auth";
+
+type AuthenticatedRequest = NextRequest & {
+  auth?: {
+    user?: {
+      email?: string | null;
+      name?: string | null;
+    };
+  };
+};
 
 function isPublicApiRoute(pathname: string): boolean {
   return pathname === "/api/auth" || pathname.startsWith("/api/auth/");
@@ -10,7 +18,8 @@ function buildCallbackUrl(pathname: string, search: string): string {
   return `${pathname}${search || ""}`;
 }
 
-export default async function middleware(request: NextRequest) {
+export default auth(async function middleware(request) {
+  const authRequest = request as AuthenticatedRequest;
   const { pathname, search } = request.nextUrl;
   const isApi = pathname.startsWith("/api/");
 
@@ -18,8 +27,7 @@ export default async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const token = await getToken({ req: request, secret: AUTH_SECRET });
-  const actorEmail = typeof token?.email === "string" ? token.email.trim().toLowerCase() : "";
+  const actorEmail = typeof authRequest.auth?.user?.email === "string" ? authRequest.auth.user.email.trim().toLowerCase() : "";
 
   if (!actorEmail) {
     if (isApi) {
@@ -34,7 +42,7 @@ export default async function middleware(request: NextRequest) {
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-actor-email", actorEmail);
 
-  const actorName = typeof token?.name === "string" ? token.name.trim() : "";
+  const actorName = typeof authRequest.auth?.user?.name === "string" ? authRequest.auth.user.name.trim() : "";
   if (actorName) {
     requestHeaders.set("x-actor-name", actorName);
   } else {
@@ -46,7 +54,7 @@ export default async function middleware(request: NextRequest) {
       headers: requestHeaders
     }
   });
-}
+});
 
 export const config = {
   matcher: [
