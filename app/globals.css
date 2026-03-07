@@ -1,3 +1,15 @@
+@import "@fontsource/inter/400.css";
+@import "@fontsource/inter/500.css";
+@import "@fontsource/inter/600.css";
+@import "@fontsource/inter/700.css";
+@import "@fontsource/inter/900.css";
+@import "@fontsource/sora/400.css";
+@import "@fontsource/sora/600.css";
+@import "@fontsource/sora/700.css";
+@import "@fontsource/space-mono/400.css";
+@import "@fontsource/space-mono/700.css";
+@import "@fontsource/libre-barcode-39-text";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -12,9 +24,11 @@
    - Serif headlines + monospace labels + clean sans-serif body
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap');
-
 :root {
+  --font-sans: "Inter", "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "Space Mono", "IBM Plex Mono", "SFMono-Regular", "Cascadia Mono", "Courier New", monospace;
+  --font-barcode: "Libre Barcode 39 Text", "Courier New", monospace;
+
   /* Base - Industrial light grey canvas */
   --background: 36 14% 90%;
   --foreground: 0 0% 7%;
@@ -115,7 +129,7 @@ body {
   min-height: 100dvh;
   color: hsl(var(--foreground));
   background: hsl(var(--background));
-  font-family: "Inter", "IBM Plex Sans", "Segoe UI", sans-serif;
+  font-family: var(--font-sans), "IBM Plex Sans", "Segoe UI", sans-serif;
   font-feature-settings: "cv11", "ss01";
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -130,7 +144,7 @@ body {
 }
 
 .font-mono-ind {
-  font-family: "Space Mono", "IBM Plex Mono", "Courier New", monospace;
+  font-family: var(--font-mono), "IBM Plex Mono", "Courier New", monospace;
 }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -167,7 +181,7 @@ body {
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 .ind-label {
-  font-family: "Space Mono", monospace;
+  font-family: var(--font-mono), monospace;
   font-size: 11px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -175,7 +189,7 @@ body {
 }
 
 .ind-label-lg {
-  font-family: "Space Mono", monospace;
+  font-family: var(--font-mono), monospace;
   font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.06em;
@@ -219,7 +233,7 @@ body {
   align-items: center;
   gap: 0.4rem;
   padding: 0.3rem 0.6rem;
-  font-family: "Space Mono", monospace;
+  font-family: var(--font-mono), monospace;
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -235,7 +249,7 @@ body {
   align-items: center;
   gap: 0.4rem;
   padding: 0.35rem 0.75rem;
-  font-family: "Space Mono", monospace;
+  font-family: var(--font-mono), monospace;
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -254,7 +268,7 @@ body {
   justify-content: center;
   gap: 0.5rem;
   padding: 0.6rem 1.5rem;
-  font-family: "Space Mono", monospace;
+  font-family: var(--font-mono), monospace;
   font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.06em;
@@ -279,7 +293,7 @@ body {
   justify-content: center;
   gap: 0.5rem;
   padding: 0.6rem 1.5rem;
-  font-family: "Space Mono", monospace;
+  font-family: var(--font-mono), monospace;
   font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.06em;
@@ -358,7 +372,7 @@ body {
   display: inline-flex;
   align-items: center;
   padding: 0.5rem 1.5rem;
-  font-family: "Space Mono", monospace;
+  font-family: var(--font-mono), monospace;
   font-size: 11px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -376,7 +390,7 @@ body {
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 .ind-barcode {
-  font-family: 'Libre Barcode 39 Text', cursive;
+  font-family: var(--font-barcode), cursive;
   font-size: 36px;
   color: hsl(var(--foreground));
   line-height: 1;

@@ -3,6 +3,7 @@ import Google from "next-auth/providers/google";
 import LinkedIn from "next-auth/providers/linkedin";
 import Credentials from "next-auth/providers/credentials";
 import { z } from "zod";
+import { readEnv } from "@/lib/env";
 import { AUTH_SECRET } from "@/lib/auth/secret";
 
 export interface AuthProviderCard {
@@ -15,8 +16,8 @@ export interface AuthProviderCard {
 const providerCards: AuthProviderCard[] = [];
 const providers: NonNullable<NextAuthConfig["providers"]> = [];
 
-const googleClientId = process.env.AUTH_GOOGLE_ID?.trim();
-const googleClientSecret = process.env.AUTH_GOOGLE_SECRET?.trim();
+const googleClientId = readEnv("AUTH_GOOGLE_ID");
+const googleClientSecret = readEnv("AUTH_GOOGLE_SECRET");
 if (googleClientId && googleClientSecret) {
   providers.push(
     Google({
@@ -32,8 +33,8 @@ if (googleClientId && googleClientSecret) {
   });
 }
 
-const linkedInClientId = process.env.AUTH_LINKEDIN_ID?.trim();
-const linkedInClientSecret = process.env.AUTH_LINKEDIN_SECRET?.trim();
+const linkedInClientId = readEnv("AUTH_LINKEDIN_ID");
+const linkedInClientSecret = readEnv("AUTH_LINKEDIN_SECRET");
 if (linkedInClientId && linkedInClientSecret) {
   providers.push(
     LinkedIn({

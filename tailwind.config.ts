@@ -16,8 +16,8 @@ const config: Config = {
         cobalt: "#1E3A8A"
       },
       fontFamily: {
-        sans: ["Inter", "IBM Plex Sans", "Segoe UI", "sans-serif"],
-        mono: ["Space Mono", "IBM Plex Mono", "Courier New", "monospace"],
+        sans: ["var(--font-sans)", "IBM Plex Sans", "Segoe UI", "sans-serif"],
+        mono: ["var(--font-mono)", "IBM Plex Mono", "Courier New", "monospace"],
         serif: ["Georgia", "Times New Roman", "Noto Serif", "serif"]
       },
       borderWidth: {

@@ -1,4 +1,6 @@
-const resolvedAuthSecret = process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET;
+import { readEnv } from "@/lib/env";
+
+const resolvedAuthSecret = readEnv("AUTH_SECRET") ?? readEnv("NEXTAUTH_SECRET");
 
 if (!resolvedAuthSecret && process.env.NODE_ENV === "production") {
   throw new Error("Missing AUTH_SECRET (or NEXTAUTH_SECRET) in production environment.");

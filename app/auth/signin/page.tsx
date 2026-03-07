@@ -78,12 +78,7 @@ interface SignInPageProps {
 }
 
 export default async function SignInPage({ searchParams }: SignInPageProps) {
-  let session: Awaited<ReturnType<typeof auth>> | null = null;
-  try {
-    session = await auth();
-  } catch {
-    session = null;
-  }
+  const session = await auth().catch(() => null);
 
   if (session?.user?.email) {
     redirect("/workspace");
