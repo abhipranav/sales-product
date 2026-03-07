@@ -43,6 +43,7 @@ const HUBSPOT_SCOPES = [
   "crm.objects.companies.write",
   "crm.objects.deals.write",
 ];
+const HUBSPOT_CONNECTION_TIMEOUT_MS = Number(process.env.APP_HUBSPOT_CONNECTION_TIMEOUT_MS ?? 1500);
 
 export function getHubSpotOAuthConfig(): HubSpotOAuthConfig | null {
   const clientId = process.env.HUBSPOT_CLIENT_ID?.trim();
@@ -127,13 +128,18 @@ export async function testHubSpotConnection(): Promise<HubSpotConnectionStatus> 
   if (privateToken) {
     // Private app token mode — verify it works
     try {
-      const response = await fetch("https://api.hubapi.com/crm/v3/objects/contacts?limit=1", {
-        headers: {
-          Authorization: `Bearer ${privateToken}`,
-          Accept: "application/json",
-        },
-        cache: "no-store",
-      });
+      const response = (await Promise.race([
+        fetch("https://api.hubapi.com/crm/v3/objects/contacts?limit=1", {
+          headers: {
+            Authorization: `Bearer ${privateToken}`,
+            Accept: "application/json",
+          },
+          cache: "no-store",
+        }),
+        new Promise<never>((_, reject) => {
+          setTimeout(() => reject(new Error("HubSpot connection check timed out.")), HUBSPOT_CONNECTION_TIMEOUT_MS);
+        })
+      ])) as Response;
 
       if (response.ok) {
         return {
