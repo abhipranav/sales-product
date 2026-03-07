@@ -8,8 +8,41 @@ import {
   getDailyUsageSummaryForMember,
   type AIDailyUsageSummary
 } from "@/lib/services/ai-usage";
+import { getRuntimeSecretStatus } from "@/lib/services/runtime-config";
 
 const DEFAULT_MODEL = "gpt-5-mini";
+const STRATEGY_AI_ENABLED = process.env.APP_ENABLE_AI_STRATEGY_PLAYS === "1";
+
+function getAIWorkflowLabels(strategyMode: "ai-enabled" | "rule-based") {
+  return strategyMode === "ai-enabled"
+    ? ["Follow-up Draft regeneration", "Meeting Prep Brief regeneration", "Strategy Lab AI generation"]
+    : ["Follow-up Draft regeneration", "Meeting Prep Brief regeneration"];
+}
+
+function buildAIStatusNote(input: {
+  source: "user" | "system" | "none";
+  systemKeyStatus: "active" | "pending-restart" | "missing";
+  strategyMode: "ai-enabled" | "rule-based";
+  model: string;
+}) {
+  if (input.source === "user") {
+    return input.strategyMode === "ai-enabled"
+      ? `Personal OpenAI key is active on ${input.model}. It powers follow-ups, meeting briefs, and Strategy Lab generation.`
+      : `Personal OpenAI key is active on ${input.model}. It powers follow-ups and meeting briefs. Strategy Lab remains rule-based until APP_ENABLE_AI_STRATEGY_PLAYS=1.`;
+  }
+
+  if (input.source === "system") {
+    return input.strategyMode === "ai-enabled"
+      ? `Workspace/system OpenAI key is active on ${input.model}. It powers follow-ups, meeting briefs, and Strategy Lab generation.`
+      : `Workspace/system OpenAI key is active on ${input.model}. It powers follow-ups and meeting briefs. Strategy Lab remains rule-based until APP_ENABLE_AI_STRATEGY_PLAYS=1.`;
+  }
+
+  if (input.systemKeyStatus === "pending-restart") {
+    return "OPENAI_API_KEY is present in your env file, but the running server has not loaded it yet. Restart the app process to activate AI workflows.";
+  }
+
+  return "No active OpenAI key is loaded. Follow-ups and meeting briefs will fall back to rule-based generation.";
+}
 
 const updateAISettingsSchema = z
   .object({
@@ -40,6 +73,10 @@ export interface AISettingsResponse {
   maskedKey: string | null;
   model: string;
   source: "user" | "system" | "none";
+  systemKeyStatus: "active" | "pending-restart" | "missing";
+  strategyMode: "ai-enabled" | "rule-based";
+  workflowLabels: string[];
+  statusNote: string;
   dailyUsage: AIDailyUsageSummary;
 }
 
@@ -88,6 +125,9 @@ async function resolveMember(actor?: ActorIdentity) {
 }
 
 export async function getUserAISettings(actor?: ActorIdentity): Promise<AISettingsResponse> {
+  const systemKeyStatus = getRuntimeSecretStatus("OPENAI_API_KEY").state;
+  const strategyMode: AISettingsResponse["strategyMode"] = STRATEGY_AI_ENABLED ? "ai-enabled" : "rule-based";
+
   try {
     const { prisma, member } = await resolveMember(actor);
 
@@ -98,7 +138,7 @@ export async function getUserAISettings(actor?: ActorIdentity): Promise<AISettin
     const selectedModel = normalizeModel(preference?.aiModel);
 
     const hasUserKey = Boolean(preference?.aiApiKey);
-    const hasSystemKey = Boolean(process.env.OPENAI_API_KEY);
+    const hasSystemKey = systemKeyStatus === "active";
     const dailyUsage = await getDailyUsageSummaryForMember(prisma, member.id, selectedModel);
 
     let maskedKey: string | null = null;
@@ -123,6 +163,15 @@ export async function getUserAISettings(actor?: ActorIdentity): Promise<AISettin
       maskedKey,
       model: selectedModel,
       source,
+      systemKeyStatus,
+      strategyMode,
+      workflowLabels: getAIWorkflowLabels(strategyMode),
+      statusNote: buildAIStatusNote({
+        source,
+        systemKeyStatus,
+        strategyMode,
+        model: selectedModel
+      }),
       dailyUsage
     };
   } catch (error) {
@@ -130,10 +179,19 @@ export async function getUserAISettings(actor?: ActorIdentity): Promise<AISettin
 
     // If the table doesn't exist yet, return a safe fallback
     return {
-      hasApiKey: Boolean(process.env.OPENAI_API_KEY),
+      hasApiKey: systemKeyStatus === "active",
       maskedKey: null,
       model: DEFAULT_MODEL,
-      source: process.env.OPENAI_API_KEY ? "system" : "none",
+      source: systemKeyStatus === "active" ? "system" : "none",
+      systemKeyStatus,
+      strategyMode,
+      workflowLabels: getAIWorkflowLabels(strategyMode),
+      statusNote: buildAIStatusNote({
+        source: systemKeyStatus === "active" ? "system" : "none",
+        systemKeyStatus,
+        strategyMode,
+        model: DEFAULT_MODEL
+      }),
       dailyUsage: createDefaultDailyUsageSummary(DEFAULT_MODEL)
     };
   }

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { ZodError } from "zod";
 import { getActorFromRequest } from "@/lib/auth/actor";
+import { revalidateDashboardViews } from "@/lib/services/cache-invalidation";
 import {
   DraftGenerationDealNotFoundError,
   DraftGenerationServiceUnavailableError,
@@ -22,6 +23,7 @@ export async function POST(request: Request, context: RouteContext) {
     const body = await request.json().catch(() => ({}));
     const payload = parseGenerateBriefInput(body);
     const result = await generateMeetingBriefForDeal(dealId, payload, actor);
+    revalidateDashboardViews();
     return NextResponse.json(result, { status: 201 });
   } catch (error) {
     if (error instanceof ZodError) {

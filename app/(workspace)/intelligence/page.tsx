@@ -57,7 +57,7 @@ export default async function IntelligencePage() {
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-bold text-[hsl(var(--foreground))]">{data.strategyPlays.length}</p>
-            <p className="font-mono text-[10px] uppercase tracking-wider text-[hsl(var(--muted-foreground))]">AI-generated active plays</p>
+            <p className="font-mono text-[10px] uppercase tracking-wider text-[hsl(var(--muted-foreground))]">Active strategy plays</p>
           </CardContent>
         </Card>
         <Link href={`/pipeline/${data.deal.id}` as "/pipeline"} className="block">

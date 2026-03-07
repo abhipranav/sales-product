@@ -44,7 +44,7 @@ export function StrategyLab({ plays, dealId }: StrategyLabProps) {
   return (
     <Card>
       <CardHeader className="flex-row items-center justify-between space-y-0">
-        <CardTitle>AI Strategy Lab</CardTitle>
+        <CardTitle>Strategy Lab</CardTitle>
         <Badge variant="accent">Intelligence</Badge>
       </CardHeader>
       <CardContent>

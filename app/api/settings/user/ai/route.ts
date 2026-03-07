@@ -7,6 +7,7 @@ import {
   updateUserAISettings,
   AISettingsServiceError
 } from "@/lib/services/ai-settings";
+import { invalidateSystemReadiness } from "@/lib/services/system-readiness";
 
 export async function GET(request: NextRequest) {
   try {
@@ -29,6 +30,7 @@ export async function PATCH(request: NextRequest) {
     const body = await request.json();
     const input = parseUpdateAISettingsInput(body);
     const settings = await updateUserAISettings(input, actor);
+    invalidateSystemReadiness(actor);
     return NextResponse.json(settings);
   } catch (error) {
     if (error instanceof ZodError) {

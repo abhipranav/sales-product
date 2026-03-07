@@ -28,6 +28,7 @@ export function FollowUpComposer({ dealId, draft }: FollowUpComposerProps) {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isQueueing, setIsQueueing] = useState(false);
   const [isRegenerating, setIsRegenerating] = useState(false);
+  const [isSavingDraft, setIsSavingDraft] = useState(false);
   const [subject, setSubject] = useState(draft.subject);
   const [body, setBody] = useState(draft.body);
   const [ask, setAsk] = useState(draft.ask);
@@ -65,6 +66,48 @@ export function FollowUpComposer({ dealId, draft }: FollowUpComposerProps) {
       toast.error("Failed to generate follow-up draft.", { id: `followup-${dealId}` });
     } finally {
       setIsRegenerating(false);
+    }
+  }
+
+  async function handleSaveDraft() {
+    if (isSavingDraft) {
+      return;
+    }
+
+    setIsSavingDraft(true);
+    toast.loading("Saving follow-up draft...", { id: `followup-save-${dealId}` });
+
+    try {
+      const response = await fetch(`/api/followups/${dealId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          subject,
+          body,
+          ask,
+          ctaTimeWindow
+        })
+      });
+
+      const payload = await response.json().catch(() => null);
+      if (!response.ok || !payload?.draft) {
+        toast.error(payload?.error ?? "Failed to save follow-up draft.", { id: `followup-save-${dealId}` });
+        return;
+      }
+
+      setSubject(payload.draft.subject);
+      setBody(payload.draft.body);
+      setAsk(payload.draft.ask);
+      setCtaTimeWindow(payload.draft.ctaTimeWindow);
+      setIsEditOpen(false);
+      toast.success("Follow-up draft saved.", { id: `followup-save-${dealId}` });
+      router.refresh();
+    } catch {
+      toast.error("Failed to save follow-up draft.", { id: `followup-save-${dealId}` });
+    } finally {
+      setIsSavingDraft(false);
     }
   }
 
@@ -186,8 +229,8 @@ export function FollowUpComposer({ dealId, draft }: FollowUpComposerProps) {
             <Button type="button" variant="outline" onClick={() => setIsEditOpen(false)}>
               Close
             </Button>
-            <Button type="button" variant="cta" onClick={() => setIsEditOpen(false)}>
-              Save Draft
+            <Button type="button" variant="cta" onClick={handleSaveDraft} disabled={isSavingDraft}>
+              {isSavingDraft ? "Saving..." : "Save Draft"}
             </Button>
           </DialogFooter>
         </DialogContent>

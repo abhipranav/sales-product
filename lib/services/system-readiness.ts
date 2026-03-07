@@ -1,12 +1,13 @@
 import { Prisma, type PrismaClient } from "@prisma/client";
 import type { ActorIdentity } from "@/lib/auth/actor";
-import { isAIConfigured } from "@/lib/ai";
 import { getPrismaClient } from "@/lib/db/prisma";
+import { getUserAISettings, type AISettingsResponse } from "@/lib/services/ai-settings";
 import {
   getHubspotSyncStateSnapshot,
   HubspotSyncServiceUnavailableError,
   HubspotSyncWorkspaceError
 } from "@/lib/services/integrations/hubspot-sync";
+import { getRuntimeSecretStatus } from "@/lib/services/runtime-config";
 import { resolveWorkspaceScope, WorkspaceAccessDeniedError } from "@/lib/services/workspace";
 
 export type ReadinessLevel = "ready" | "needs-action" | "warning";
@@ -40,9 +41,18 @@ export interface SystemReadiness {
     cursor: string | null;
   };
   publicUrl: string | null;
+  ai: {
+    hasApiKey: boolean;
+    source: AISettingsResponse["source"];
+    systemKeyStatus: AISettingsResponse["systemKeyStatus"];
+    strategyMode: AISettingsResponse["strategyMode"];
+    model: string;
+    workflowLabels: string[];
+    statusNote: string;
+  };
 }
 
-const READINESS_CACHE_TTL_MS = 15_000;
+const READINESS_CACHE_TTL_MS = 5_000;
 const DB_REACHABILITY_TIMEOUT_MS = 450;
 
 type ReadinessCacheEntry = {
@@ -117,7 +127,7 @@ async function isDatabaseReachable(prisma: PrismaClient): Promise<boolean> {
   );
 }
 
-function pushShareAndAiChecks(checks: ReadinessCheck[], publicUrl: string | null) {
+function pushShareCheck(checks: ReadinessCheck[], publicUrl: string | null) {
   checks.push({
     id: "public-url",
     label: "Public URL for sharing",
@@ -130,15 +140,6 @@ function pushShareAndAiChecks(checks: ReadinessCheck[], publicUrl: string | null
       command: 'APP_BASE_URL="https://your-domain.com"'
     }
   });
-
-  checks.push({
-    id: "ai-provider",
-    label: "AI Strategy Provider",
-    level: isAIConfigured() ? "ready" : "warning",
-    detail: isAIConfigured()
-      ? "OpenAI key is configured; Strategy Lab can generate AI plays."
-      : "OPENAI_API_KEY is not configured. Strategy Lab will use rule-based fallback."
-  });
 }
 
 function buildReadinessResult(input: {
@@ -148,6 +149,7 @@ function buildReadinessResult(input: {
   stats: { accounts: number; contacts: number; deals: number };
   hubspot: { status: string | null; lastRunAt: string | null; cursor: string | null };
   publicUrl: string | null;
+  ai: SystemReadiness["ai"];
 }): SystemReadiness {
   return {
     mode: input.mode,
@@ -155,7 +157,86 @@ function buildReadinessResult(input: {
     checks: input.checks,
     stats: input.stats,
     hubspot: input.hubspot,
-    publicUrl: input.publicUrl
+    publicUrl: input.publicUrl,
+    ai: input.ai
+  };
+}
+
+async function buildAIReadiness(actor?: ActorIdentity) {
+  let ai: AISettingsResponse;
+
+  try {
+    ai = await getUserAISettings(actor);
+  } catch {
+    const systemKeyStatus = getRuntimeSecretStatus("OPENAI_API_KEY").state;
+    const strategyMode: AISettingsResponse["strategyMode"] =
+      process.env.APP_ENABLE_AI_STRATEGY_PLAYS === "1" ? "ai-enabled" : "rule-based";
+
+    ai = {
+      hasApiKey: systemKeyStatus === "active",
+      maskedKey: null,
+      model: "gpt-5-mini",
+      source: systemKeyStatus === "active" ? "system" : "none",
+      systemKeyStatus,
+      strategyMode,
+      workflowLabels:
+        strategyMode === "ai-enabled"
+          ? ["Follow-up Draft regeneration", "Meeting Prep Brief regeneration", "Strategy Lab AI generation"]
+          : ["Follow-up Draft regeneration", "Meeting Prep Brief regeneration"],
+      statusNote:
+        systemKeyStatus === "pending-restart"
+          ? "OPENAI_API_KEY is present in your env file, but the running server has not loaded it yet. Restart the app process to activate AI workflows."
+          : systemKeyStatus === "active"
+            ? strategyMode === "ai-enabled"
+              ? "Workspace/system OpenAI key is active on gpt-5-mini. It powers follow-ups, meeting briefs, and Strategy Lab generation."
+              : "Workspace/system OpenAI key is active on gpt-5-mini. It powers follow-ups and meeting briefs. Strategy Lab remains rule-based until APP_ENABLE_AI_STRATEGY_PLAYS=1."
+            : "No active OpenAI key is loaded. Follow-ups and meeting briefs will fall back to rule-based generation.",
+      dailyUsage: {
+        date: new Date().toISOString().slice(0, 10),
+        timezone: "UTC",
+        resetAt: new Date(new Date().setUTCHours(24, 0, 0, 0)).toISOString(),
+        selectedModel: "gpt-5-mini",
+        selectedModelTokens: 0,
+        selectedModelDailyLimit: 2_500_000,
+        selectedModelRemaining: 2_500_000,
+        selectedModelPercentUsed: 0,
+        models: []
+      }
+    };
+  }
+
+  const level: ReadinessLevel = ai.hasApiKey ? "ready" : ai.systemKeyStatus === "pending-restart" ? "warning" : "warning";
+
+  const action =
+    ai.systemKeyStatus === "pending-restart"
+      ? {
+          label: "Restart app",
+          command: "Restart the running Next.js server after editing .env"
+        }
+      : !ai.hasApiKey
+        ? {
+            label: "Open AI settings",
+            href: "/settings"
+          }
+        : undefined;
+
+  return {
+    ai: {
+      hasApiKey: ai.hasApiKey,
+      source: ai.source,
+      systemKeyStatus: ai.systemKeyStatus,
+      strategyMode: ai.strategyMode,
+      model: ai.model,
+      workflowLabels: ai.workflowLabels,
+      statusNote: ai.statusNote
+    },
+    check: {
+      id: "ai-provider",
+      label: "AI Workflows",
+      level,
+      detail: ai.statusNote,
+      action
+    } satisfies ReadinessCheck
   };
 }
 
@@ -169,8 +250,30 @@ function getCacheKey(actor?: ActorIdentity): string {
   return `${actorEmail}|${workspaceSlug}|${shareUrl}|${dbConfigured}|${aiConfigured}`;
 }
 
+export function invalidateSystemReadiness(actor?: ActorIdentity) {
+  if (!actor?.email) {
+    readinessCache.clear();
+    readinessInFlight.clear();
+    return;
+  }
+
+  const actorPrefix = `${actor.email.toLowerCase()}|`;
+  for (const key of readinessCache.keys()) {
+    if (key.startsWith(actorPrefix)) {
+      readinessCache.delete(key);
+    }
+  }
+
+  for (const key of readinessInFlight.keys()) {
+    if (key.startsWith(actorPrefix)) {
+      readinessInFlight.delete(key);
+    }
+  }
+}
+
 async function computeSystemReadiness(actor?: ActorIdentity): Promise<SystemReadiness> {
   const checks: ReadinessCheck[] = [];
+  const aiReadiness = await buildAIReadiness(actor);
   const publicUrl = resolvePublicUrl();
   let accounts = 0;
   let contacts = 0;
@@ -182,6 +285,8 @@ async function computeSystemReadiness(actor?: ActorIdentity): Promise<SystemRead
     lastRunAt: null,
     cursor: null
   };
+
+  checks.push(aiReadiness.check);
 
   const hasDatabaseUrl = Boolean(process.env.DATABASE_URL?.trim());
   checks.push({
@@ -212,7 +317,7 @@ async function computeSystemReadiness(actor?: ActorIdentity): Promise<SystemRead
       }
     });
 
-    pushShareAndAiChecks(checks, publicUrl);
+    pushShareCheck(checks, publicUrl);
 
     return buildReadinessResult({
       mode,
@@ -220,7 +325,8 @@ async function computeSystemReadiness(actor?: ActorIdentity): Promise<SystemRead
       checks,
       stats: { accounts, contacts, deals },
       hubspot,
-      publicUrl
+      publicUrl,
+      ai: aiReadiness.ai
     });
   }
 
@@ -243,7 +349,7 @@ async function computeSystemReadiness(actor?: ActorIdentity): Promise<SystemRead
       }
     });
 
-    pushShareAndAiChecks(checks, publicUrl);
+    pushShareCheck(checks, publicUrl);
 
     return buildReadinessResult({
       mode,
@@ -251,7 +357,8 @@ async function computeSystemReadiness(actor?: ActorIdentity): Promise<SystemRead
       checks,
       stats: { accounts, contacts, deals },
       hubspot,
-      publicUrl
+      publicUrl,
+      ai: aiReadiness.ai
     });
   }
 
@@ -294,7 +401,7 @@ async function computeSystemReadiness(actor?: ActorIdentity): Promise<SystemRead
               command: "npm run db:push"
             }
           });
-          pushShareAndAiChecks(checks, publicUrl);
+          pushShareCheck(checks, publicUrl);
 
           return buildReadinessResult({
             mode,
@@ -302,7 +409,8 @@ async function computeSystemReadiness(actor?: ActorIdentity): Promise<SystemRead
             checks,
             stats: { accounts, contacts, deals },
             hubspot,
-            publicUrl
+            publicUrl,
+            ai: aiReadiness.ai
           });
         }
 
@@ -389,7 +497,7 @@ async function computeSystemReadiness(actor?: ActorIdentity): Promise<SystemRead
     }
   }
 
-  pushShareAndAiChecks(checks, publicUrl);
+  pushShareCheck(checks, publicUrl);
 
   return buildReadinessResult({
     mode,
@@ -397,7 +505,8 @@ async function computeSystemReadiness(actor?: ActorIdentity): Promise<SystemRead
     checks,
     stats: { accounts, contacts, deals },
     hubspot,
-    publicUrl
+    publicUrl,
+    ai: aiReadiness.ai
   });
 }
 

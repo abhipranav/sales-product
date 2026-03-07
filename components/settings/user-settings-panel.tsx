@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -51,6 +52,10 @@ interface UserAISettingsResponse {
   maskedKey: string | null;
   model: string;
   source: "user" | "system" | "none";
+  systemKeyStatus: "active" | "pending-restart" | "missing";
+  strategyMode: "ai-enabled" | "rule-based";
+  workflowLabels: string[];
+  statusNote: string;
   dailyUsage: {
     date: string;
     timezone: "UTC";
@@ -90,6 +95,10 @@ function createDefaultAISettings(model = "gpt-5-mini"): UserAISettingsResponse {
     maskedKey: null,
     model: normalizedModel,
     source: "none",
+    systemKeyStatus: "missing",
+    strategyMode: "rule-based",
+    workflowLabels: ["Follow-up Draft regeneration", "Meeting Prep Brief regeneration"],
+    statusNote: "No active OpenAI key is loaded. Follow-ups and meeting briefs will fall back to rule-based generation.",
     dailyUsage: {
       date: new Date().toISOString().slice(0, 10),
       timezone: "UTC",
@@ -166,6 +175,7 @@ function ToggleField({
 }
 
 export function UserSettingsPanel() {
+  const router = useRouter();
   const [settings, setSettings] = useState<UserSettingsResponse | null>(null);
   const [aiSettings, setAISettings] = useState<UserAISettingsResponse>(createDefaultAISettings());
   const [aiApiKeyInput, setAIApiKeyInput] = useState("");
@@ -308,6 +318,7 @@ export function UserSettingsPanel() {
       setAIModelInput(nextSettings.model);
       setAIApiKeyInput("");
       toast.success("AI settings saved.");
+      router.refresh();
     } catch (error) {
       console.error(error);
       toast.error("Could not save AI settings.");
@@ -337,6 +348,7 @@ export function UserSettingsPanel() {
       setAIModelInput(nextSettings.model);
       setAIApiKeyInput("");
       toast.success("Personal AI key removed.");
+      router.refresh();
     } catch (error) {
       console.error(error);
       toast.error("Could not clear personal AI key.");
@@ -762,13 +774,30 @@ export function UserSettingsPanel() {
               <Badge variant={aiSettings.source === "user" ? "success" : "outline"}>
                 {aiSettings.source === "user" ? "personal key active" : "personal key inactive"}
               </Badge>
-              <Badge variant={aiSettings.source === "system" ? "warning" : "outline"}>
-                {aiSettings.source === "system" ? "using workspace/system key" : "no workspace/system fallback"}
+              <Badge
+                variant={
+                  aiSettings.source === "system"
+                    ? "warning"
+                    : aiSettings.systemKeyStatus === "pending-restart"
+                      ? "warning"
+                      : "outline"
+                }
+              >
+                {aiSettings.source === "system"
+                  ? "using workspace/system key"
+                  : aiSettings.systemKeyStatus === "pending-restart"
+                    ? "system key pending restart"
+                    : "no workspace/system fallback"}
               </Badge>
               <Badge variant={aiSettings.hasApiKey ? "accent" : "destructive"}>
                 {aiSettings.hasApiKey ? "ai enabled" : "ai unavailable"}
               </Badge>
+              <Badge variant={aiSettings.strategyMode === "ai-enabled" ? "accent" : "outline"}>
+                {aiSettings.strategyMode === "ai-enabled" ? "strategy ai enabled" : "strategy lab rule-based"}
+              </Badge>
             </div>
+
+            <p className="text-xs text-[hsl(var(--muted-foreground))]">{aiSettings.statusNote}</p>
 
             <div className="space-y-1">
               <Label htmlFor="ai-api-key">OpenAI API key (optional override)</Label>
@@ -809,6 +838,22 @@ export function UserSettingsPanel() {
                   </Button>
                 ))}
               </div>
+            </div>
+
+            <div className="space-y-2">
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[hsl(var(--muted-foreground))]">
+                AI is currently used for
+              </p>
+              <ul className="space-y-2 text-sm text-[hsl(var(--muted-foreground))]">
+                {aiSettings.workflowLabels.map((workflow) => (
+                  <li
+                    key={workflow}
+                    className="border-[2px] border-[hsl(var(--border))] bg-[hsl(var(--muted))] px-3 py-2"
+                  >
+                    {workflow}
+                  </li>
+                ))}
+              </ul>
             </div>
 
             <div className="flex flex-wrap gap-2 pt-1">

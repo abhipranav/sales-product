@@ -16,6 +16,13 @@ const generateBriefInputSchema = z.object({
   focus: z.string().min(3).max(160).optional()
 });
 
+const updateFollowUpDraftInputSchema = z.object({
+  subject: z.string().min(5).max(160),
+  body: z.string().min(20).max(3000),
+  ask: z.string().min(5).max(240),
+  ctaTimeWindow: z.string().min(3).max(120)
+});
+
 const followUpShapeSchema = z.object({
   subject: z.string().min(5).max(160),
   body: z.string().min(20).max(3000),
@@ -66,6 +73,10 @@ export function parseGenerateFollowUpInput(payload: unknown) {
 
 export function parseGenerateBriefInput(payload: unknown) {
   return generateBriefInputSchema.parse(payload);
+}
+
+export function parseUpdateFollowUpDraftInput(payload: unknown) {
+  return updateFollowUpDraftInputSchema.parse(payload);
 }
 
 function compact(text: string) {
@@ -377,5 +388,43 @@ export async function generateMeetingBriefForDeal(
     },
     source,
     generatedAt: new Date().toISOString()
+  };
+}
+
+export async function updateFollowUpDraftForDeal(
+  dealId: string,
+  payload: z.infer<typeof updateFollowUpDraftInputSchema>,
+  actor?: ActorIdentity
+) {
+  const { prisma, deal } = await loadDealContext(dealId, actor);
+
+  const saved = await prisma.followUpDraft.upsert({
+    where: {
+      dealId: deal.id
+    },
+    create: {
+      dealId: deal.id,
+      subject: payload.subject,
+      body: payload.body,
+      ask: payload.ask,
+      ctaTimeWindow: payload.ctaTimeWindow
+    },
+    update: {
+      subject: payload.subject,
+      body: payload.body,
+      ask: payload.ask,
+      ctaTimeWindow: payload.ctaTimeWindow
+    }
+  });
+
+  return {
+    dealId: deal.externalId ?? deal.id,
+    draft: {
+      subject: saved.subject,
+      body: saved.body,
+      ask: saved.ask,
+      ctaTimeWindow: saved.ctaTimeWindow
+    },
+    updatedAt: new Date().toISOString()
   };
 }

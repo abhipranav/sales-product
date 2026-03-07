@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -130,6 +131,48 @@ export default async function SetupPage() {
                   </li>
                 ))}
               </ol>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="font-mono text-xs uppercase tracking-wider">AI WORKFLOWS</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3 text-sm text-[hsl(var(--muted-foreground))]">
+              <div className="flex flex-wrap gap-2">
+                <Badge variant={readiness.ai.hasApiKey ? "success" : readiness.ai.systemKeyStatus === "pending-restart" ? "warning" : "destructive"}>
+                  {readiness.ai.hasApiKey
+                    ? readiness.ai.source === "user"
+                      ? "personal key active"
+                      : "system key active"
+                    : readiness.ai.systemKeyStatus === "pending-restart"
+                      ? "restart required"
+                      : "no active key"}
+                </Badge>
+                <Badge variant={readiness.ai.strategyMode === "ai-enabled" ? "accent" : "outline"}>
+                  {readiness.ai.strategyMode === "ai-enabled" ? "strategy ai enabled" : "strategy lab rule-based"}
+                </Badge>
+                <Badge variant="outline">{readiness.ai.model}</Badge>
+              </div>
+
+              <p>{readiness.ai.statusNote}</p>
+
+              <ul className="space-y-2">
+                {readiness.ai.workflowLabels.map((workflow) => (
+                  <li
+                    key={workflow}
+                    className="border-[2px] border-[hsl(var(--border))] bg-[hsl(var(--muted))] px-3 py-2"
+                  >
+                    {workflow}
+                  </li>
+                ))}
+              </ul>
+
+              <div className="flex flex-wrap gap-2">
+                <Button asChild size="sm" variant="outline">
+                  <Link href="/settings">Open AI Settings</Link>
+                </Button>
+              </div>
             </CardContent>
           </Card>
 
