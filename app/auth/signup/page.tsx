@@ -6,14 +6,14 @@ import { auth, authProviderCards, signIn } from "@/auth";
 
 function normalizeCallbackUrl(value: string | undefined): string {
   if (!value) {
-    return "/workspace";
+    return "/workspace/get-started";
   }
 
   if (value.startsWith("/") && !value.startsWith("//")) {
     return value;
   }
 
-  return "/workspace";
+  return "/workspace/get-started";
 }
 
 function getErrorMessage(errorCode: string | undefined): string | null {
@@ -22,11 +22,11 @@ function getErrorMessage(errorCode: string | undefined): string | null {
   }
 
   if (errorCode === "CredentialsSignin") {
-    return "Login failed. Check your email and name and try again.";
+    return "Account creation failed. Check your email and name and try again.";
   }
 
   if (errorCode === "OAuthAccountNotLinked") {
-    return "This email is linked to a different login provider. Use the original provider.";
+    return "This email is already linked to another provider. Use the original login method.";
   }
 
   if (errorCode === "AccessDenied") {
@@ -36,7 +36,7 @@ function getErrorMessage(errorCode: string | undefined): string | null {
   return "Authentication failed. Please try again.";
 }
 
-async function signInWithProvider(formData: FormData) {
+async function signUpWithProvider(formData: FormData) {
   "use server";
 
   const provider = String(formData.get("provider") ?? "");
@@ -45,13 +45,13 @@ async function signInWithProvider(formData: FormData) {
   const allowed = authProviderCards.some((card) => card.kind === "oauth" && card.id === provider);
 
   if (!allowed) {
-    redirect(`/auth/signin?error=AccessDenied&callbackUrl=${encodeURIComponent(callbackUrl)}`);
+    redirect(`/auth/signup?error=AccessDenied&callbackUrl=${encodeURIComponent(callbackUrl)}` as Route);
   }
 
   await signIn(provider, { redirectTo: callbackUrl });
 }
 
-async function signInWithCredentials(formData: FormData) {
+async function signUpWithCredentials(formData: FormData) {
   "use server";
 
   const callbackParam = formData.get("callbackUrl");
@@ -67,22 +67,22 @@ async function signInWithCredentials(formData: FormData) {
     });
   } catch (error) {
     if (error instanceof AuthError) {
-      redirect(`/auth/signin?error=${encodeURIComponent(error.type)}&callbackUrl=${encodeURIComponent(callbackUrl)}`);
+      redirect(`/auth/signup?error=${encodeURIComponent(error.type)}&callbackUrl=${encodeURIComponent(callbackUrl)}` as Route);
     }
 
     throw error;
   }
 }
 
-interface SignInPageProps {
+interface SignUpPageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
-export default async function SignInPage({ searchParams }: SignInPageProps) {
+export default async function SignUpPage({ searchParams }: SignUpPageProps) {
   const session = await auth().catch(() => null);
 
   if (session?.user?.email) {
-    redirect("/workspace");
+    redirect("/workspace/get-started" as Route);
   }
 
   const params = await searchParams;
@@ -100,27 +100,27 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
         <section className="grid w-full gap-5 lg:grid-cols-[1.1fr_0.9fr]">
           <div className="ind-card relative">
             <div className="absolute -top-3 -right-2 z-10">
-              <span className="ind-badge">SECURE ACCESS</span>
+              <span className="ind-badge">CREATE WORKSPACE ACCESS</span>
             </div>
 
-            <p className="ind-label mb-4">VELOCITY_OS // AUTH</p>
+            <p className="ind-label mb-4">VELOCITY_OS // SIGN_UP</p>
             <h1 className="font-serif text-4xl font-bold leading-[1.05] tracking-[-0.02em] text-[hsl(var(--foreground))] md:text-[3.25rem]">
-              Sign in to continue
+              Create your account
               <br />
-              execution workflows.
+              and start onboarding.
             </h1>
             <p className="mt-5 max-w-xl font-mono text-sm leading-relaxed text-[hsl(var(--muted-foreground))]">
-              Your workspace apps are now protected. Use your provider login to unlock cockpit, pipeline, and account
-              operations.
+              The first successful login sends you into guided setup, where you can create the first account, first
+              contact, and first LinkedIn-assisted capture without touching production auth settings.
             </p>
 
             <div className="mt-8 space-y-3">
               {oauthProviders.map((provider) => (
-                <form key={provider.id} action={signInWithProvider}>
+                <form key={provider.id} action={signUpWithProvider}>
                   <input type="hidden" name="provider" value={provider.id} />
                   <input type="hidden" name="callbackUrl" value={callbackUrl} />
                   <button type="submit" className="ind-btn w-full justify-center">
-                    {provider.label}
+                    {provider.id === "linkedin" ? "Create Account with LinkedIn" : provider.label.replace("Continue", "Create Account")}
                   </button>
                 </form>
               ))}
@@ -129,30 +129,28 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
                 <div className="border-[2px] border-[hsl(var(--border))] bg-[hsl(var(--muted))] p-3">
                   <p className="ind-label">No OAuth provider configured yet</p>
                   <p className="mt-1 text-sm text-[hsl(var(--muted-foreground))]">
-                    Add `AUTH_GOOGLE_*` or `AUTH_LINKEDIN_*` vars to enable production sign-in.
+                    Add `AUTH_GOOGLE_*` or `AUTH_LINKEDIN_*` vars to enable production sign-up.
                   </p>
                 </div>
               ) : null}
             </div>
 
-            <div className="mt-8">
-              <div className="flex flex-wrap gap-3">
-                <Link href="/" className="ind-btn-outline">
-                  ← Back to Landing
-                </Link>
-                <Link href={"/auth/signup" as Route} className="ind-btn-outline">
-                  Create Account
-                </Link>
-              </div>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link href="/" className="ind-btn-outline">
+                ← Back to Landing
+              </Link>
+              <Link href="/auth/signin" className="ind-btn-outline">
+                Already have an account?
+              </Link>
             </div>
           </div>
 
           <div className="space-y-4">
             <div className="ind-card p-0 overflow-hidden">
               <div className="px-5 py-4">
-                <p className="ind-label-lg">SESSION SECURITY</p>
+                <p className="ind-label-lg">CUSTOMER ENTRY FLOW</p>
                 <p className="mt-2 text-sm text-[hsl(var(--muted-foreground))]">
-                  JWT sessions are active with protected workspace and API routes.
+                  Sign-up now leads directly into guided workspace bootstrap instead of dropping users into an empty shell.
                 </p>
               </div>
               <div className="caution-stripe" />
@@ -160,12 +158,12 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
 
             {hasCredentialsProvider ? (
               <div className="ind-card-dashed">
-                <p className="ind-label">Developer Login</p>
+                <p className="ind-label">Developer Sign-up</p>
                 <p className="mt-1 text-sm text-[hsl(var(--muted-foreground))]">
                   For local testing only. Disabled in production unless explicitly enabled.
                 </p>
 
-                <form action={signInWithCredentials} className="mt-4 grid gap-3">
+                <form action={signUpWithCredentials} className="mt-4 grid gap-3">
                   <input type="hidden" name="callbackUrl" value={callbackUrl} />
                   <label className="block">
                     <span className="ind-label">Email</span>
@@ -175,7 +173,7 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
                       required
                       autoComplete="email"
                       className="mt-1 w-full border-[2px] border-[hsl(var(--border))] bg-[hsl(var(--card))] px-3 py-2 text-sm text-[hsl(var(--foreground))] outline-none focus:border-[hsl(var(--foreground))]"
-                      placeholder="rep@company.com"
+                      placeholder="founder@company.com"
                     />
                   </label>
 
@@ -186,12 +184,12 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
                       type="text"
                       autoComplete="name"
                       className="mt-1 w-full border-[2px] border-[hsl(var(--border))] bg-[hsl(var(--card))] px-3 py-2 text-sm text-[hsl(var(--foreground))] outline-none focus:border-[hsl(var(--foreground))]"
-                      placeholder="Default Rep"
+                      placeholder="Founding Rep"
                     />
                   </label>
 
                   <button type="submit" className="ind-btn w-full justify-center">
-                    Continue with Developer Login
+                    Create Account with Developer Login
                   </button>
                 </form>
               </div>
@@ -203,18 +201,6 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
                 <p className="mt-1 text-sm text-[hsl(var(--foreground))]">{errorMessage}</p>
               </div>
             ) : null}
-
-            <div className="ind-card">
-              <p className="ind-label">NEW CUSTOMER?</p>
-              <p className="mt-2 text-sm text-[hsl(var(--muted-foreground))]">
-                Create a new account to land in guided onboarding instead of the generic workspace home.
-              </p>
-              <div className="mt-4">
-                <Link href={"/auth/signup" as Route} className="ind-btn-outline">
-                  Go to Sign Up
-                </Link>
-              </div>
-            </div>
           </div>
         </section>
       </div>
