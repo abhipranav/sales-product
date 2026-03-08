@@ -1,3 +1,4 @@
+import type { Route } from "next";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -101,6 +102,14 @@ export default async function HomePage() {
             <Badge variant="accent">OPEN DEALS {data.pipelineMetrics.openDeals}</Badge>
             <Badge variant="outline">OVERDUE {data.pipelineMetrics.overdueTasks}</Badge>
             <Badge variant="outline">HIGH_PRI {data.pipelineMetrics.highPriorityTasks}</Badge>
+          </div>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Button asChild size="sm" variant="cta">
+              <Link href={"/workspace/get-started" as Route}>GET STARTED</Link>
+            </Button>
+            <Button asChild size="sm" variant="outline">
+              <Link href={"/integrations/linkedin" as Route}>LINKEDIN COMPANION</Link>
+            </Button>
           </div>
         </div>
 

@@ -1,5 +1,6 @@
 "use client";
 
+import type { Route } from "next";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -43,10 +44,12 @@ const pillars = [
 ] as const;
 
 const capabilities = [
+  "Guided sign-up and first-workspace onboarding",
   "Call intelligence with notes-to-actions",
   "Buying-signal detection with priority scoring",
   "Sequence planning and step-level execution tracking",
   "CRM command center for account/contact/deal updates",
+  "LinkedIn companion capture into editable CRM records",
   "Workspace access controls with actor scoping",
   "Audit-ready workflow logs across every mutation",
 ] as const;
@@ -120,11 +123,14 @@ export default function LandingPage() {
 
           {/* Actions */}
           <div className="flex items-center gap-3">
-            <Link href="/auth/signin" className="ind-btn-outline text-xs py-1.5 px-3">
-              SIGN IN
+            <Link href={"/auth/signup" as Route} className="ind-btn text-xs py-1.5 px-3">
+              CREATE ACCOUNT
             </Link>
-            <Link href="/workspace" className="ind-btn text-xs py-1.5 px-3">
-              OPEN APP
+            <Link href={"/book-demo" as Route} className="ind-btn-outline text-xs py-1.5 px-3">
+              BOOK DEMO
+            </Link>
+            <Link href="/auth/signin" className="ind-btn-outline border-transparent hover:border-[hsl(var(--foreground))] text-xs py-1.5 px-3">
+              SIGN IN
             </Link>
           </div>
         </div>
@@ -161,14 +167,14 @@ export default function LandingPage() {
             </p>
 
             <div className="mt-7 flex flex-wrap gap-3">
-              <Link href="/workspace" className="ind-btn">
-                LAUNCH WORKSPACE →
+              <Link href={"/auth/signup?callbackUrl=%2Fworkspace%2Fget-started" as Route} className="ind-btn">
+                CREATE ACCOUNT →
               </Link>
-              <Link href="/auth/signin" className="ind-btn-outline">
-                SIGN IN
+              <Link href={"/linkedin-extension" as Route} className="ind-btn-outline">
+                INSTALL LINKEDIN COMPANION
               </Link>
-              <Link href="/cockpit" className="ind-btn-outline">
-                PREVIEW COCKPIT
+              <Link href="/workspace" className="ind-btn-outline">
+                OPEN APP
               </Link>
             </div>
 
@@ -198,8 +204,8 @@ export default function LandingPage() {
                     </p>
                   </div>
                 </div>
-                <Link href="/workspace" className="ind-btn text-xs py-1.5 px-3">
-                  GET ACCESS
+                <Link href={"/auth/signup?callbackUrl=%2Fworkspace%2Fget-started" as Route} className="ind-btn text-xs py-1.5 px-3">
+                  START SETUP
                 </Link>
               </div>
               <div className="caution-stripe" />
@@ -388,7 +394,9 @@ export default function LandingPage() {
               <li className="flex items-center gap-2"><span className="text-xs">▪</span> Tasks and approvals</li>
               <li className="flex items-center gap-2"><span className="text-xs">▪</span> Core CRM sync</li>
             </ul>
-            <button className="ind-btn-outline w-full mt-5 text-xs py-2">GET STARTED</button>
+            <Link href={"/auth/signup?plan=starter&callbackUrl=%2Fworkspace%2Fget-started" as Route} className="ind-btn-outline w-full mt-5 text-xs py-2 text-center">
+              GET STARTED
+            </Link>
           </div>
 
           {/* Growth — Featured */}
@@ -405,7 +413,9 @@ export default function LandingPage() {
               <li className="flex items-center gap-2"><span className="text-xs">▪</span> Intelligence + signals</li>
               <li className="flex items-center gap-2"><span className="text-xs">▪</span> Sequence tracking</li>
             </ul>
-            <button className="ind-btn w-full mt-5 text-xs py-2">CHOOSE GROWTH</button>
+            <Link href={"/auth/signup?plan=growth&callbackUrl=%2Fworkspace%2Fget-started" as Route} className="ind-btn w-full mt-5 text-xs py-2 text-center">
+              CHOOSE GROWTH
+            </Link>
           </div>
 
           {/* Enterprise */}
@@ -419,7 +429,9 @@ export default function LandingPage() {
               <li className="flex items-center gap-2"><span className="text-xs">▪</span> Dedicated architecture support</li>
               <li className="flex items-center gap-2"><span className="text-xs">▪</span> Custom deployment lanes</li>
             </ul>
-            <button className="ind-btn-outline w-full mt-5 text-xs py-2">CONTACT SALES</button>
+            <Link href={"/linkedin-extension" as Route} className="ind-btn-outline w-full mt-5 text-xs py-2 text-center">
+              SEE CAPTURE FLOW
+            </Link>
           </div>
         </div>
       </section>
@@ -469,22 +481,25 @@ export default function LandingPage() {
 
       {/* ── CTA BANNER ─────────────────────────────────────────────────── */}
       <section className="mx-auto w-full max-w-7xl px-5 pb-0 pt-4 md:px-8">
-        <div className="border-[2px] border-[#111111] p-5" style={{ background: '#111111' }}>
+        <div className="border-[2px] border-[hsl(var(--foreground))] p-5 bg-[hsl(var(--foreground))]">
           <div className="flex flex-col gap-5 p-4 md:flex-row md:items-center md:justify-between">
             <div>
-              <h3 className="font-serif text-2xl font-bold text-white">
+              <h3 className="font-serif text-2xl font-bold text-[hsl(var(--background))]">
                 Build from one execution surface.
               </h3>
-              <p className="mt-1 text-sm font-mono text-white/70 tracking-wider">
+              <p className="mt-1 text-sm font-mono text-[hsl(var(--background))]/70 tracking-wider">
                 CONNECT YOUR STACK // RUN YOUR SALES MOTION WITH AI + OPERATOR CONTROL
               </p>
             </div>
             <div className="flex flex-wrap gap-3">
-              <Link href="/workspace" className="ind-btn bg-[#FFFF00] text-[#111111] border-[2px] border-[#111111] hover:bg-white hover:text-[#111111] hover:border-[#111111]">
-                OPEN WORKSPACE
+              <Link href={"/auth/signup?callbackUrl=%2Fworkspace%2Fget-started" as Route} className="ind-btn bg-[hsl(var(--accent))] text-[hsl(var(--accent-foreground))] border-[2px] border-[hsl(var(--accent-foreground))] hover:bg-[hsl(var(--background))] hover:text-[hsl(var(--foreground))] hover:border-[hsl(var(--background))]">
+                CREATE ACCOUNT
               </Link>
-              <Link href="/integrations" className="ind-btn-outline border-white/50 text-white hover:bg-white/10 hover:border-white">
-                SEE INTEGRATIONS
+              <Link href={"/book-demo" as Route} className="ind-btn-outline border-[hsl(var(--background))]/50 text-[hsl(var(--background))] hover:bg-[hsl(var(--background))]/10 hover:border-[hsl(var(--background))]">
+                BOOK DEMO
+              </Link>
+              <Link href={"/linkedin-extension" as Route} className="ind-btn-outline border-[hsl(var(--background))]/50 text-[hsl(var(--background))] hover:bg-[hsl(var(--background))]/10 hover:border-[hsl(var(--background))]">
+                INSTALL COMPANION
               </Link>
             </div>
           </div>
