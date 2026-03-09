@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Velocity Companion</title>
+    <style>
+      :root {
+        --bg: #E3DFD8;
+        --fg: #111111;
+        --muted: #6b7280;
+        --yellow: #FFFF00;
+        --card: #F0EDE6;
+        --border: #111111;
+        --success: #22c55e;
+        --danger: #ef4444;
+      }
+
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+
+      body {
+        width: 360px;
+        font-family: Inter, system-ui, sans-serif;
+        background: var(--bg);
+        color: var(--fg);
+      }
+
+      .header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 16px;
+        border-bottom: 2px solid var(--border);
+      }
+
+      .brand {
+        font-family: "Space Mono", monospace;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .status-dot {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+      }
+
+      .status-dot.active { background: var(--success); }
+      .status-dot.inactive { background: var(--danger); }
+
+      .section {
+        padding: 12px 16px;
+        border-bottom: 2px solid var(--border);
+      }
+
+      .section-label {
+        font-family: "Space Mono", monospace;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin-bottom: 8px;
+      }
+
+      .data-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        padding: 4px 0;
+      }
+
+      .data-key {
+        font-family: "Space Mono", monospace;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+
+      .data-value {
+        font-size: 12px;
+        font-weight: 600;
+        max-width: 200px;
+        text-align: right;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .empty-state {
+        text-align: center;
+        padding: 20px 16px;
+      }
+
+      .empty-state p {
+        font-size: 12px;
+        color: var(--muted);
+        line-height: 1.5;
+      }
+
+      .actions {
+        padding: 12px 16px;
+      }
+
+      .btn {
+        display: block;
+        width: 100%;
+        border: 2px solid var(--border);
+        padding: 10px 12px;
+        font-family: "Space Mono", monospace;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        cursor: pointer;
+        text-align: center;
+        text-decoration: none;
+        transition: all 150ms ease;
+        margin-bottom: 6px;
+      }
+
+      .btn-primary {
+        background: var(--fg);
+        color: var(--bg);
+      }
+
+      .btn-primary:hover {
+        background: var(--yellow);
+        color: var(--fg);
+      }
+
+      .btn-secondary {
+        background: transparent;
+        color: var(--fg);
+      }
+
+      .btn-secondary:hover {
+        background: var(--fg);
+        color: var(--bg);
+      }
+
+      .btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .config-section {
+        padding: 8px 16px 12px;
+      }
+
+      .config-section label {
+        display: block;
+        font-family: "Space Mono", monospace;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin-bottom: 4px;
+      }
+
+      .config-section input {
+        width: 100%;
+        border: 2px solid var(--border);
+        background: white;
+        padding: 8px 10px;
+        font-size: 11px;
+        font-family: "Space Mono", monospace;
+      }
+
+      #status-text {
+        font-family: "Space Mono", monospace;
+        font-size: 9px;
+        color: var(--muted);
+        text-align: center;
+        padding: 0 16px 10px;
+      }
+
+      .caution-stripe {
+        background: repeating-linear-gradient(
+          -45deg,
+          var(--yellow),
+          var(--yellow) 6px,
+          var(--fg) 6px,
+          var(--fg) 12px
+        );
+        height: 4px;
+        width: 100%;
+      }
+
+      .page-type-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 3px 8px;
+        font-family: "Space Mono", monospace;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        background: var(--yellow);
+        color: var(--fg);
+        border: 2px solid var(--fg);
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Header -->
+    <div class="header">
+      <span class="brand">VELOCITY // COMPANION</span>
+      <span id="connection-dot" class="status-dot inactive" title="Not connected"></span>
+    </div>
+    <div class="caution-stripe"></div>
+
+    <!-- Scraped Data -->
+    <div id="scraped-section" class="section" style="display: none;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <span class="section-label" style="margin-bottom: 0;">CAPTURED_DATA</span>
+        <span id="page-type-badge" class="page-type-badge"></span>
+      </div>
+      <div id="scraped-data"></div>
+    </div>
+
+    <!-- Empty State -->
+    <div id="empty-state" class="empty-state">
+      <p>Navigate to a LinkedIn profile or company page to capture data.</p>
+    </div>
+
+    <!-- Actions -->
+    <div class="actions">
+      <button id="capture-btn" class="btn btn-primary" disabled>
+        ⚡ CAPTURE TO CRM
+      </button>
+      <button id="enrich-btn" class="btn btn-primary" disabled style="background: var(--yellow); color: var(--fg); border-color: var(--fg); display: none;">
+        ✨ AI ENRICH PROFILE
+      </button>
+      <button id="workbench-btn" class="btn btn-secondary">
+        OPEN FULL WORKBENCH →
+      </button>
+    </div>
+
+    <!-- Config -->
+    <div class="config-section">
+      <label for="base-url">APP BASE URL</label>
+      <input id="base-url" type="url" placeholder="https://www.salescortex.me" />
+    </div>
+
+    <p id="status-text"></p>
+
+    <script src="popup.js"></script>
+  </body>
+</html>
