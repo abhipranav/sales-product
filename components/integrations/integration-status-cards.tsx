@@ -1,3 +1,5 @@
+import type { Route } from "next";
+import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,7 +11,7 @@ interface IntegrationStatusCardsProps {
 
 export function IntegrationStatusCards({ status }: IntegrationStatusCardsProps) {
   return (
-    <div className="grid gap-4 md:grid-cols-2">
+    <div className="grid gap-4 md:grid-cols-3">
       <Card>
         <CardHeader>
           <CardTitle className="font-mono text-xs uppercase tracking-wider">HUBSPOT_HEALTH</CardTitle>
@@ -39,8 +41,8 @@ export function IntegrationStatusCards({ status }: IntegrationStatusCardsProps) 
               ))}
             </div>
           ) : null}
-          <Button variant="outline" size="sm" disabled className="mt-2">
-            {status?.hubspot?.connected ? "Reconnect" : "Connect HubSpot"}
+          <Button asChild variant="outline" size="sm" className="mt-2">
+            <Link href="/setup">{status?.hubspot?.connected ? "Review CRM Setup" : "Open CRM Setup"}</Link>
           </Button>
         </CardContent>
       </Card>
@@ -65,8 +67,26 @@ export function IntegrationStatusCards({ status }: IntegrationStatusCardsProps) 
               {status.calendar.error}
             </p>
           )}
-          <Button variant="outline" size="sm" disabled className="mt-2">
-            {status?.calendar?.connected ? "Reconnect" : "Connect Calendar"}
+          <Button asChild variant="outline" size="sm" className="mt-2">
+            <Link href="/setup">{status?.calendar?.connected ? "Review Calendar Setup" : "Open Calendar Setup"}</Link>
+          </Button>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="font-mono text-xs uppercase tracking-wider">LINKEDIN_COMPANION</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="flex items-center gap-2">
+            <Badge variant="accent">READY</Badge>
+            <Badge variant="outline">TAB-TO-CRM</Badge>
+          </div>
+          <p className="font-mono text-[10px] uppercase tracking-wider text-[hsl(var(--muted-foreground))]">
+            Companion install opens the current LinkedIn tab inside a guided capture workbench and saves editable CRM records.
+          </p>
+          <Button asChild variant="outline" size="sm" className="mt-2">
+            <Link href={"/integrations/linkedin" as Route}>Open Companion</Link>
           </Button>
         </CardContent>
       </Card>

@@ -1,3 +1,4 @@
+import type { Route } from "next";
 import Link from "next/link";
 import { CalendarIngest } from "@/components/cockpit/calendar-ingest";
 import { CrmSyncPanel } from "@/components/cockpit/crm-sync-panel";
@@ -62,6 +63,19 @@ export default async function IntegrationsPage() {
             <CardContent className="space-y-2">
               <Badge variant="success">HUBSPOT CONNECTED</Badge>
               <p className="font-mono text-[10px] uppercase tracking-wider text-[hsl(var(--muted-foreground))] group-hover:text-[hsl(var(--background))]/60">Payload-based upsert is active for account, contact, and deal entities.</p>
+            </CardContent>
+          </Card>
+        </Link>
+        <Link href={"/integrations/linkedin" as Route} className="block">
+          <Card className="h-full transition-all duration-150 hover:bg-[hsl(var(--foreground))] hover:text-[hsl(var(--background))] cursor-pointer group">
+            <CardHeader>
+              <CardTitle className="font-mono text-xs uppercase tracking-wider group-hover:text-[hsl(var(--background))]">LINKEDIN_COMPANION</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <Badge variant="accent">CAPTURE READY</Badge>
+              <p className="font-mono text-[10px] uppercase tracking-wider text-[hsl(var(--muted-foreground))] group-hover:text-[hsl(var(--background))]/60">
+                Send the current tab into a guided capture workbench, then save account and contact details into the CRM.
+              </p>
             </CardContent>
           </Card>
         </Link>
