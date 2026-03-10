@@ -53,7 +53,7 @@ export interface SystemReadiness {
 }
 
 const READINESS_CACHE_TTL_MS = 5_000;
-const DB_REACHABILITY_TIMEOUT_MS = 450;
+const DB_REACHABILITY_TIMEOUT_MS = Number(process.env.APP_DB_REACHABILITY_TIMEOUT_MS ?? 2_000);
 
 type ReadinessCacheEntry = {
   value: SystemReadiness;
