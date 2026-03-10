@@ -50,7 +50,7 @@ export function ContactForm({ mode, initialData, accounts = [], onSuccess, onCan
         role,
         accountId,
         ...(email ? { email } : {}),
-        ...(linkedIn ? { linkedIn } : {})
+        ...(linkedIn ? { linkedInUrl: linkedIn } : {})
       };
 
       const url = mode === "edit" && initialData?.id 
