@@ -45,6 +45,8 @@ Returns a rep cockpit snapshot for the active account/deal context.
   - Reads and updates user/workspace preference fields.
 - `GET|PATCH /api/settings/user/ai`
   - Reads and updates per-user AI provider preferences and usage context.
+- `POST /api/integrations/linkedin/capture`
+  - Saves operator-confirmed LinkedIn companion context into workspace-scoped account/contact records.
 - `POST /api/cron/reminders`
   - Cron-protected reminder runner wrapper around task reminder generation.
 - `POST /api/cron/crm-sync`
@@ -162,6 +164,40 @@ Upserts account, contacts, and deals from a HubSpot-style payload into the activ
 - `account` (`externalId`, `name`, `segment`, `website?`, `employeeBand?`)
 - `contacts[]` (`externalId`, `fullName`, `title`, `email?`, `linkedInUrl?`, `role`)
 - `deals[]` (`externalId`, `name`, `stage`, `amount`, `confidence`, `closeDate`, `riskSummary`)
+
+## `POST /api/integrations/linkedin/capture`
+
+Creates or matches a workspace account and optionally saves a contact from the LinkedIn companion workbench.
+
+### Request body
+
+- `sourceUrl?` (string, URL)
+- `sourceTitle?` (string)
+- `accountId?` (string, existing workspace account)
+- `companyName?` (string)
+- `companyWebsite?` (string, URL)
+- `employeeBand?` (string)
+- `segment` (`startup` | `mid-market` | `enterprise`)
+- `contactName?` (string)
+- `contactTitle?` (string, required when `contactName` is set)
+- `contactEmail?` (string, email)
+- `contactLinkedInUrl?` (string, URL)
+- `contactRole` (`champion` | `approver` | `blocker` | `influencer`)
+
+### Response shape
+
+- `source`
+  - `url`
+  - `title`
+- `account`
+  - `id`
+  - `name`
+  - `status` (`created` | `updated` | `matched`)
+- `contact`
+  - `id`
+  - `fullName`
+  - `status` (`created` | `updated` | `matched`)
+  - nullable when no contact was saved
 
 ## `GET /api/integrations/hubspot/sync`
 

@@ -5,6 +5,7 @@
 - Clean Next.js + TypeScript application skeleton
 - Multi-page super-app shell with persistent navigation and module routes (home, workspace, cockpit, accounts, pipeline, intelligence, notifications, integrations, workflows)
 - Additional workspace routes for contacts, activities, settings, setup, and branded sign-in
+- Customer entry flow now includes branded sign-up (`/auth/signup`), guided onboarding (`/workspace/get-started`), and a public LinkedIn companion install page (`/linkedin-extension`)
 - Initial cockpit experience centered on rep workflow execution
 - Domain models for account/contact/deal/task/activity/signal
 - Prisma schema for canonical persistent objects
@@ -21,6 +22,7 @@
 - Outbound approval queue (`/api/approvals*`) and cockpit controls for approve/reject workflow
 - Approval review now auto-dispatches outbound artifacts and logs `outbound.sent` / `outbound.failed`
 - Auth.js JWT session runtime with branded sign-in page and middleware protection for workspace routes + APIs
+- Guided onboarding flow for first account/contact bootstrap without changing the production auth middleware
 - Middleware-to-service actor bridge via `x-actor-email` / `x-actor-name` headers with workspace membership checks (`403` on violation)
 - AI Strategy Lab in cockpit for first-principles play generation per deal context
 - shadcn/ui-style local design system baseline with shared primitives (`components/ui`) and cockpit-wide adoption
@@ -45,6 +47,8 @@
 - Cron-callable HubSpot delta sync cadence endpoint (`POST /api/cron/crm-sync`) for automated incremental sync
 - Integration connection health API (`GET /api/integrations/status`) returning real-time HubSpot + Calendar connectivity
 - Integration health status cards component on the Integrations page showing live connection state
+- LinkedIn companion workbench (`/integrations/linkedin`) plus browser companion package (`extensions/linkedin-companion`) for tab-to-CRM capture
+- LinkedIn capture API (`POST /api/integrations/linkedin/capture`) that creates or matches accounts and optionally saves contacts
 - Calendar OAuth provider integration stub (Google Calendar scopes, auth URL builder, token lifecycle) awaiting credentials
 - HubSpot OAuth integration stub (auth URL, token exchange) with private-app-token fallback and live connection test
 - RBAC role-permission matrix service (`owner > manager > rep`) with `enforcePermission` and `enforceMinRole` utilities
@@ -55,6 +59,7 @@
 - Domain services still consume an injected actor-header bridge instead of reading Auth.js session state directly
 - Calendar ingest currently manual trigger only (not provider-synced)
 - RBAC helpers exist, but broad sensitive-route enforcement is not fully wired yet
+- LinkedIn companion is currently distributed as an unpacked/private extension; Chrome Web Store packaging and policy review are still pending
 
 ## Current mitigation
 

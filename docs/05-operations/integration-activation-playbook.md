@@ -12,6 +12,9 @@ This guide is for moving the current frontend from demo-style behavior to produc
   - `/api/deals/:dealId/stage`
 - Workflow APIs:
   - tasks, approvals, meeting-notes processing, activity logging
+- LinkedIn companion capture:
+  - `/integrations/linkedin`
+  - `/api/integrations/linkedin/capture`
 - HubSpot payload sync endpoint:
   - `GET /api/integrations/hubspot/sync`
   - `POST /api/integrations/hubspot/sync`
@@ -105,11 +108,16 @@ Activation plan:
 
 Current status:
 - `linkedin` exists as a suggested channel enum.
+- Public install guide exists at `/linkedin-extension`.
+- Workspace capture workbench exists at `/integrations/linkedin`.
+- Browser companion package exists at `extensions/linkedin-companion`.
+- `POST /api/integrations/linkedin/capture` saves operator-confirmed account/contact records from the companion context.
 - No LinkedIn send API integration is implemented.
 
 Important:
 - LinkedIn APIs require strict app review and approved scopes.
-- Treat LinkedIn as phase-2 after email adapters are stable.
+- Treat send-side LinkedIn automation as phase-2 after email adapters are stable.
+- Current companion flow is intentionally user-confirmed and CRM-first, so the production auth/runtime path stays independent of the browser extension.
 
 ## 5) Social sharing / LinkedIn preview
 

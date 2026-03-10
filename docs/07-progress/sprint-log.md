@@ -80,12 +80,16 @@ Next:
 Completed:
 
 - Shipped Auth.js JWT session baseline with branded `/auth/signin`, middleware protection, and signed actor propagation into existing workspace services
+- Added branded `/auth/signup` plus guided `/workspace/get-started` onboarding for first account/contact bootstrap
+- Added LinkedIn companion install page, unpacked browser companion package, and `/api/integrations/linkedin/capture` for tab-to-CRM saves
 - Fixed typecheck regressions around auth/session handling and removed broken root-layout telemetry imports
 - Replaced network-dependent custom font loading with zero-network local font stacks for reliable production builds
 - Added lightweight workspace summary cache for notifications, integrations, and activities pages to avoid over-fetching full dashboard state
 - Added cached pilot metrics and integration-health lookups to reduce repeated expensive runtime work
 - Debounced command palette search and parallelized CRM entity search queries
 - Server-preloaded Accounts and Contacts index pages to eliminate client-only loading spinners on first paint
+- Replaced dead-end landing/integration buttons with actionable entry points and separated setup/settings action surfaces
+- Fixed contact form payload mismatch so LinkedIn URLs are now persisted correctly from the CRM form flow
 - Audited docs for implementation drift and updated route/API/auth status to match the shipped codebase
 
 Next:

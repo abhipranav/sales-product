@@ -10,6 +10,7 @@
 
 ## Tier 1 (high-impact extensions)
 
+- Browser companion capture (LinkedIn tab -> Velocity workbench -> CRM save)
 - Conversation intelligence tools (call metadata + speaker diarization)
 - Sales engagement tools (sequence execution telemetry)
 - Contract and e-sign tools (commercial milestone tracking)

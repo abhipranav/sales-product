@@ -36,7 +36,10 @@ This repository now includes:
 - Multi-page super-app shell with persistent navigation:
   - `/` (Marketing landing page)
   - `/auth/signin` (custom branded sign-in)
+  - `/auth/signup` (customer-facing sign-up)
+  - `/linkedin-extension` (public LinkedIn companion install guide)
   - `/workspace` (Super App Home)
+  - `/workspace/get-started` (guided first-run onboarding)
   - `/settings` (User account + notification preferences)
   - `/setup` (Live readiness and integration checklist)
   - `/cockpit`
@@ -46,6 +49,7 @@ This repository now includes:
   - `/intelligence`
   - `/notifications`
   - `/integrations`
+  - `/integrations/linkedin`
   - `/workflows`
   - `/activities`
 - Shared UI primitives and cockpit migration to shadcn-style components:
@@ -64,6 +68,8 @@ This repository now includes:
 - Workspace sidebar now routes to landing page via app logo (no separate landing nav item)
 - Route-level performance timing logs for dashboard fetches (enable with `APP_PERF_LOGS=1`)
 - Protected workspace + API routes via middleware and Auth.js session checks
+- Guided sign-up flow that sends new users into onboarding instead of an empty shell
+- LinkedIn companion capture workbench for operator-confirmed account/contact import from the current browser tab
 - Debounced command palette search with cached results and parallel CRM search lookups
 - Server-preloaded Accounts and Contacts index pages to avoid post-hydration loading spinners
 - Cached pilot metrics, workspace summary lookups, and integration health snapshots for faster page loads
@@ -85,6 +91,7 @@ This repository now includes:
   - `PATCH /api/settings/user`
   - `GET /api/settings/user/ai`
   - `PATCH /api/settings/user/ai`
+  - `POST /api/integrations/linkedin/capture`
   - `GET /api/notifications`
   - `POST /api/notifications/:notificationId/ack`
   - `POST /api/followups/:dealId/generate`
@@ -118,7 +125,9 @@ This repository now includes:
 3. Start dev server: `npm run dev`
 4. Open: `http://localhost:3000`
 5. Sign in: `http://localhost:3000/auth/signin`
-6. Open setup/readiness page: `http://localhost:3000/setup`
+6. Sign up: `http://localhost:3000/auth/signup`
+7. Open onboarding: `http://localhost:3000/workspace/get-started`
+8. Open setup/readiness page: `http://localhost:3000/setup`
 
 ## Supabase integration (recommended)
 
@@ -188,6 +197,15 @@ This repository now includes:
 - Direct API clients can still override actor headers:
   - `x-actor-email`
   - `x-actor-name`
+
+## LinkedIn companion
+
+- Unpacked browser companion lives in `extensions/linkedin-companion`.
+- The companion stores an app base URL, reads the current tab URL/title, and opens:
+  - `/integrations/linkedin?sourceUrl=...&sourceTitle=...`
+- The app-side capture workbench persists operator-confirmed account/contact details through:
+  - `POST /api/integrations/linkedin/capture`
+- Current design intentionally keeps the final save inside the app so CRM data remains editable and the production auth/runtime path stays independent from the browser companion.
 
 ## Super-App Foundation
 

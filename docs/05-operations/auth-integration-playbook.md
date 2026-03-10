@@ -1,6 +1,6 @@
 # Auth Integration Playbook (Free-First)
 
-Last updated: 2026-02-24
+Last updated: 2026-03-07
 
 ## Goal
 
@@ -11,9 +11,12 @@ Harden the current production-grade authentication baseline in this Next.js + Pr
 - Auth runtime: Auth.js with JWT sessions (no Prisma adapter yet).
 - Route protection: `middleware.ts` guards workspace UI + `/api/*` (except `/api/auth/*`).
 - Sign-in UI: `app/auth/signin/page.tsx` (industrial design system style).
+- Sign-up UI: `app/auth/signup/page.tsx` (customer entry into onboarding).
+- Guided onboarding route: `app/(workspace)/workspace/get-started/page.tsx`.
 - Provider route: `app/api/auth/[...nextauth]/route.ts`.
 - Config entrypoint: `auth.ts`.
 - Actor mapping: middleware injects `x-actor-email` and `x-actor-name` from session for existing workspace services.
+- Production-sensitive note: new customer-entry flows are layered on top of the current middleware/session bridge and do not replace it.
 
 ## Current rollout values
 
