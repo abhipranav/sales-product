@@ -1,3 +1,4 @@
+import type { Route } from "next";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -102,15 +103,21 @@ export default async function SetupPage() {
                   <p className="text-sm font-bold text-[hsl(var(--foreground))]">{check.label}</p>
                 </div>
                 <p className="mt-2 text-sm text-[hsl(var(--muted-foreground))]">{check.detail}</p>
-                {check.action?.command ? (
-                  <code className="mt-2 block border-[2px] border-[hsl(var(--border))] bg-[hsl(var(--card))] px-2 py-1 text-xs">
-                    {check.action.command}
-                  </code>
-                ) : null}
-                {check.action?.href ? (
-                  <Button asChild variant="outline" size="sm" className="mt-2">
-                    <a href={check.action.href}>{check.action.label}</a>
-                  </Button>
+                {check.action?.command || check.action?.href ? (
+                  <div className="mt-3 grid gap-2 md:grid-cols-[1fr_auto]">
+                    {check.action?.command ? (
+                      <code className="block border-[2px] border-[hsl(var(--border))] bg-[hsl(var(--card))] px-2 py-2 text-xs">
+                        {check.action.command}
+                      </code>
+                    ) : (
+                      <div />
+                    )}
+                    {check.action?.href ? (
+                      <Button asChild variant="outline" size="sm" className="w-full md:w-auto">
+                        <a href={check.action.href}>{check.action.label}</a>
+                      </Button>
+                    ) : null}
+                  </div>
                 ) : null}
               </div>
             ))}
@@ -168,10 +175,29 @@ export default async function SetupPage() {
                 ))}
               </ul>
 
-              <div className="flex flex-wrap gap-2">
-                <Button asChild size="sm" variant="outline">
-                  <Link href="/settings">Open AI Settings</Link>
-                </Button>
+              <div className="grid gap-2">
+                <div className="border-[2px] border-[hsl(var(--border))] bg-[hsl(var(--card))] p-3">
+                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[hsl(var(--muted-foreground))]">
+                    AI settings
+                  </p>
+                  <p className="mt-1 text-xs text-[hsl(var(--muted-foreground))]">
+                    Manage the active OpenAI key, model, and daily token visibility.
+                  </p>
+                  <Button asChild size="sm" variant="outline" className="mt-3 w-full">
+                    <Link href="/settings">Open AI Settings</Link>
+                  </Button>
+                </div>
+                <div className="border-[2px] border-[hsl(var(--border))] bg-[hsl(var(--card))] p-3">
+                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[hsl(var(--muted-foreground))]">
+                    Guided onboarding
+                  </p>
+                  <p className="mt-1 text-xs text-[hsl(var(--muted-foreground))]">
+                    Jump into first-run setup for accounts, contacts, and capture workflows.
+                  </p>
+                  <Button asChild size="sm" variant="outline" className="mt-3 w-full">
+                    <Link href={"/workspace/get-started" as Route}>Open Get Started</Link>
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -190,17 +216,35 @@ export default async function SetupPage() {
                   {readiness.publicUrl ?? "not configured"}
                 </span>
               </p>
-              <div className="flex flex-wrap gap-2">
-                <Button asChild size="sm" variant="outline">
-                  <a href="https://www.linkedin.com/post-inspector/" target="_blank" rel="noreferrer">
-                    Open Post Inspector
-                  </a>
-                </Button>
-                <Button asChild size="sm" variant="outline">
-                  <a href="https://www.linkedin.com/help/linkedin/answer/a507663" target="_blank" rel="noreferrer">
-                    LinkedIn Preview Docs
-                  </a>
-                </Button>
+              <div className="grid gap-2">
+                <div className="border-[2px] border-[hsl(var(--border))] bg-[hsl(var(--card))] p-3">
+                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[hsl(var(--muted-foreground))]">
+                    LinkedIn companion
+                  </p>
+                  <p className="mt-1 text-xs text-[hsl(var(--muted-foreground))]">
+                    Install the tab-to-CRM companion and test the capture flow inside the app.
+                  </p>
+                  <Button asChild size="sm" variant="outline" className="mt-3 w-full">
+                    <Link href={"/integrations/linkedin" as Route}>Open Companion</Link>
+                  </Button>
+                </div>
+                <div className="border-[2px] border-[hsl(var(--border))] bg-[hsl(var(--card))] p-3">
+                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[hsl(var(--muted-foreground))]">
+                    Preview validation
+                  </p>
+                  <div className="mt-3 grid gap-2">
+                    <Button asChild size="sm" variant="outline" className="w-full">
+                      <a href="https://www.linkedin.com/post-inspector/" target="_blank" rel="noreferrer">
+                        Open Post Inspector
+                      </a>
+                    </Button>
+                    <Button asChild size="sm" variant="outline" className="w-full">
+                      <a href="https://www.linkedin.com/help/linkedin/answer/a507663" target="_blank" rel="noreferrer">
+                        LinkedIn Preview Docs
+                      </a>
+                    </Button>
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>

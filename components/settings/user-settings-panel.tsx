@@ -437,13 +437,34 @@ export function UserSettingsPanel() {
               </p>
             </div>
 
-            <div className="flex flex-wrap gap-2">
-              <Button asChild variant="outline" size="sm">
-                <a href="/setup">System Setup</a>
-              </Button>
-              <Button asChild variant="outline" size="sm">
-                <a href="/integrations">Integrations</a>
-              </Button>
+            <div className="grid gap-3 md:grid-cols-3">
+              <div className="border-[2px] border-[hsl(var(--border))] bg-[hsl(var(--card))] p-3">
+                <p className="text-sm font-semibold text-[hsl(var(--foreground))]">System setup</p>
+                <p className="mt-1 text-xs text-[hsl(var(--muted-foreground))]">
+                  Review readiness, env state, and activation checks.
+                </p>
+                <Button asChild variant="outline" size="sm" className="mt-3 w-full">
+                  <a href="/setup">Open Setup</a>
+                </Button>
+              </div>
+              <div className="border-[2px] border-[hsl(var(--border))] bg-[hsl(var(--card))] p-3">
+                <p className="text-sm font-semibold text-[hsl(var(--foreground))]">Integrations</p>
+                <p className="mt-1 text-xs text-[hsl(var(--muted-foreground))]">
+                  Manage CRM, calendar, and external workflow connections.
+                </p>
+                <Button asChild variant="outline" size="sm" className="mt-3 w-full">
+                  <a href="/integrations">Open Integrations</a>
+                </Button>
+              </div>
+              <div className="border-[2px] border-[hsl(var(--border))] bg-[hsl(var(--card))] p-3">
+                <p className="text-sm font-semibold text-[hsl(var(--foreground))]">LinkedIn companion</p>
+                <p className="mt-1 text-xs text-[hsl(var(--muted-foreground))]">
+                  Launch the capture workbench and install flow for reps.
+                </p>
+                <Button asChild variant="outline" size="sm" className="mt-3 w-full">
+                  <a href="/integrations/linkedin">Open Companion</a>
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -856,8 +877,8 @@ export function UserSettingsPanel() {
               </ul>
             </div>
 
-            <div className="flex flex-wrap gap-2 pt-1">
-              <Button type="button" onClick={saveAISettings} disabled={!canSaveAI} variant="cta">
+            <div className="grid gap-2 pt-1">
+              <Button type="button" onClick={saveAISettings} disabled={!canSaveAI} variant="cta" className="w-full">
                 {isSavingAI ? "Saving..." : "Save AI Settings"}
               </Button>
               <Button
@@ -865,6 +886,7 @@ export function UserSettingsPanel() {
                 onClick={clearPersonalAIKey}
                 disabled={!canClearPersonalKey}
                 variant="outline"
+                className="w-full"
               >
                 Clear Personal Key
               </Button>
