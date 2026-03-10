@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import { WorkspaceNav } from "@/components/shell/workspace-nav";
 import { ThemeToggle } from "@/components/shell/theme-toggle";
+import { AIStatusIndicator } from "@/components/shell/ai-status-indicator";
 import { CommandPaletteMount } from "@/components/shell/command-palette-mount";
 import { SystemReadinessBanner } from "@/components/shell/system-readiness-banner";
 import { getActorFromServerContext } from "@/lib/auth/actor";
@@ -73,6 +74,7 @@ export default async function WorkspaceLayout({ children }: WorkspaceLayoutProps
 
           {/* Footer */}
           <div className="mt-auto pt-4 space-y-2">
+            <AIStatusIndicator />
             <ThemeToggle />
             <div className="caution-stripe-thin" />
             <div className="flex items-center justify-between">
