@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { logger } from "@/lib/logger";
 import { ContactForm } from "@/components/crm/contact-form";
 import {
   Dialog,
@@ -39,7 +40,7 @@ export function ContactDetailClient({ contactId, contactName }: ContactDetailCli
         toast.error(error.error ?? "Failed to delete contact");
       }
     } catch (error) {
-      console.error("Error deleting contact:", error);
+      logger.error("Error deleting contact:", { contactId }, error);
       toast.error("Failed to delete contact");
     } finally {
       setDeleting(false);

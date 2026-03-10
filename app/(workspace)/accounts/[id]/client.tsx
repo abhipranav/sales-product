@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { logger } from "@/lib/logger";
 import { AccountForm } from "@/components/crm/account-form";
 import {
   Dialog,
@@ -39,7 +40,7 @@ export function AccountDetailClient({ accountId, accountName }: AccountDetailCli
         toast.error(error.error ?? "Failed to delete account");
       }
     } catch (error) {
-      console.error("Error deleting account:", error);
+      logger.error("Error deleting account:", { accountId }, error);
       toast.error("Failed to delete account");
     } finally {
       setDeleting(false);

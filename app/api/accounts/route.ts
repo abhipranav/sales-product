@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getActorFromRequest } from "@/lib/auth/actor";
+import { logger } from "@/lib/logger";
 import {
   listAccounts,
   createAccount,
@@ -42,7 +43,7 @@ export async function GET(request: NextRequest) {
     if (error instanceof CrmServiceUnavailableError) {
       return NextResponse.json({ error: "CRM service unavailable" }, { status: 503 });
     }
-    console.error("Error listing accounts:", error);
+    logger.error("Error listing accounts:", { route: "/api/accounts" }, error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
@@ -61,7 +62,7 @@ export async function POST(request: NextRequest) {
     if (error instanceof Error && error.name === "ZodError") {
       return NextResponse.json({ error: "Invalid input", details: error }, { status: 400 });
     }
-    console.error("Error creating account:", error);
+    logger.error("Error creating account:", { route: "/api/accounts" }, error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

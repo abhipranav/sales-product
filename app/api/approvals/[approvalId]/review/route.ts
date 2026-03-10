@@ -1,4 +1,5 @@
 import { getActorFromRequest } from "@/lib/auth/actor";
+import { logger } from "@/lib/logger";
 import {
   ApprovalNotFoundError,
   ApprovalServiceUnavailableError,
@@ -16,9 +17,9 @@ interface RouteContext {
 }
 
 export async function POST(request: Request, context: RouteContext) {
+  const { approvalId } = await context.params;
   try {
     const actor = getActorFromRequest(request);
-    const { approvalId } = await context.params;
     const payload = parseReviewApprovalInput(await request.json());
     const approval = await reviewApprovalRequest(approvalId, payload, actor);
 
@@ -46,7 +47,7 @@ export async function POST(request: Request, context: RouteContext) {
       return NextResponse.json({ error: error.message }, { status: 403 });
     }
 
-    console.error("Approval review failed", error);
+    logger.error("Approval review failed", { approvalId, route: "/api/approvals/[approvalId]/review" }, error);
     return NextResponse.json({ error: "Failed to review approval." }, { status: 500 });
   }
 }

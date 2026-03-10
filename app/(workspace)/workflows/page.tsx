@@ -5,6 +5,7 @@ import { NextActions } from "@/components/cockpit/next-actions";
 import { SequenceExecutionBoard } from "@/components/cockpit/sequence-execution-board";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { logger } from "@/lib/logger";
 import { getActorFromServerContext } from "@/lib/auth/actor";
 import { getCachedDashboardData } from "@/lib/services/dashboard-cache";
 import { SequenceServiceUnavailableError, listSequenceExecutions } from "@/lib/services/sequences";
@@ -19,10 +20,10 @@ export default async function WorkflowsPage() {
     sequenceExecutions = await listSequenceExecutions({ dealId: data.deal.id, limit: 8 }, actor);
   } catch (error) {
     if (error instanceof SequenceServiceUnavailableError || error instanceof WorkspaceAccessDeniedError) {
-      console.warn(error.message);
+      logger.warn(error.message, { dealId: data.deal.id });
       sequenceExecutions = [];
     } else {
-      console.error("Failed to list sequence executions", error);
+      logger.error("Failed to list sequence executions", { dealId: data.deal.id }, error);
       sequenceExecutions = [];
     }
   }

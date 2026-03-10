@@ -1,4 +1,5 @@
 import { getActorFromRequest } from "@/lib/auth/actor";
+import { logger } from "@/lib/logger";
 import {
   ApprovalDealNotFoundError,
   ApprovalServiceUnavailableError,
