@@ -311,6 +311,56 @@ body {
   color: hsl(var(--background));
 }
 
+.ind-btn-banner-solid {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.5rem;
+  font-family: var(--font-mono), monospace;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border: var(--ind-border-width) solid hsl(var(--background));
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  cursor: pointer;
+  transition: all 180ms ease;
+}
+
+.ind-btn-banner-solid:hover {
+  background: var(--ind-yellow);
+  color: var(--ind-black);
+  border-color: var(--ind-black);
+}
+
+.ind-btn-banner-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.5rem;
+  font-family: var(--font-mono), monospace;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border: var(--ind-border-width) solid hsl(var(--background) / 0.7);
+  background: transparent;
+  color: hsl(var(--background));
+  cursor: pointer;
+  transition: all 180ms ease;
+}
+
+.ind-btn-banner-outline:hover {
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  border-color: hsl(var(--background));
+}
+
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    DIVIDERS — Newspaper column separators
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */

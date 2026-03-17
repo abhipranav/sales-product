@@ -54,7 +54,14 @@ const capabilities = [
   "Audit-ready workflow logs across every mutation",
 ] as const;
 
-const integrationLogos = ["Salesforce", "HubSpot", "Google", "Microsoft", "Zoom", "Slack"] as const;
+const integrationLogos = [
+  { name: "Salesforce", src: "/brand-logos/salesforce.svg" },
+  { name: "HubSpot", src: "/brand-logos/hubspot.svg" },
+  { name: "Google Workspace", src: "/brand-logos/google-workspace.svg" },
+  { name: "Microsoft", src: "/brand-logos/microsoft.svg" },
+  { name: "Zoom", src: "/brand-logos/zoom.svg" },
+  { name: "Slack", src: "/brand-logos/slack.svg" },
+] as const;
 
 const faqs = [
   {
@@ -260,12 +267,24 @@ export default function LandingPage() {
         <div className="ind-divider-h mb-6" />
         <p className="ind-label text-center mb-4">WORKS_WITH // YOUR STACK</p>
         <div className="grid gap-2 sm:grid-cols-3 lg:grid-cols-6">
-          {integrationLogos.map((name) => (
+          {integrationLogos.map((logo) => (
             <div
-              key={name}
+              key={logo.name}
               className="ind-card text-center py-2.5 px-3 ind-hover cursor-default"
             >
-              <span className="font-mono text-xs font-bold ind-hover-invert">{name.toUpperCase()}</span>
+              <div className="flex min-h-[62px] flex-col items-center justify-center gap-2">
+                <img
+                  src={logo.src}
+                  alt={`${logo.name} logo`}
+                  loading="lazy"
+                  width="28"
+                  height="28"
+                  className="h-7 w-7 opacity-80 brightness-0 saturate-0 ind-hover-invert"
+                />
+                <span className="font-mono text-[10px] font-bold uppercase tracking-[0.08em] ind-hover-invert">
+                  {logo.name}
+                </span>
+              </div>
             </div>
           ))}
         </div>
@@ -481,7 +500,7 @@ export default function LandingPage() {
 
       {/* ── CTA BANNER ─────────────────────────────────────────────────── */}
       <section className="mx-auto w-full max-w-7xl px-5 pb-0 pt-4 md:px-8">
-        <div className="border-[2px] border-[hsl(var(--foreground))] p-5 bg-[hsl(var(--foreground))]">
+        <div className="border-[2px] border-[hsl(var(--foreground))] bg-[hsl(var(--foreground))] p-5">
           <div className="flex flex-col gap-5 p-4 md:flex-row md:items-center md:justify-between">
             <div>
               <h3 className="font-serif text-2xl font-bold text-[hsl(var(--background))]">
@@ -491,14 +510,14 @@ export default function LandingPage() {
                 CONNECT YOUR STACK // RUN YOUR SALES MOTION WITH AI + OPERATOR CONTROL
               </p>
             </div>
-            <div className="flex flex-wrap gap-3">
-              <Link href={"/auth/signup?callbackUrl=%2Fworkspace%2Fget-started" as Route} className="ind-btn bg-[hsl(var(--accent))] text-[hsl(var(--accent-foreground))] border-[2px] border-[hsl(var(--accent-foreground))] hover:bg-[hsl(var(--background))] hover:text-[hsl(var(--foreground))] hover:border-[hsl(var(--background))]">
+            <div className="flex flex-wrap gap-3 md:justify-end">
+              <Link href={"/auth/signup?callbackUrl=%2Fworkspace%2Fget-started" as Route} className="ind-btn-banner-solid">
                 CREATE ACCOUNT
               </Link>
-              <Link href={"/book-demo" as Route} className="ind-btn-outline border-[hsl(var(--background))]/50 text-[hsl(var(--background))] hover:bg-[hsl(var(--background))]/10 hover:border-[hsl(var(--background))]">
+              <Link href={"/book-demo" as Route} className="ind-btn-banner-outline">
                 BOOK DEMO
               </Link>
-              <Link href={"/linkedin-extension" as Route} className="ind-btn-outline border-[hsl(var(--background))]/50 text-[hsl(var(--background))] hover:bg-[hsl(var(--background))]/10 hover:border-[hsl(var(--background))]">
+              <Link href={"/linkedin-extension" as Route} className="ind-btn-banner-outline">
                 INSTALL COMPANION
               </Link>
             </div>
