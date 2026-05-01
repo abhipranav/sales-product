@@ -3,103 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
-}
-
-enum AccountSegment {
-  STARTUP
-  MID_MARKET
-  ENTERPRISE
-}
-
-enum StakeholderRole {
-  CHAMPION
-  APPROVER
-  BLOCKER
-  INFLUENCER
-}
-
-enum DealStage {
-  DISCOVERY
-  EVALUATION
-  PROPOSAL
-  PROCUREMENT
-  CLOSED_WON
-  CLOSED_LOST
-}
-
-enum SignalType {
-  HIRING
-  FUNDING
-  TOOLING
-  ENGAGEMENT
-}
-
-enum ActivityType {
-  CALL
-  EMAIL
-  MEETING
-  NOTE
-}
-
-enum TaskOwner {
-  REP
-  MANAGER
-  SYSTEM
-}
-
-enum TaskPriority {
-  HIGH
-  MEDIUM
-  LOW
-}
-
-enum TaskStatus {
-  TODO
-  IN_PROGRESS
-  DONE
-}
-
-enum SuggestedChannel {
-  EMAIL
-  PHONE
-  LINKEDIN
-  MEETING
-}
-
-enum WorkspaceMemberRole {
-  OWNER
-  MANAGER
-  REP
-}
-
-enum ApprovalStatus {
-  PENDING
-  APPROVED
-  REJECTED
-}
-
-enum IntegrationProvider {
-  HUBSPOT
-}
-
-enum NotificationStatus {
-  UNREAD
-  ACKNOWLEDGED
-}
-
-enum SequenceExecutionStatus {
-  ACTIVE
-  COMPLETED
-}
-
-enum SequenceStepStatus {
-  TODO
-  IN_PROGRESS
-  DONE
-  SKIPPED
+  provider = "sqlite"
+  url      = "file:./dev.db"
 }
 
 model Workspace {
@@ -121,7 +26,7 @@ model WorkspaceMember {
   workspace   Workspace           @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   email       String
   fullName    String
-  role        WorkspaceMemberRole @default(REP)
+  role        String              @default("REP")
   preferences UserPreference?
   aiUsageDaily AiUsageDaily[]
   createdAt   DateTime            @default(now())
@@ -151,7 +56,7 @@ model UserPreference {
   loginAlerts           Boolean         @default(true)
   productAnnouncements  Boolean         @default(true)
   aiApiKey              String?
-  aiModel               String          @default("gpt-5-mini")
+  aiModel               String          @default("gpt-5.4-mini-2026-03-17")
   createdAt             DateTime        @default(now())
   updatedAt             DateTime        @updatedAt
 
@@ -164,7 +69,7 @@ model Account {
   workspace     Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   externalId   String?        @unique
   name         String
-  segment      AccountSegment
+  segment      String
   website      String?
   employeeBand String?
   contacts     Contact[]
@@ -185,7 +90,7 @@ model Contact {
   title      String
   email      String?
   linkedIn   String?
-  role       StakeholderRole
+  role       String
   sequenceExecutions SequenceExecution[]
   createdAt  DateTime        @default(now())
   updatedAt  DateTime        @updatedAt
@@ -199,7 +104,7 @@ model Deal {
   accountId    String
   account      Account        @relation(fields: [accountId], references: [id], onDelete: Cascade)
   name         String
-  stage        DealStage
+  stage        String
   amount       Int
   confidence   Float
   closeDate    DateTime
@@ -225,7 +130,7 @@ model Signal {
   externalId String?    @unique
   accountId  String
   account    Account    @relation(fields: [accountId], references: [id], onDelete: Cascade)
-  type       SignalType
+  type       String
   summary    String
   happenedAt DateTime
   score      Int
@@ -241,7 +146,7 @@ model Activity {
   externalId String?      @unique
   dealId     String
   deal       Deal         @relation(fields: [dealId], references: [id], onDelete: Cascade)
-  type       ActivityType
+  type       String
   happenedAt DateTime
   summary    String
   createdAt  DateTime     @default(now())
@@ -256,11 +161,11 @@ model Task {
   dealId           String
   deal             Deal             @relation(fields: [dealId], references: [id], onDelete: Cascade)
   title            String
-  owner            TaskOwner
+  owner            String
   dueAt            DateTime
-  priority         TaskPriority
-  status           TaskStatus
-  suggestedChannel SuggestedChannel
+  priority         String
+  status           String
+  suggestedChannel String
   completedAt      DateTime?
   auditLogs        AuditLog[]
   createdAt        DateTime         @default(now())
@@ -280,7 +185,7 @@ model CalendarEvent {
   startsAt       DateTime
   endsAt         DateTime
   organizerEmail String?
-  attendees      String[]
+  attendees      String   @default("")
   source         String
   createdAt      DateTime @default(now())
 
@@ -312,9 +217,9 @@ model MeetingBrief {
   dealId               String   @unique
   deal                 Deal     @relation(fields: [dealId], references: [id], onDelete: Cascade)
   primaryGoal          String
-  likelyObjections     String[]
+  likelyObjections     String   @default("[]")
   recommendedNarrative String
-  proofPoints          String[]
+  proofPoints          String   @default("[]")
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
 }
@@ -335,10 +240,10 @@ model OutboundApproval {
   id              String         @id @default(cuid())
   dealId           String
   deal             Deal           @relation(fields: [dealId], references: [id], onDelete: Cascade)
-  channel          SuggestedChannel
+  channel          String
   subject          String
   body             String
-  status           ApprovalStatus @default(PENDING)
+  status           String         @default("PENDING")
   requestedBy      String
   reviewedBy       String?
   reviewedAt       DateTime?
@@ -354,7 +259,7 @@ model IntegrationSyncState {
   id          String              @id @default(cuid())
   workspaceId String
   workspace   Workspace           @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  provider    IntegrationProvider
+  provider    String
   cursor      String?
   status      String              @default("idle")
   lastRunAt   DateTime?
@@ -374,10 +279,10 @@ model SignalNotification {
   signal           Signal             @relation(fields: [signalId], references: [id], onDelete: Cascade)
   dealId           String?
   deal             Deal?              @relation(fields: [dealId], references: [id], onDelete: SetNull)
-  priority         TaskPriority
+  priority         String
   summary          String
   recommendedAction String
-  status           NotificationStatus @default(UNREAD)
+  status           String             @default("UNREAD")
   acknowledgedAt   DateTime?
   acknowledgedBy   String?
   createdAt        DateTime           @default(now())
@@ -393,12 +298,12 @@ model SequenceExecution {
   workspaceId  String
   workspace    Workspace               @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   dealId       String
-  deal         Deal                    @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  deal                 Deal                    @relation(fields: [dealId], references: [id], onDelete: Cascade)
   contactId    String?
   contact      Contact?                @relation(fields: [contactId], references: [id], onDelete: SetNull)
   title        String
-  channelMix   SuggestedChannel[]
-  status       SequenceExecutionStatus @default(ACTIVE)
+  channelMix   String                  @default("")
+  status       String                  @default("ACTIVE")
   createdBy    String
   steps        SequenceStep[]
   createdAt    DateTime                @default(now())
@@ -413,9 +318,9 @@ model SequenceStep {
   executionId  String
   execution    SequenceExecution  @relation(fields: [executionId], references: [id], onDelete: Cascade)
   order        Int
-  channel      SuggestedChannel
+  channel      String
   instruction  String
-  status       SequenceStepStatus @default(TODO)
+  status       String             @default("TODO")
   outcome      String?
   completedAt  DateTime?
   createdAt    DateTime           @default(now())
