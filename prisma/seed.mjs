@@ -838,7 +838,7 @@ async function main() {
         startsAt: new Date("2026-02-12T16:00:00Z"),
         endsAt: new Date("2026-02-12T16:45:00Z"),
         organizerEmail: "maya.kim@auroralogistics.com",
-        attendees: ["maya.kim@auroralogistics.com", "neil.grant@auroralogistics.com", process.env.APP_ACTOR_EMAIL || "alex@velocity.io"],
+        attendees: ["maya.kim@auroralogistics.com", "neil.grant@auroralogistics.com", process.env.APP_ACTOR_EMAIL || "alex@velocity.io"].join(","),
         source: "google-calendar"
       },
       {
@@ -848,7 +848,7 @@ async function main() {
         startsAt: new Date("2026-02-14T14:00:00Z"),
         endsAt: new Date("2026-02-14T14:30:00Z"),
         organizerEmail: process.env.APP_ACTOR_EMAIL || "alex@velocity.io",
-        attendees: ["alex.rivera@auroralogistics.com", "maya.kim@auroralogistics.com"],
+        attendees: ["alex.rivera@auroralogistics.com", "maya.kim@auroralogistics.com"].join(","),
         source: "google-calendar"
       },
       {
@@ -858,7 +858,7 @@ async function main() {
         startsAt: new Date("2026-02-13T10:00:00Z"),
         endsAt: new Date("2026-02-13T11:00:00Z"),
         organizerEmail: "marcus.johnson@techventurelabs.io",
-        attendees: ["marcus.johnson@techventurelabs.io", "emily.watson@techventurelabs.io", process.env.APP_ACTOR_EMAIL || "alex@velocity.io"],
+        attendees: ["marcus.johnson@techventurelabs.io", "emily.watson@techventurelabs.io", process.env.APP_ACTOR_EMAIL || "alex@velocity.io"].join(","),
         source: "google-calendar"
       },
       {
@@ -868,7 +868,7 @@ async function main() {
         startsAt: new Date("2026-02-14T14:00:00Z"),
         endsAt: new Date("2026-02-14T15:00:00Z"),
         organizerEmail: process.env.APP_ACTOR_EMAIL || "alex@velocity.io",
-        attendees: ["chris.anderson@catalystfinancial.com", "kevin.taylor@catalystfinancial.com", "amanda.garcia@catalystfinancial.com"],
+        attendees: ["chris.anderson@catalystfinancial.com", "kevin.taylor@catalystfinancial.com", "amanda.garcia@catalystfinancial.com"].join(","),
         source: "google-calendar"
       },
       {
@@ -878,7 +878,7 @@ async function main() {
         startsAt: new Date("2026-02-20T15:00:00Z"),
         endsAt: new Date("2026-02-20T15:30:00Z"),
         organizerEmail: "lisa.thompson@meridianhealth.org",
-        attendees: ["lisa.thompson@meridianhealth.org", "james.wilson@meridianhealth.org"],
+        attendees: ["lisa.thompson@meridianhealth.org", "james.wilson@meridianhealth.org"].join(","),
         source: "google-calendar"
       }
     ]
@@ -891,47 +891,47 @@ async function main() {
       {
         dealId: auroraDeal1.id,
         primaryGoal: "Secure security and finance alignment before proposal stage.",
-        likelyObjections: [
+        likelyObjections: JSON.stringify([
           "Need evidence of data segregation for EU candidates.",
           "Seat-based pricing may be high for seasonal hiring variability.",
           "Security team hasn't seen SOC 2 Type II report yet."
-        ],
+        ]),
         recommendedNarrative: "Lead with cycle-time reduction (31% faster screening-to-offer). Anchor on their hiring urgency signal. Offer staged ramp pricing tied to hiring volume.",
-        proofPoints: [
+        proofPoints: JSON.stringify([
           "Median screening-to-offer cycle reduced by 31% in logistics cohort.",
           "SOC 2 Type II certified with controls mapped to common buyer questionnaires.",
           "3 similar mid-market recruiting teams deployed in under 2 weeks."
-        ]
+        ])
       },
       {
         dealId: techventureDeal1.id,
         primaryGoal: "Differentiate against Salesforce Einstein and secure technical approval.",
-        likelyObjections: [
+        likelyObjections: JSON.stringify([
           "How does AI accuracy compare to Salesforce Einstein?",
           "What's the implementation timeline for 1000+ users?",
           "Need evidence of enterprise-scale deployments."
-        ],
+        ]),
         recommendedNarrative: "Focus on faster time-to-value (2 weeks vs 3 months) and specialization for sales execution. Highlight recent $75M funding as green light for technology investments.",
-        proofPoints: [
+        proofPoints: JSON.stringify([
           "48% improvement in forecast accuracy vs legacy tools.",
           "Average implementation time of 2 weeks for enterprise clients.",
           "Used by 3 of the top 10 fastest-growing enterprise SaaS companies."
-        ]
+        ])
       },
       {
         dealId: catalystDeal.id,
         primaryGoal: "Address data residency concerns and move to contract.",
-        likelyObjections: [
+        likelyObjections: JSON.stringify([
           "Where is data stored? We need US-only residency.",
           "What about PII handling and SOC 2 compliance?",
           "Can we get a dedicated instance?"
-        ],
+        ]),
         recommendedNarrative: "Lead with dedicated deployment option that addresses all data residency requirements. Emphasize financial services expertise with existing Catalyst POC success.",
-        proofPoints: [
+        proofPoints: JSON.stringify([
           "Dedicated deployment option with US-only data residency.",
           "SOC 2 Type II and SOC 2 + HIPAA certified.",
           "POC delivered 40% improvement in lead response time."
-        ]
+        ])
       }
     ]
   });
@@ -1016,7 +1016,7 @@ async function main() {
       dealId: auroraDeal1.id,
       contactId: mayaKim.id,
       title: "Champion & Finance Alignment Sequence",
-      channelMix: ["EMAIL", "PHONE", "LINKEDIN"],
+      channelMix: ["EMAIL", "PHONE", "LINKEDIN"].join(","),
       status: "ACTIVE",
       createdBy: process.env.APP_ACTOR_EMAIL || "alex@velocity.io"
     }
@@ -1056,7 +1056,7 @@ async function main() {
       dealId: techventureDeal1.id,
       contactId: sarahChen.id,
       title: "Enterprise Close Acceleration",
-      channelMix: ["EMAIL", "MEETING"],
+      channelMix: ["EMAIL", "MEETING"].join(","),
       status: "ACTIVE",
       createdBy: process.env.APP_ACTOR_EMAIL || "alex@velocity.io"
     }
