@@ -10,6 +10,7 @@ export interface AIMessage {
 
 export interface AIGenerateOptions {
   model?: string;
+  schema?: any;
 }
 
 export interface AIProvider {
