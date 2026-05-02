@@ -10,7 +10,7 @@ import {
 } from "@/lib/services/ai-usage";
 import { getRuntimeSecretStatus } from "@/lib/services/runtime-config";
 
-const DEFAULT_MODEL = "gpt-5-mini";
+const DEFAULT_MODEL = "gpt-5.4-mini-2026-03-17";
 const STRATEGY_AI_ENABLED = process.env.APP_ENABLE_AI_STRATEGY_PLAYS === "1";
 
 function getAIWorkflowLabels(strategyMode: "ai-enabled" | "rule-based") {
