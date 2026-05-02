@@ -3,10 +3,10 @@ import type { ActorIdentity } from "@/lib/auth/actor";
 import { getPrismaClient } from "@/lib/db/prisma";
 import { resolveWorkspaceScope } from "@/lib/services/workspace";
 
-const DEFAULT_MODEL = "gpt-5-mini";
+const DEFAULT_MODEL = "gpt-5.4-mini-2026-03-17";
 const MODEL_CAPS = {
-  "gpt-5-mini": 2_500_000,
-  "gpt-5": 250_000
+  "gpt-5.4-mini-2026-03-17": 2_500_000,
+  "gpt-5.5-2026-04-23": 250_000
 } as const;
 
 let usageSchemaUnavailable = false;
@@ -71,21 +71,15 @@ function normalizeModel(model: string | undefined): string {
 export function getDailyTokenLimitForModel(model: string): number | null {
   const normalized = normalizeModel(model);
 
-  if (normalized.startsWith("gpt-5-mini")) {
-    return MODEL_CAPS["gpt-5-mini"];
+  if (normalized.includes("mini") || normalized === "gpt-5.4-mini-2026-03-17") {
+    return MODEL_CAPS["gpt-5.4-mini-2026-03-17"];
   }
 
-  if (
-    normalized === "gpt-5" ||
-    (normalized.startsWith("gpt-5-") &&
-      !normalized.startsWith("gpt-5-mini") &&
-      !normalized.startsWith("gpt-5-nano") &&
-      !normalized.startsWith("gpt-5-codex"))
-  ) {
-    return MODEL_CAPS["gpt-5"];
+  if (normalized === "gpt-5.5-2026-04-23" || normalized === "gpt-5" || normalized.startsWith("gpt-5.5")) {
+    return MODEL_CAPS["gpt-5.5-2026-04-23"];
   }
 
-  return null;
+  return 500_000; // safe fallback cap for unrecognized models to prevent unlimited financial exploit
 }
 
 function buildModelSummary(row: {
@@ -113,7 +107,7 @@ function buildModelSummary(row: {
 
 function createEmptySummary(selectedModel: string, dayStart: Date): AIDailyUsageSummary {
   const normalizedSelectedModel = normalizeModel(selectedModel);
-  const baselineModels = Array.from(new Set([normalizedSelectedModel, "gpt-5-mini", "gpt-5"]));
+  const baselineModels = Array.from(new Set([normalizedSelectedModel, "gpt-5.4-mini-2026-03-17", "gpt-5.5-2026-04-23"]));
   const modelSummaries = baselineModels.map((model) =>
     buildModelSummary({
       model,
