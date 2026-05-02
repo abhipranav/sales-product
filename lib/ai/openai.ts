@@ -1,10 +1,11 @@
 import OpenAI from "openai";
+import { zodResponseFormat } from "openai/helpers/zod";
 import { AIProviderError, type AIGenerateOptions, type AIMessage, type AIProvider } from "./provider";
 import type { ActorIdentity } from "@/lib/auth/actor";
 import { getUserAIConfig } from "@/lib/services/ai-settings";
 import { AITokenLimitExceededError, enforceDailyTokenCap, recordDailyTokenUsage } from "@/lib/services/ai-usage";
 
-const DEFAULT_MODEL = "gpt-5-mini";
+const DEFAULT_MODEL = "gpt-5.4-mini-2026-03-17";
 
 let systemClient: OpenAI | null = null;
 
@@ -27,7 +28,7 @@ function getEffectiveModel(defaultModel: string, options?: AIGenerateOptions): s
   return options?.model ?? defaultModel;
 }
 
-function toTokenUsage(response: OpenAI.Chat.Completions.ChatCompletion): {
+function toTokenUsage(response: any): {
   totalTokens: number;
   promptTokens: number;
   completionTokens: number;
@@ -73,18 +74,37 @@ function buildProvider(getClient: () => OpenAI, defaultModel: string, actor?: Ac
         await enforceDailyTokenCap(actor, model);
 
         const client = getClient();
-        const response = await client.chat.completions.create({
-          model,
-          response_format: { type: "json_object" },
-          messages: messages.map((m) => ({ role: m.role, content: m.content })),
-        });
-        await recordDailyTokenUsage(actor, model, toTokenUsage(response));
+        if (options?.schema) {
+          const response = await client.chat.completions.parse({
+            model,
+            messages: messages.map((m) => ({ role: m.role, content: m.content })),
+            response_format: zodResponseFormat(options.schema, "json_response"),
+          });
+          await recordDailyTokenUsage(actor, model, toTokenUsage(response));
 
-        const content = response.choices[0]?.message?.content;
-        if (!content) {
-          throw new AIProviderError("Empty response from OpenAI", "openai");
+          if (response.choices[0]?.message?.refusal) {
+            throw new AIProviderError(`Model refused structured output: ${response.choices[0].message.refusal}`, "openai");
+          }
+
+          const parsed = response.choices[0]?.message?.parsed;
+          if (parsed === undefined || parsed === null) {
+            throw new AIProviderError("Empty or failed structured response from OpenAI", "openai");
+          }
+          return parsed as T;
+        } else {
+          const response = await client.chat.completions.create({
+            model,
+            response_format: { type: "json_object" },
+            messages: messages.map((m) => ({ role: m.role, content: m.content })),
+          });
+          await recordDailyTokenUsage(actor, model, toTokenUsage(response));
+
+          const content = response.choices[0]?.message?.content;
+          if (!content) {
+            throw new AIProviderError("Empty response from OpenAI", "openai");
+          }
+          return JSON.parse(content) as T;
         }
-        return JSON.parse(content) as T;
       } catch (error) {
         if (error instanceof AITokenLimitExceededError) {
           throw new AIProviderError(error.message, "openai", error);
