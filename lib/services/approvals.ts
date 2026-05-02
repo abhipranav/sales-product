@@ -84,10 +84,10 @@ function mapApproval(
   approval: {
     id: string;
     dealId: string;
-    channel: keyof typeof dbChannelToUi;
+    channel: string;
     subject: string;
     body: string;
-    status: keyof typeof dbStatusToUi;
+    status: string;
     requestedBy: string;
     reviewedBy: string | null;
     reviewedAt: Date | null;
@@ -96,13 +96,15 @@ function mapApproval(
   },
   externalDealId?: string | null
 ) {
+  const channelKey = approval.channel as keyof typeof dbChannelToUi;
+  const statusKey = approval.status as keyof typeof dbStatusToUi;
   return {
     id: approval.id,
     dealId: externalDealId ?? approval.dealId,
-    channel: dbChannelToUi[approval.channel],
+    channel: dbChannelToUi[channelKey] || "email",
     subject: approval.subject,
     body: approval.body,
-    status: dbStatusToUi[approval.status],
+    status: dbStatusToUi[statusKey] || "pending",
     requestedBy: approval.requestedBy,
     reviewedBy: approval.reviewedBy ?? undefined,
     reviewedAt: approval.reviewedAt?.toISOString(),
@@ -238,7 +240,7 @@ export async function reviewApprovalRequest(
     const dispatch = await dispatchApprovedOutbound({
       dealId: approval.deal.id,
       approvalId: updated.id,
-      channel: updated.channel,
+      channel: updated.channel as any,
       subject: updated.subject,
       body: updated.body,
       actor: actorEmail
