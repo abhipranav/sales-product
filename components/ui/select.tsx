@@ -46,7 +46,7 @@ export function Select({ value = "", onValueChange, children }: SelectProps) {
 }
 
 // Select Trigger
-interface SelectTriggerProps {
+interface SelectTriggerProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   className?: string;
   children: React.ReactNode;
 }
@@ -89,10 +89,14 @@ export function SelectTrigger({ className, children, ...props }: SelectTriggerPr
 // Select Value
 interface SelectValueProps {
   placeholder?: string;
+  children?: React.ReactNode;
 }
 
-export function SelectValue({ placeholder }: SelectValueProps) {
+export function SelectValue({ placeholder, children }: SelectValueProps) {
   const { value } = useSelectContext();
+  if (children !== undefined) {
+    return <span className="font-mono text-xs uppercase tracking-wider">{children}</span>;
+  }
   return <span className={cn("font-mono text-xs uppercase tracking-wider", !value && "text-[hsl(var(--muted-foreground))]")}>{value || placeholder}</span>;
 }
 
