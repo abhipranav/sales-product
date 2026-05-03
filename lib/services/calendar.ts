@@ -79,7 +79,7 @@ export async function ingestCalendarEvent(payload: z.infer<typeof ingestCalendar
           startsAt,
           endsAt,
           organizerEmail: payload.organizerEmail,
-          attendees: payload.attendees,
+          attendees: payload.attendees.join(","),
           source: payload.source
         },
         update: {
@@ -88,7 +88,7 @@ export async function ingestCalendarEvent(payload: z.infer<typeof ingestCalendar
           startsAt,
           endsAt,
           organizerEmail: payload.organizerEmail,
-          attendees: payload.attendees,
+          attendees: payload.attendees.join(","),
           source: payload.source
         }
       })
@@ -99,7 +99,7 @@ export async function ingestCalendarEvent(payload: z.infer<typeof ingestCalendar
           startsAt,
           endsAt,
           organizerEmail: payload.organizerEmail,
-          attendees: payload.attendees,
+          attendees: payload.attendees.join(","),
           source: payload.source
         }
       });
@@ -129,7 +129,7 @@ export async function ingestCalendarEvent(payload: z.infer<typeof ingestCalendar
       title: calendarEvent.title,
       startsAt: calendarEvent.startsAt.toISOString(),
       endsAt: calendarEvent.endsAt.toISOString(),
-      attendees: calendarEvent.attendees,
+      attendees: calendarEvent.attendees ? calendarEvent.attendees.split(",") : [],
       source: calendarEvent.source
     },
     activity: {
