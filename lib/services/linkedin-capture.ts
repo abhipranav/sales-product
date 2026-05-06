@@ -131,8 +131,7 @@ async function findAccountMatch(
     where: {
       workspaceId,
       name: {
-        equals: payload.companyName,
-        mode: "insensitive"
+        equals: payload.companyName
       }
     }
   });
@@ -148,8 +147,7 @@ async function findContactMatch(
       where: {
         accountId,
         email: {
-          equals: payload.contactEmail,
-          mode: "insensitive"
+          equals: payload.contactEmail
         }
       }
     });
@@ -165,8 +163,7 @@ async function findContactMatch(
       where: {
         accountId,
         linkedIn: {
-          equals: normalizedLinkedIn,
-          mode: "insensitive"
+          equals: normalizedLinkedIn
         }
       }
     });
@@ -184,8 +181,7 @@ async function findContactMatch(
     where: {
       accountId,
       fullName: {
-        equals: payload.contactName,
-        mode: "insensitive"
+        equals: payload.contactName
       }
     }
   });
