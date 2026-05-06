@@ -14,12 +14,14 @@ export const linkedInEnrichmentSchema = z.object({
 
 export type LinkedInEnrichmentInput = z.infer<typeof linkedInEnrichmentSchema>;
 
-export interface LinkedInEnrichmentResult {
-  executiveSummary: string;
-  suggestedIcebreaker: string;
-  estimatedSeniority: "Executive" | "Director" | "Manager" | "Individual Contributor" | "Unknown";
-  salesRelevance: number; // 1-10 string mapped to number later
-}
+export const linkedInEnrichmentResultSchema = z.object({
+  executiveSummary: z.string(),
+  suggestedIcebreaker: z.string(),
+  estimatedSeniority: z.enum(["Executive", "Director", "Manager", "Individual Contributor", "Unknown"]),
+  salesRelevance: z.number(),
+});
+
+export type LinkedInEnrichmentResult = z.infer<typeof linkedInEnrichmentResultSchema>;
 
 const systemPrompt = `You are an elite B2B sales intelligence AI. 
 Analyze the provided LinkedIn profile data and return a concise, high-impact sales brief in JSON format following this exact schema:
@@ -66,7 +68,10 @@ export async function generateLinkedInSalesBrief(
       { role: "user" as const, content: buildUserPrompt(data) }
     ];
 
-    const result = await provider.generateJSON<LinkedInEnrichmentResult>(messages);
+    const result = await provider.generateJSON<LinkedInEnrichmentResult>(messages, {
+      model: "gpt-5.4-mini-2026-03-17",
+      schema: linkedInEnrichmentResultSchema
+    });
     
     // Ensure the response matches the expected shape
     return {
