@@ -125,13 +125,13 @@ export async function listSignalNotifications(limit = 30, actor?: ActorIdentity)
           dealId: dealByAccount.get(signal.accountId),
           priority: priorityFromScore(signal.score),
           summary: signal.summary,
-          recommendedAction: recommendedActionForType(signal.type)
+          recommendedAction: recommendedActionForType(signal.type as "HIRING" | "FUNDING" | "TOOLING" | "ENGAGEMENT")
         },
         update: {
           dealId: dealByAccount.get(signal.accountId),
           priority: priorityFromScore(signal.score),
           summary: signal.summary,
-          recommendedAction: recommendedActionForType(signal.type)
+          recommendedAction: recommendedActionForType(signal.type as "HIRING" | "FUNDING" | "TOOLING" | "ENGAGEMENT")
         }
       })
     )
@@ -164,8 +164,8 @@ export async function listSignalNotifications(limit = 30, actor?: ActorIdentity)
     dealName: row.deal?.name ?? null,
     summary: row.summary,
     recommendedAction: row.recommendedAction,
-    priority: priorityMap[row.priority],
-    status: notificationStatusMap[row.status],
+    priority: priorityMap[row.priority as keyof typeof priorityMap],
+    status: notificationStatusMap[row.status as keyof typeof notificationStatusMap],
     score: row.signal.score,
     signalType: row.signal.type.toLowerCase(),
     happenedAt: row.signal.happenedAt.toISOString(),
@@ -205,7 +205,7 @@ export async function acknowledgeSignalNotification(notificationId: string, acto
 
   return {
     id: updated.id,
-    status: notificationStatusMap[updated.status],
+    status: notificationStatusMap[updated.status as keyof typeof notificationStatusMap],
     acknowledgedAt: updated.acknowledgedAt?.toISOString() ?? null
   };
 }
