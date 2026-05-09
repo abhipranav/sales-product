@@ -728,8 +728,8 @@ export async function listAccounts(
     ...(filters.search
       ? {
           OR: [
-            { name: { contains: filters.search, mode: "insensitive" as const } },
-            { website: { contains: filters.search, mode: "insensitive" as const } }
+            { name: { contains: filters.search } },
+            { website: { contains: filters.search } }
           ]
         }
       : {})
@@ -1002,9 +1002,9 @@ export async function listContacts(
     ...(filters.search
       ? {
           OR: [
-            { fullName: { contains: filters.search, mode: "insensitive" as const } },
-            { title: { contains: filters.search, mode: "insensitive" as const } },
-            { email: { contains: filters.search, mode: "insensitive" as const } }
+            { fullName: { contains: filters.search } },
+            { title: { contains: filters.search } },
+            { email: { contains: filters.search } }
           ]
         }
       : {})
@@ -1267,8 +1267,8 @@ export async function listDeals(
     ...(filters.search
       ? {
           OR: [
-            { name: { contains: filters.search, mode: "insensitive" as const } },
-            { riskSummary: { contains: filters.search, mode: "insensitive" as const } }
+            { name: { contains: filters.search } },
+            { riskSummary: { contains: filters.search } }
           ]
         }
       : {})
@@ -1394,9 +1394,9 @@ export async function getDeal(dealId: string, actor?: ActorIdentity) {
     meetingBrief: deal.meetingBrief
       ? {
           primaryGoal: deal.meetingBrief.primaryGoal,
-          likelyObjections: deal.meetingBrief.likelyObjections,
+          likelyObjections: typeof deal.meetingBrief.likelyObjections === "string" ? JSON.parse(deal.meetingBrief.likelyObjections) : deal.meetingBrief.likelyObjections,
           recommendedNarrative: deal.meetingBrief.recommendedNarrative,
-          proofPoints: deal.meetingBrief.proofPoints
+          proofPoints: typeof deal.meetingBrief.proofPoints === "string" ? JSON.parse(deal.meetingBrief.proofPoints) : deal.meetingBrief.proofPoints
         }
       : null,
     followUp: deal.followUp
@@ -1516,8 +1516,8 @@ export async function searchCrmRecords(
           where: {
             workspaceId,
             OR: [
-              { name: { contains: normalizedQuery, mode: "insensitive" } },
-              { website: { contains: normalizedQuery, mode: "insensitive" } }
+              { name: { contains: normalizedQuery } },
+              { website: { contains: normalizedQuery } }
             ]
           },
           take: perTypeLimit,
@@ -1542,9 +1542,9 @@ export async function searchCrmRecords(
           where: {
             account: { workspaceId },
             OR: [
-              { fullName: { contains: normalizedQuery, mode: "insensitive" } },
-              { title: { contains: normalizedQuery, mode: "insensitive" } },
-              { email: { contains: normalizedQuery, mode: "insensitive" } }
+              { fullName: { contains: normalizedQuery } },
+              { title: { contains: normalizedQuery } },
+              { email: { contains: normalizedQuery } }
             ]
           },
           include: { account: { select: { name: true } } },
@@ -1570,8 +1570,8 @@ export async function searchCrmRecords(
           where: {
             account: { workspaceId },
             OR: [
-              { name: { contains: normalizedQuery, mode: "insensitive" } },
-              { riskSummary: { contains: normalizedQuery, mode: "insensitive" } }
+              { name: { contains: normalizedQuery } },
+              { riskSummary: { contains: normalizedQuery } }
             ]
           },
           include: { account: { select: { name: true } } },
