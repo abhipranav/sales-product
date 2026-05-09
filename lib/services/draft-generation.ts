@@ -187,7 +187,11 @@ async function generateFollowUpWithAI(params: {
           "You are a B2B sales execution assistant. Generate concise and practical follow-up drafts. Return strict JSON."
       },
       { role: "user", content: prompt }
-    ]
+    ],
+    {
+      model: "gpt-5.4-mini-2026-03-17",
+      schema: followUpShapeSchema
+    }
   );
 
   return followUpShapeSchema.parse(result);
@@ -219,7 +223,11 @@ async function generateBriefWithAI(params: {
           "You are a B2B sales strategist. Produce practical meeting briefs with clear goals and proof points. Return strict JSON."
       },
       { role: "user", content: prompt }
-    ]
+    ],
+    {
+      model: "gpt-5.5-2026-04-23",
+      schema: briefShapeSchema
+    }
   );
 
   return briefShapeSchema.parse(result);
@@ -366,25 +374,28 @@ export async function generateMeetingBriefForDeal(
     create: {
       dealId: deal.id,
       primaryGoal: brief.primaryGoal,
-      likelyObjections: brief.likelyObjections,
+      likelyObjections: JSON.stringify(brief.likelyObjections),
       recommendedNarrative: brief.recommendedNarrative,
-      proofPoints: brief.proofPoints
+      proofPoints: JSON.stringify(brief.proofPoints)
     },
     update: {
       primaryGoal: brief.primaryGoal,
-      likelyObjections: brief.likelyObjections,
+      likelyObjections: JSON.stringify(brief.likelyObjections),
       recommendedNarrative: brief.recommendedNarrative,
-      proofPoints: brief.proofPoints
+      proofPoints: JSON.stringify(brief.proofPoints)
     }
   });
+
+  const parsedObjections = typeof saved.likelyObjections === "string" ? JSON.parse(saved.likelyObjections) : saved.likelyObjections;
+  const parsedProofPoints = typeof saved.proofPoints === "string" ? JSON.parse(saved.proofPoints) : saved.proofPoints;
 
   return {
     dealId: deal.externalId ?? deal.id,
     brief: {
       primaryGoal: saved.primaryGoal,
-      likelyObjections: saved.likelyObjections,
+      likelyObjections: parsedObjections,
       recommendedNarrative: saved.recommendedNarrative,
-      proofPoints: saved.proofPoints
+      proofPoints: parsedProofPoints
     },
     source,
     generatedAt: new Date().toISOString()
