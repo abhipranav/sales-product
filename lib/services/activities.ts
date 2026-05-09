@@ -74,14 +74,15 @@ function toUi(row: {
   id: string;
   externalId: string | null;
   dealId: string;
-  type: keyof typeof dbToUiTypeMap;
+  type: string;
   summary: string;
   happenedAt: Date;
 }) {
+  const typeKey = row.type as keyof typeof dbToUiTypeMap;
   return {
     id: row.externalId ?? row.id,
     dealId: row.dealId,
-    type: dbToUiTypeMap[row.type],
+    type: dbToUiTypeMap[typeKey] || "call",
     summary: row.summary,
     happenedAt: row.happenedAt.toISOString(),
   };
