@@ -311,15 +311,15 @@ export async function processMeetingNotes(
     create: {
       dealId: deal.id,
       primaryGoal,
-      likelyObjections: objections,
+      likelyObjections: JSON.stringify(objections),
       recommendedNarrative,
-      proofPoints
+      proofPoints: JSON.stringify(proofPoints)
     },
     update: {
       primaryGoal,
-      likelyObjections: objections,
+      likelyObjections: JSON.stringify(objections),
       recommendedNarrative,
-      proofPoints
+      proofPoints: JSON.stringify(proofPoints)
     }
   });
 
@@ -364,6 +364,9 @@ export async function processMeetingNotes(
     ]
   });
 
+  const parsedObjections = typeof meetingBrief.likelyObjections === "string" ? JSON.parse(meetingBrief.likelyObjections) : meetingBrief.likelyObjections;
+  const parsedProofPoints = typeof meetingBrief.proofPoints === "string" ? JSON.parse(meetingBrief.proofPoints) : meetingBrief.proofPoints;
+
   return {
     activity: {
       id: activity.externalId ?? activity.id,
@@ -378,15 +381,15 @@ export async function processMeetingNotes(
       title: task.title,
       owner: "rep" as const,
       dueAt: task.dueAt.toISOString(),
-      priority: dbPriorityToUi[task.priority],
+      priority: dbPriorityToUi[task.priority as keyof typeof dbPriorityToUi],
       status: "todo" as const,
-      suggestedChannel: dbChannelToUi[task.suggestedChannel]
+      suggestedChannel: dbChannelToUi[task.suggestedChannel as keyof typeof dbChannelToUi]
     })),
     meetingBrief: {
       primaryGoal: meetingBrief.primaryGoal,
-      likelyObjections: meetingBrief.likelyObjections,
+      likelyObjections: parsedObjections,
       recommendedNarrative: meetingBrief.recommendedNarrative,
-      proofPoints: meetingBrief.proofPoints
+      proofPoints: parsedProofPoints
     },
     followUpDraft: {
       subject: followUpDraft.subject,
