@@ -208,14 +208,14 @@ export async function getDashboardData(actor?: ActorIdentity, options?: Dashboar
         id: task.externalId ?? task.id,
         dealId: task.dealId,
         title: task.title,
-        owner: enumMap.taskOwner[task.owner],
+        owner: enumMap.taskOwner[task.owner as keyof typeof enumMap.taskOwner],
         dueAt: task.dueAt.toISOString(),
-        priority: enumMap.taskPriority[task.priority],
-        status: enumMap.taskStatus[task.status],
-        suggestedChannel: enumMap.channel[task.suggestedChannel]
+        priority: enumMap.taskPriority[task.priority as keyof typeof enumMap.taskPriority],
+        status: enumMap.taskStatus[task.status as keyof typeof enumMap.taskStatus],
+        suggestedChannel: enumMap.channel[task.suggestedChannel as keyof typeof enumMap.channel]
       }))
       .sort((a, b) => {
-        const priorityDelta = priorityRank[a.priority] - priorityRank[b.priority];
+        const priorityDelta = priorityRank[a.priority as Task["priority"]] - priorityRank[b.priority as Task["priority"]];
         if (priorityDelta !== 0) {
           return priorityDelta;
         }
@@ -227,7 +227,7 @@ export async function getDashboardData(actor?: ActorIdentity, options?: Dashboar
       id: deal.externalId ?? deal.id,
       accountId: deal.accountId,
       name: deal.name,
-      stage: enumMap.dealStage[deal.stage],
+      stage: enumMap.dealStage[deal.stage as keyof typeof enumMap.dealStage],
       amount: deal.amount,
       confidence: deal.confidence,
       closeDate: deal.closeDate.toISOString(),
@@ -237,7 +237,7 @@ export async function getDashboardData(actor?: ActorIdentity, options?: Dashboar
     const mappedSignals = deal.account.signals.map((signal) => ({
       id: signal.externalId ?? signal.id,
       accountId: signal.accountId,
-      type: enumMap.signalType[signal.type],
+      type: enumMap.signalType[signal.type as keyof typeof enumMap.signalType],
       summary: signal.summary,
       happenedAt: signal.happenedAt.toISOString(),
       score: signal.score
@@ -246,10 +246,10 @@ export async function getDashboardData(actor?: ActorIdentity, options?: Dashboar
     const mappedApprovals = deal.outboundApprovals.map((approval) => ({
       id: approval.id,
       dealId: mappedDeal.id,
-      channel: enumMap.channel[approval.channel],
+      channel: enumMap.channel[approval.channel as keyof typeof enumMap.channel],
       subject: approval.subject,
       body: approval.body,
-      status: enumMap.approvalStatus[approval.status],
+      status: enumMap.approvalStatus[approval.status as keyof typeof enumMap.approvalStatus],
       requestedBy: approval.requestedBy,
       reviewedBy: approval.reviewedBy ?? undefined,
       reviewedAt: approval.reviewedAt?.toISOString(),
@@ -260,7 +260,7 @@ export async function getDashboardData(actor?: ActorIdentity, options?: Dashboar
     const mappedRecentActivities = deal.activities.map((activity) => ({
       id: activity.externalId ?? activity.id,
       dealId: activity.dealId,
-      type: enumMap.activityType[activity.type],
+      type: enumMap.activityType[activity.type as keyof typeof enumMap.activityType],
       happenedAt: activity.happenedAt.toISOString(),
       summary: activity.summary
     }));
@@ -286,7 +286,7 @@ export async function getDashboardData(actor?: ActorIdentity, options?: Dashboar
       account: {
         id: deal.account.externalId ?? deal.account.id,
         name: deal.account.name,
-        segment: enumMap.segment[deal.account.segment],
+        segment: enumMap.segment[deal.account.segment as keyof typeof enumMap.segment],
         website: deal.account.website ?? undefined,
         employeeBand: deal.account.employeeBand ?? undefined,
         signals: mappedSignals
@@ -298,7 +298,7 @@ export async function getDashboardData(actor?: ActorIdentity, options?: Dashboar
         title: contact.title,
         email: contact.email ?? undefined,
         linkedInUrl: contact.linkedIn ?? undefined,
-        role: enumMap.contactRole[contact.role]
+        role: enumMap.contactRole[contact.role as keyof typeof enumMap.contactRole]
       })),
       deal: mappedDeal,
       pipelineMetrics: {
@@ -316,11 +316,15 @@ export async function getDashboardData(actor?: ActorIdentity, options?: Dashboar
       meetingBrief: {
         accountName: deal.account.name,
         primaryGoal: deal.meetingBrief?.primaryGoal ?? "Align all stakeholders on next best action.",
-        likelyObjections: deal.meetingBrief?.likelyObjections ?? ["Budget uncertainty", "Security and legal review"],
+        likelyObjections: deal.meetingBrief?.likelyObjections
+          ? (typeof deal.meetingBrief.likelyObjections === "string" ? JSON.parse(deal.meetingBrief.likelyObjections) : deal.meetingBrief.likelyObjections)
+          : ["Budget uncertainty", "Security and legal review"],
         recommendedNarrative:
           deal.meetingBrief?.recommendedNarrative ??
           "Anchor on measurable business outcomes, then walk through risk-control evidence.",
-        proofPoints: deal.meetingBrief?.proofPoints ?? ["Cycle time reduction benchmark", "SOC 2 control mapping"]
+        proofPoints: deal.meetingBrief?.proofPoints
+          ? (typeof deal.meetingBrief.proofPoints === "string" ? JSON.parse(deal.meetingBrief.proofPoints) : deal.meetingBrief.proofPoints)
+          : ["Cycle time reduction benchmark", "SOC 2 control mapping"]
       },
       followUpDraft: {
         subject: deal.followUp?.subject ?? "Recap and next steps",
