@@ -1,8 +1,9 @@
 import type { Activity, Deal, OutboundApproval, Signal, StrategyPlay, Task } from "@/lib/domain/types";
 import { createUserAwareProvider, type AIMessage } from "@/lib/ai";
 import type { ActorIdentity } from "@/lib/auth/actor";
+import { z } from "zod";
 
-const AI_STRATEGY_TIMEOUT_MS = Number(process.env.APP_AI_STRATEGY_TIMEOUT_MS ?? 900);
+const AI_STRATEGY_TIMEOUT_MS = Number(process.env.APP_AI_STRATEGY_TIMEOUT_MS ?? 12000);
 const ENABLE_AI_STRATEGY_PLAYS = process.env.APP_ENABLE_AI_STRATEGY_PLAYS === "1";
 
 function hasKeyword(value: string, keywords: string[]): boolean {
@@ -129,18 +130,20 @@ function buildRuleBasedPlays(input: {
   return plays.slice(0, 4);
 }
 
-interface AIGeneratedPlay {
-  title: string;
-  thesis: string;
-  trigger: string;
-  steps: string[];
-  expectedImpact: string;
-  confidence: number;
-}
+const aiGeneratedPlaySchema = z.object({
+  title: z.string(),
+  thesis: z.string(),
+  trigger: z.string(),
+  steps: z.array(z.string()),
+  expectedImpact: z.string(),
+  confidence: z.number()
+});
 
-interface AIPlaysResponse {
-  plays: AIGeneratedPlay[];
-}
+const aiPlaysResponseSchema = z.object({
+  plays: z.array(aiGeneratedPlaySchema)
+});
+
+type AIPlaysResponse = z.infer<typeof aiPlaysResponseSchema>;
 
 async function buildAIGeneratedPlays(input: {
   deal: Deal;
@@ -203,7 +206,10 @@ Generate 2-4 strategic plays tailored to this specific deal situation.`;
 
   try {
     const provider = await createUserAwareProvider(actor);
-    const aiResponse = provider.generateJSON<AIPlaysResponse>(messages);
+    const aiResponse = provider.generateJSON<AIPlaysResponse>(messages, {
+      model: "gpt-5.5-2026-04-23",
+      schema: aiPlaysResponseSchema
+    });
 
     const response = await Promise.race([
       aiResponse,
