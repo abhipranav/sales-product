@@ -156,7 +156,7 @@ export async function executeStrategyPlay(
       id: deal.externalId ?? deal.id,
       accountId: deal.accountId,
       name: deal.name,
-      stage: enumMap.dealStage[deal.stage],
+      stage: enumMap.dealStage[deal.stage as keyof typeof enumMap.dealStage],
       amount: deal.amount,
       confidence: deal.confidence,
       closeDate: deal.closeDate.toISOString(),
@@ -165,7 +165,7 @@ export async function executeStrategyPlay(
     signals: deal.account.signals.map((s) => ({
       id: s.externalId ?? s.id,
       accountId: s.accountId,
-      type: enumMap.signalType[s.type],
+      type: enumMap.signalType[s.type as keyof typeof enumMap.signalType],
       summary: s.summary,
       happenedAt: s.happenedAt.toISOString(),
       score: s.score
@@ -174,19 +174,19 @@ export async function executeStrategyPlay(
       id: t.externalId ?? t.id,
       dealId: t.dealId,
       title: t.title,
-      owner: enumMap.taskOwner[t.owner],
+      owner: enumMap.taskOwner[t.owner as keyof typeof enumMap.taskOwner],
       dueAt: t.dueAt.toISOString(),
-      priority: enumMap.taskPriority[t.priority],
-      status: enumMap.taskStatus[t.status],
-      suggestedChannel: enumMap.channel[t.suggestedChannel]
+      priority: enumMap.taskPriority[t.priority as keyof typeof enumMap.taskPriority],
+      status: enumMap.taskStatus[t.status as keyof typeof enumMap.taskStatus],
+      suggestedChannel: enumMap.channel[t.suggestedChannel as keyof typeof enumMap.channel]
     })),
     approvals: deal.outboundApprovals.map((a) => ({
       id: a.id,
       dealId: deal.externalId ?? deal.id,
-      channel: enumMap.channel[a.channel],
+      channel: enumMap.channel[a.channel as keyof typeof enumMap.channel],
       subject: a.subject,
       body: a.body,
-      status: enumMap.approvalStatus[a.status],
+      status: enumMap.approvalStatus[a.status as keyof typeof enumMap.approvalStatus],
       requestedBy: a.requestedBy,
       reviewedBy: a.reviewedBy ?? undefined,
       reviewedAt: a.reviewedAt?.toISOString(),
@@ -196,7 +196,7 @@ export async function executeStrategyPlay(
     recentActivities: deal.activities.map((a) => ({
       id: a.externalId ?? a.id,
       dealId: a.dealId,
-      type: enumMap.activityType[a.type],
+      type: enumMap.activityType[a.type as keyof typeof enumMap.activityType],
       happenedAt: a.happenedAt.toISOString(),
       summary: a.summary
     }))
