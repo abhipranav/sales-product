@@ -132,7 +132,7 @@ export async function createSequenceExecution(payload: z.infer<typeof createSequ
       dealId: deal.id,
       contactId: resolvedContactId,
       title: payload.title,
-      channelMix: payload.channelMix.map((channel) => channelMap[channel]),
+      channelMix: payload.channelMix.map((channel) => channelMap[channel]).join(","),
       createdBy: workspaceScope?.actorEmail ?? "system",
       steps: {
         create: payload.steps.map((step, index) => ({
@@ -154,7 +154,7 @@ export async function createSequenceExecution(payload: z.infer<typeof createSequ
   return {
     id: execution.id,
     title: execution.title,
-    status: dbExecutionStatusToUi[execution.status],
+    status: dbExecutionStatusToUi[execution.status as keyof typeof dbExecutionStatusToUi],
     stepCount: execution.steps.length
   };
 }
@@ -220,7 +220,7 @@ export async function updateSequenceStep(stepId: string, payload: z.infer<typeof
 
   return {
     id: updated.id,
-    status: dbStatusToUi[updated.status],
+    status: dbStatusToUi[updated.status as keyof typeof dbStatusToUi],
     outcome: updated.outcome ?? null
   };
 }
@@ -295,12 +295,12 @@ export async function listSequenceExecutions(params: { dealId?: string; limit?: 
   return rows.map((row) => ({
     id: row.id,
     title: row.title,
-    status: dbExecutionStatusToUi[row.status],
+    status: dbExecutionStatusToUi[row.status as keyof typeof dbExecutionStatusToUi],
     dealId: row.deal.externalId ?? row.deal.id,
     dealName: row.deal.name,
     contactId: row.contact?.id ?? null,
     contactName: row.contact?.fullName ?? null,
-    channelMix: row.channelMix.map((channel) => channel.toLowerCase()),
+    channelMix: (typeof row.channelMix === "string" ? row.channelMix.split(",") : []).filter(Boolean).map((channel) => channel.toLowerCase()),
     createdBy: row.createdBy,
     createdAt: row.createdAt.toISOString(),
     steps: row.steps.map((step) => ({
@@ -308,7 +308,7 @@ export async function listSequenceExecutions(params: { dealId?: string; limit?: 
       order: step.order,
       channel: step.channel.toLowerCase(),
       instruction: step.instruction,
-      status: dbStatusToUi[step.status],
+      status: dbStatusToUi[step.status as keyof typeof dbStatusToUi],
       outcome: step.outcome ?? null,
       completedAt: step.completedAt?.toISOString() ?? null
     }))
