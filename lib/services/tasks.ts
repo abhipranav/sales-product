@@ -254,7 +254,7 @@ export async function updateTask(taskId: string, payload: z.infer<typeof updateT
     title: updated.title,
     dueAt: updated.dueAt.toISOString(),
     priority: updated.priority.toLowerCase() as "high" | "medium" | "low",
-    status: dbToUiStatusMap[updated.status],
+    status: dbToUiStatusMap[updated.status as keyof typeof dbToUiStatusMap],
     suggestedChannel: updated.suggestedChannel.toLowerCase() as "email" | "phone" | "linkedin" | "meeting"
   };
 }
