@@ -175,7 +175,7 @@ async function buildAIReadiness(actor?: ActorIdentity) {
     ai = {
       hasApiKey: systemKeyStatus === "active",
       maskedKey: null,
-      model: "gpt-5-mini",
+      model: "gpt-5.4-mini-2026-03-17",
       source: systemKeyStatus === "active" ? "system" : "none",
       systemKeyStatus,
       strategyMode,
@@ -188,14 +188,14 @@ async function buildAIReadiness(actor?: ActorIdentity) {
           ? "OPENAI_API_KEY is present in your env file, but the running server has not loaded it yet. Restart the app process to activate AI workflows."
           : systemKeyStatus === "active"
             ? strategyMode === "ai-enabled"
-              ? "Workspace/system OpenAI key is active on gpt-5-mini. It powers follow-ups, meeting briefs, and Strategy Lab generation."
-              : "Workspace/system OpenAI key is active on gpt-5-mini. It powers follow-ups and meeting briefs. Strategy Lab remains rule-based until APP_ENABLE_AI_STRATEGY_PLAYS=1."
+              ? "Workspace/system OpenAI key is active on gpt-5.4-mini-2026-03-17. It powers follow-ups, meeting briefs, and Strategy Lab generation."
+              : "Workspace/system OpenAI key is active on gpt-5.4-mini-2026-03-17. It powers follow-ups and meeting briefs. Strategy Lab remains rule-based until APP_ENABLE_AI_STRATEGY_PLAYS=1."
             : "No active OpenAI key is loaded. Follow-ups and meeting briefs will fall back to rule-based generation.",
       dailyUsage: {
         date: new Date().toISOString().slice(0, 10),
         timezone: "UTC",
         resetAt: new Date(new Date().setUTCHours(24, 0, 0, 0)).toISOString(),
-        selectedModel: "gpt-5-mini",
+        selectedModel: "gpt-5.4-mini-2026-03-17",
         selectedModelTokens: 0,
         selectedModelDailyLimit: 2_500_000,
         selectedModelRemaining: 2_500_000,
