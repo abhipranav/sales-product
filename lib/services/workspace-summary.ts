@@ -102,7 +102,7 @@ export async function getWorkspaceSummary(actor?: ActorIdentity): Promise<Worksp
       account: {
         id: deal.account.externalId ?? deal.account.id,
         name: deal.account.name,
-        segment: segmentMap[deal.account.segment],
+        segment: segmentMap[deal.account.segment as keyof typeof segmentMap],
         website: deal.account.website ?? undefined,
         employeeBand: deal.account.employeeBand ?? undefined
       },
@@ -110,7 +110,7 @@ export async function getWorkspaceSummary(actor?: ActorIdentity): Promise<Worksp
         id: deal.externalId ?? deal.id,
         accountId: deal.accountId,
         name: deal.name,
-        stage: dealStageMap[deal.stage],
+        stage: dealStageMap[deal.stage as keyof typeof dealStageMap],
         amount: deal.amount,
         confidence: deal.confidence,
         closeDate: deal.closeDate.toISOString(),
