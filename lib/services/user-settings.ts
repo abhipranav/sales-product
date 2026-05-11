@@ -156,7 +156,7 @@ export async function getUserSettings(actor?: ActorIdentity) {
       update: {}
     });
 
-    const role = mapRole(member.role);
+    const role = mapRole(member.role as "OWNER" | "MANAGER" | "REP");
     const isAdmin = role === "owner" || role === "manager";
 
     return {
