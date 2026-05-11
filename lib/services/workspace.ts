@@ -147,7 +147,7 @@ export async function resolveWorkspaceScope(
       workspaceName: workspace.name,
       actorEmail: member.email,
       actorName: member.fullName,
-      actorRole: roleMap[member.role]
+      actorRole: roleMap[member.role as keyof typeof roleMap]
     };
     } catch (error) {
       if (isMissingWorkspaceSchemaError(error)) {
