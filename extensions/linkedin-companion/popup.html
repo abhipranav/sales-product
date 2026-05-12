@@ -3,142 +3,424 @@
   <head>
     <meta charset="utf-8" />
     <title>Velocity Companion</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
       :root {
-        --bg: #E3DFD8;
-        --fg: #111111;
-        --muted: #6b7280;
-        --yellow: #FFFF00;
-        --card: #F0EDE6;
-        --border: #111111;
-        --success: #22c55e;
-        --danger: #ef4444;
+        --bg: #E3DFD8;          /* Industrial Light Beige Canvas */
+        --card: #F0EDE6;        /* Lighter card backgrounds */
+        --input-bg: #FFFFFF;    /* Clean white inputs */
+        --border: #111111;      /* Solid Heavy Black Border */
+        --fg: #111111;          /* Solid Industrial Black text */
+        --muted-fg: #555555;    /* Muted text */
+        --accent: #FFFF00;      /* Caution Hazard Yellow */
+        --success: #16a34a;     /* Industrial green */
+        --warning: #d97706;     /* Industrial warning amber */
+        --danger: #dc2626;      /* Industrial destructive red */
       }
 
-      * { box-sizing: border-box; margin: 0; padding: 0; }
+      * { 
+        box-sizing: border-box; 
+        margin: 0; 
+        padding: 0; 
+        scrollbar-width: thin;
+        scrollbar-color: var(--border) transparent;
+      }
+
+      *::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+      }
+      *::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      *::-webkit-scrollbar-thumb {
+        background-color: var(--border);
+        border: 1px solid var(--bg);
+      }
 
       body {
-        width: 360px;
-        font-family: Inter, system-ui, sans-serif;
+        width: 380px;
+        font-family: 'Inter', system-ui, sans-serif;
         background: var(--bg);
         color: var(--fg);
+        overflow-x: hidden;
+        padding-bottom: 16px;
+        -webkit-font-smoothing: antialiased;
       }
 
+      /* Premium Header - Industrial newspaper style */
       .header {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: 12px 16px;
+        padding: 14px 18px;
+        background: var(--card);
         border-bottom: 2px solid var(--border);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+
+      .brand-container {
+        display: flex;
+        align-items: center;
+        gap: 6px;
       }
 
       .brand {
-        font-family: "Space Mono", monospace;
-        font-size: 11px;
-        font-weight: 700;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-      }
-
-      .status-dot {
-        display: inline-block;
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-      }
-
-      .status-dot.active { background: var(--success); }
-      .status-dot.inactive { background: var(--danger); }
-
-      .section {
-        padding: 12px 16px;
-        border-bottom: 2px solid var(--border);
-      }
-
-      .section-label {
-        font-family: "Space Mono", monospace;
-        font-size: 9px;
+        font-family: 'Space Mono', monospace;
+        font-size: 13px;
         font-weight: 700;
         letter-spacing: 0.12em;
         text-transform: uppercase;
-        color: var(--muted);
-        margin-bottom: 8px;
+        color: var(--fg);
       }
 
-      .data-row {
+      .status-container {
         display: flex;
-        justify-content: space-between;
-        align-items: baseline;
-        padding: 4px 0;
+        align-items: center;
+        gap: 6px;
       }
 
-      .data-key {
-        font-family: "Space Mono", monospace;
-        font-size: 9px;
+      .status-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 0px;
+        border: 2px solid var(--border);
+      }
+
+      .status-dot.active { 
+        background: var(--accent); 
+        box-shadow: 0 0 6px var(--accent);
+      }
+
+      .status-dot.inactive { 
+        background: var(--danger); 
+      }
+
+      /* Caution Stripe / Hazard Tape */
+      .caution-stripe {
+        background: repeating-linear-gradient(
+          -45deg,
+          var(--accent),
+          var(--accent) 8px,
+          var(--border) 8px,
+          var(--border) 16px
+        );
+        height: 8px;
+        width: 100%;
+        border-bottom: 2px solid var(--border);
+      }
+
+      /* Scanning Container */
+      .scanner-wrapper {
+        position: relative;
+        overflow: hidden;
+      }
+
+      @keyframes scan {
+        0% { transform: translateY(-100%); }
+        100% { transform: translateY(450px); }
+      }
+
+      .scan-line {
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 4px;
+        background: var(--accent);
+        border-bottom: 1.5px solid var(--border);
+        border-top: 1.5px solid var(--border);
+        box-shadow: 0 0 8px var(--accent);
+        opacity: 0;
+        pointer-events: none;
+        z-index: 10;
+      }
+
+      .scanning .scan-line {
+        opacity: 1;
+        animation: scan 2.2s linear infinite;
+      }
+
+      /* Sections styling - Flat Industrial Heavy Border */
+      .section {
+        padding: 16px;
+        background: var(--card);
+        margin: 14px;
+        border: 2px solid var(--border);
+        border-radius: 0px; /* Square corners */
+        box-shadow: 4px 4px 0px var(--border);
+      }
+
+      .section-label {
+        font-family: 'Space Mono', monospace;
+        font-size: 11px;
         font-weight: 700;
         letter-spacing: 0.08em;
         text-transform: uppercase;
-        color: var(--muted);
+        color: var(--muted-fg);
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
       }
 
-      .data-value {
+      /* Input Forms */
+      .form-grid {
+        display: grid;
+        gap: 12px;
+      }
+
+      .field-group {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .field-group label {
+        font-family: 'Space Mono', monospace;
+        font-size: 10px;
+        font-weight: 700;
+        color: var(--fg);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+      }
+
+      .field-input {
+        background: var(--input-bg);
+        border: 2px solid var(--border);
+        border-radius: 0px;
+        padding: 8px 10px;
+        color: var(--fg);
         font-size: 12px;
-        font-weight: 600;
-        max-width: 200px;
-        text-align: right;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
+        font-family: inherit;
+        transition: background-color 0.15s ease;
       }
 
+      .field-input:focus {
+        outline: none;
+        background: #FFFFFA;
+        box-shadow: 2px 2px 0px var(--border);
+      }
+
+      /* Advanced parameters drawer */
+      .advanced-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 0 6px;
+        margin-top: 6px;
+        cursor: pointer;
+        font-family: 'Space Mono', monospace;
+        font-size: 10px;
+        font-weight: 700;
+        color: var(--fg);
+        letter-spacing: 0.05em;
+        border-top: 2px dashed var(--border);
+      }
+
+      .advanced-toggle:hover {
+        text-decoration: underline;
+      }
+
+      .advanced-toggle-icon {
+        font-size: 8px;
+        transition: transform 0.2s;
+      }
+
+      .advanced-drawer {
+        display: none;
+        grid-gap: 12px;
+        padding-top: 10px;
+      }
+
+      .advanced-drawer.open {
+        display: grid;
+      }
+
+      /* Select styling */
+      .field-select {
+        background: var(--input-bg);
+        border: 2px solid var(--border);
+        border-radius: 0px;
+        padding: 8px 10px;
+        color: var(--fg);
+        font-size: 12px;
+        font-family: inherit;
+        cursor: pointer;
+        width: 100%;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23111111'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2.5' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 10px center;
+        background-size: 12px;
+      }
+
+      .field-select:focus {
+        outline: none;
+      }
+
+      /* Empty State */
       .empty-state {
         text-align: center;
-        padding: 20px 16px;
+        padding: 36px 20px;
+        margin: 14px;
+        background: var(--card);
+        border: 2px dashed var(--border);
+        border-radius: 0px;
+      }
+
+      .empty-icon {
+        font-size: 28px;
+        margin-bottom: 12px;
+        display: inline-block;
+      }
+
+      .empty-state h3 {
+        font-family: Georgia, serif;
+        font-size: 16px;
+        font-weight: 700;
+        margin-bottom: 8px;
       }
 
       .empty-state p {
-        font-size: 12px;
-        color: var(--muted);
-        line-height: 1.5;
+        font-size: 11px;
+        color: var(--muted-fg);
+        line-height: 1.6;
+        max-width: 260px;
+        margin: 0 auto 18px;
       }
 
-      .actions {
-        padding: 12px 16px;
+      /* Loading Visualizer */
+      .loader-container {
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 24px 18px;
+        margin: 14px;
+        background: var(--card);
+        border: 2px solid var(--border);
+        border-radius: 0px;
+        box-shadow: 4px 4px 0px var(--border);
+      }
+
+      .spinner {
+        width: 32px;
+        height: 32px;
+        border: 3px solid rgba(17, 17, 17, 0.1);
+        border-radius: 50%;
+        border-top-color: var(--fg);
+        border-right-color: var(--accent);
+        animation: spin 1s linear infinite;
+        margin-bottom: 16px;
+      }
+
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+
+      .loader-steps {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .loader-step {
+        font-family: 'Space Mono', monospace;
+        font-size: 11px;
+        color: var(--muted-fg);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .loader-step-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 0px;
+        background: rgba(17, 17, 17, 0.2);
+        border: 1px solid var(--border);
+      }
+
+      .loader-step.active {
+        color: var(--fg);
+        font-weight: 700;
+      }
+
+      .loader-step.active .loader-step-dot {
+        background: var(--accent);
+        box-shadow: 0 0 6px var(--accent);
+      }
+
+      .loader-step.done {
+        color: var(--muted-fg);
+      }
+
+      .loader-step.done .loader-step-dot {
+        background: var(--fg);
+      }
+
+      /* Buttons & Actions */
+      .actions-container {
+        padding: 4px 14px 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
       }
 
       .btn {
-        display: block;
         width: 100%;
         border: 2px solid var(--border);
-        padding: 10px 12px;
-        font-family: "Space Mono", monospace;
-        font-size: 11px;
+        border-radius: 0px; /* Industrial flat */
+        padding: 11px 16px;
+        font-family: 'Space Mono', monospace;
+        font-size: 12px;
         font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.06em;
         cursor: pointer;
         text-align: center;
         text-decoration: none;
         transition: all 150ms ease;
-        margin-bottom: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
       }
 
+      /* Inverting Solid Black buttons */
       .btn-primary {
         background: var(--fg);
         color: var(--bg);
       }
 
-      .btn-primary:hover {
-        background: var(--yellow);
+      .btn-primary:hover:not(:disabled) {
+        background: var(--accent);
         color: var(--fg);
       }
 
+      /* Enrich Button - Hazard Yellow */
+      .btn-enrich {
+        background: var(--accent);
+        color: var(--fg);
+      }
+
+      .btn-enrich:hover:not(:disabled) {
+        background: var(--fg);
+        color: var(--accent);
+      }
+
+      /* Outline Button */
       .btn-secondary {
         background: transparent;
         color: var(--fg);
       }
 
-      .btn-secondary:hover {
+      .btn-secondary:hover:not(:disabled) {
         background: var(--fg);
         color: var(--bg);
       }
@@ -146,110 +428,493 @@
       .btn:disabled {
         opacity: 0.5;
         cursor: not-allowed;
+        transform: none !important;
+        box-shadow: none !important;
       }
 
-      .config-section {
-        padding: 8px 16px 12px;
-      }
-
-      .config-section label {
-        display: block;
-        font-family: "Space Mono", monospace;
-        font-size: 9px;
-        font-weight: 700;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        color: var(--muted);
-        margin-bottom: 4px;
-      }
-
-      .config-section input {
-        width: 100%;
+      /* AI Enrichment Card styling */
+      .enrich-brief-section {
+        display: none;
+        margin: 14px;
+        padding: 16px;
+        background: var(--card);
         border: 2px solid var(--border);
-        background: white;
-        padding: 8px 10px;
-        font-size: 11px;
-        font-family: "Space Mono", monospace;
+        border-radius: 0px;
+        box-shadow: 4px 4px 0px var(--border);
       }
 
-      #status-text {
-        font-family: "Space Mono", monospace;
-        font-size: 9px;
-        color: var(--muted);
-        text-align: center;
-        padding: 0 16px 10px;
+      .enrich-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+        border-bottom: 2.5px solid var(--border);
+        padding-bottom: 8px;
       }
 
-      .caution-stripe {
-        background: repeating-linear-gradient(
-          -45deg,
-          var(--yellow),
-          var(--yellow) 6px,
-          var(--fg) 6px,
-          var(--fg) 12px
-        );
-        height: 4px;
-        width: 100%;
-      }
-
-      .page-type-badge {
+      /* Rotated Badges from Ankitkr0 style */
+      .enrich-badge {
         display: inline-flex;
         align-items: center;
         gap: 4px;
-        padding: 3px 8px;
-        font-family: "Space Mono", monospace;
+        padding: 4px 8px;
+        font-family: 'Space Mono', monospace;
+        font-size: 10px;
+        font-weight: 700;
+        background: var(--accent);
+        color: var(--fg);
+        border: 2px solid var(--border);
+        transform: rotate(-2.5deg);
+      }
+
+      .seniority-badge {
+        font-family: 'Space Mono', monospace;
         font-size: 9px;
         font-weight: 700;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        background: var(--yellow);
+        padding: 3px 6px;
+        border-radius: 0px;
+        background: var(--fg);
+        color: var(--bg);
+        border: 1px solid var(--border);
+      }
+
+      .seniority-badge.executive {
+        background: var(--accent); /* Caution Yellow */
         color: var(--fg);
-        border: 2px solid var(--fg);
+        border: 1.5px solid var(--border);
+      }
+
+      .seniority-badge.director {
+        background: var(--fg); /* Solid Black */
+        color: var(--bg); /* Light beige canvas */
+        border: 1.5px solid var(--border);
+      }
+
+      .seniority-badge.manager {
+        background: var(--card); /* Gray-beige */
+        color: var(--fg);
+        border: 1.5px solid var(--border);
+      }
+
+      .seniority-badge.contributor {
+        background: transparent;
+        color: var(--muted-fg);
+        border: 1.5px dashed var(--border);
+      }
+
+      .page-type-badge {
+        font-family: 'Space Mono', monospace;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        background: var(--fg);
+        color: var(--bg);
+        padding: 2px 6px;
+        border: 1.5px solid var(--border);
+      }
+
+      .meta-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 10px;
+        margin-bottom: 12px;
+      }
+
+      .meta-box {
+        background: var(--input-bg);
+        border: 2px solid var(--border);
+        border-radius: 0px;
+        padding: 8px 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .meta-box-label {
+        font-size: 9px;
+        font-family: 'Space Mono', monospace;
+        font-weight: 700;
+        color: var(--muted-fg);
+        text-transform: uppercase;
+      }
+
+      .relevance-score-container {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 2px;
+      }
+
+      .relevance-bar-bg {
+        flex-grow: 1;
+        height: 10px;
+        background: var(--bg);
+        border: 2px solid var(--border);
+        overflow: hidden;
+      }
+
+      .relevance-bar-fill {
+        height: 100%;
+        background: var(--accent);
+        width: 0%;
+        transition: width 1s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      .relevance-num {
+        font-family: 'Space Mono', monospace;
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--fg);
+      }
+
+      .brief-card {
+        background: var(--input-bg);
+        border: 2px solid var(--border);
+        border-radius: 0px;
+        padding: 10px 12px;
+        margin-bottom: 10px;
+      }
+
+      .brief-title {
+        font-family: 'Space Mono', monospace;
+        font-size: 9px;
+        font-weight: 700;
+        color: var(--muted-fg);
+        margin-bottom: 4px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      .brief-content {
+        font-size: 12px;
+        line-height: 1.5;
+        color: var(--fg);
+      }
+
+      .icebreaker-container {
+        position: relative;
+        background: #FFFFFA;
+        border: 2px dashed var(--border);
+      }
+
+      .copy-btn {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        background: var(--bg);
+        border: 2px solid var(--border);
+        border-radius: 0px;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        color: var(--fg);
+        transition: all 0.15s;
+      }
+
+      .copy-btn:hover {
+        background: var(--accent);
+        color: var(--fg);
+      }
+
+      .copy-btn.copied {
+        background: var(--fg);
+        color: var(--accent);
+      }
+
+      /* Success Result Card */
+      .success-card {
+        display: none;
+        margin: 14px;
+        padding: 24px 18px;
+        background: var(--card);
+        border: 2px solid var(--border);
+        box-shadow: 4px 4px 0px var(--border);
+        border-radius: 0px;
+        text-align: center;
+      }
+
+      .success-icon {
+        width: 38px;
+        height: 38px;
+        background: var(--accent);
+        border: 2px solid var(--border);
+        color: var(--fg);
+        border-radius: 0px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        font-weight: 800;
+        margin-bottom: 12px;
+      }
+
+      .success-title {
+        font-family: Georgia, serif;
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--fg);
+        margin-bottom: 6px;
+      }
+
+      .success-desc {
+        font-size: 11px;
+        color: var(--muted-fg);
+        line-height: 1.5;
+        margin-bottom: 18px;
+      }
+
+      .success-links {
+        display: flex;
+        gap: 8px;
+      }
+
+      /* Config Section */
+      .config-section {
+        margin: 14px;
+        padding: 12px;
+        background: var(--card);
+        border: 2px solid var(--border);
+        border-radius: 0px;
+      }
+
+      /* Toast Notification Layer - Retro Newspaper style */
+      #toast-container {
+        position: fixed;
+        bottom: 14px;
+        left: 14px;
+        right: 14px;
+        z-index: 1000;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        pointer-events: none;
+      }
+
+      .toast {
+        background: var(--card);
+        border: 2px solid var(--border);
+        color: var(--fg);
+        padding: 10px 14px;
+        border-radius: 0px;
+        font-size: 11px;
+        font-family: 'Space Mono', monospace;
+        font-weight: 700;
+        box-shadow: 4px 4px 0px var(--border);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        animation: toastIn 0.3s cubic-bezier(0.16, 1, 0.3, 1), toastOut 0.3s 2.7s forwards;
+        pointer-events: auto;
+      }
+
+      .toast.success {
+        border-left: 6px solid var(--success);
+      }
+      
+      .toast.error {
+        border-left: 6px solid var(--danger);
+      }
+
+      @keyframes toastIn {
+        from { transform: translateY(20px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+      }
+
+      @keyframes toastOut {
+        from { transform: translateY(0); opacity: 1; }
+        to { transform: translateY(12px); opacity: 0; }
       }
     </style>
   </head>
   <body>
-    <!-- Header -->
+    <!-- Premium Header -->
     <div class="header">
-      <span class="brand">VELOCITY // COMPANION</span>
-      <span id="connection-dot" class="status-dot inactive" title="Not connected"></span>
+      <div class="brand-container">
+        <span class="brand">VELOCITY // COMPANION</span>
+      </div>
+      <div class="status-container">
+        <span id="connection-dot" class="status-dot inactive" title="Not connected"></span>
+      </div>
     </div>
+    
+    <!-- Caution Stripes from Industrial aesthetic -->
     <div class="caution-stripe"></div>
 
-    <!-- Scraped Data -->
-    <div id="scraped-section" class="section" style="display: none;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-        <span class="section-label" style="margin-bottom: 0;">CAPTURED_DATA</span>
-        <span id="page-type-badge" class="page-type-badge"></span>
+    <div class="scanner-wrapper" id="scanner-wrapper">
+      <div class="scan-line"></div>
+
+      <!-- Scraped Review & Edit Form -->
+      <div id="scraped-section" class="section" style="display: none;">
+        <span class="section-label">
+          <span>OPERATOR REVIEW OVERRIDE</span>
+          <span id="page-type-badge" class="page-type-badge"></span>
+        </span>
+        
+        <form id="companion-form" class="form-grid">
+          <div class="field-group">
+            <label for="form-name">Full Name</label>
+            <input type="text" id="form-name" class="field-input" required />
+          </div>
+
+          <div class="field-group">
+            <label for="form-title">Job Title</label>
+            <input type="text" id="form-title" class="field-input" required />
+          </div>
+
+          <div class="field-group">
+            <label for="form-company">Company</label>
+            <input type="text" id="form-company" class="field-input" required />
+          </div>
+
+          <div class="field-group">
+            <label for="form-location">Location</label>
+            <input type="text" id="form-location" class="field-input" />
+          </div>
+
+          <!-- Collapsible Advanced Drawer -->
+          <div>
+            <div class="advanced-toggle" id="advanced-toggle">
+              <span>CRM TARGET METADATA</span>
+              <span class="advanced-toggle-icon" id="advanced-toggle-icon">▶</span>
+            </div>
+            
+            <div class="advanced-drawer" id="advanced-drawer">
+              <div class="field-group">
+                <label for="form-website">Company Website</label>
+                <input type="url" id="form-website" class="field-input" placeholder="https://..." />
+              </div>
+
+              <div class="field-group">
+                <label for="form-size">Employee Band</label>
+                <input type="text" id="form-size" class="field-input" placeholder="e.g. 50-100" />
+              </div>
+
+              <div class="field-group">
+                <label for="form-segment">Company Segment</label>
+                <select id="form-segment" class="field-select">
+                  <option value="startup">Startup</option>
+                  <option value="mid-market" selected>Mid-Market</option>
+                  <option value="enterprise">Enterprise</option>
+                </select>
+              </div>
+
+              <div class="field-group">
+                <label for="form-role">Relationship Role</label>
+                <select id="form-role" class="field-select">
+                  <option value="champion">Champion</option>
+                  <option value="approver">Approver</option>
+                  <option value="blocker">Blocker</option>
+                  <option value="influencer" selected>Influencer</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </form>
       </div>
-      <div id="scraped-data"></div>
+
+      <!-- Empty State -->
+      <div id="empty-state" class="empty-state">
+        <span class="empty-icon">⚠️</span>
+        <h3>NO LINKEDIN CONTEXT DETECTED</h3>
+        <p style="margin-top: 8px;">Navigate to a LinkedIn profile or company page in your browser tab to activate scraping.</p>
+        <button id="empty-workbench-btn" class="btn btn-secondary">
+          OPEN WORKBENCH COCKPIT →
+        </button>
+      </div>
+
+      <!-- Progressive Loading Visualizer -->
+      <div id="loader-container" class="loader-container">
+        <div class="spinner"></div>
+        <div class="loader-steps">
+          <div class="loader-step active" id="step-0">
+            <span class="loader-step-dot"></span>
+            <span>Parsing active tab elements...</span>
+          </div>
+          <div class="loader-step" id="step-1">
+            <span class="loader-step-dot"></span>
+            <span>Querying Gemini Sales Model...</span>
+          </div>
+          <div class="loader-step" id="step-2">
+            <span class="loader-step-dot"></span>
+            <span>Structuring database entries...</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI Sales Brief Enrichment Panel -->
+      <div id="enrichment-section" class="enrich-brief-section">
+        <div class="enrich-header">
+          <span class="enrich-badge">✨ AI SALES BRIEF</span>
+          <span id="seniority-badge" class="seniority-badge">CONTRIBUTOR</span>
+        </div>
+
+        <div class="meta-grid">
+          <div class="meta-box">
+            <span class="meta-box-label">Sales Relevance Metric</span>
+            <div class="relevance-score-container">
+              <div class="relevance-bar-bg">
+                <div id="relevance-score-fill" class="relevance-bar-fill"></div>
+              </div>
+              <span id="relevance-score-text" class="relevance-num">5/10</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="brief-card">
+          <div class="brief-title">Executive Summary Summary</div>
+          <div id="executive-summary" class="brief-content">Analyze profile data to synthesize sales context.</div>
+        </div>
+
+        <div class="brief-card icebreaker-container">
+          <div class="brief-title">Suggested Icebreaker Hook</div>
+          <div id="suggested-icebreaker" class="brief-content" style="padding-right: 28px;">Extracting contextual hooks...</div>
+          <button id="copy-hook-btn" class="copy-btn" title="Copy Icebreaker">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Success Record Panel -->
+      <div id="success-card" class="success-card">
+        <div class="success-icon">✓</div>
+        <div class="success-title">CRM INGESTION SUCCESS</div>
+        <div id="success-message" class="success-desc">Lead has been securely captured into Velocity CRM database.</div>
+        <div class="success-links">
+          <button id="success-acc-btn" class="btn btn-primary" style="flex: 1; padding: 8px 12px; font-size: 10px;">OPEN ACCOUNT</button>
+          <button id="success-con-btn" class="btn btn-secondary" style="flex: 1; padding: 8px 12px; font-size: 10px; display: none;">OPEN CONTACT</button>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="actions-container" id="actions-container">
+        <button id="capture-btn" class="btn btn-primary" disabled>
+          ⚡ CAPTURE TO CRM
+        </button>
+        <button id="enrich-btn" class="btn btn-enrich" disabled style="display: none;">
+          ✨ AI ENRICH PROFILE
+        </button>
+        <button id="workbench-btn" class="btn btn-secondary">
+          OPEN WORKBENCH →
+        </button>
+      </div>
     </div>
 
-    <!-- Empty State -->
-    <div id="empty-state" class="empty-state">
-      <p>Navigate to a LinkedIn profile or company page to capture data.</p>
-    </div>
-
-    <!-- Actions -->
-    <div class="actions">
-      <button id="capture-btn" class="btn btn-primary" disabled>
-        ⚡ CAPTURE TO CRM
-      </button>
-      <button id="enrich-btn" class="btn btn-primary" disabled style="background: var(--yellow); color: var(--fg); border-color: var(--fg); display: none;">
-        ✨ AI ENRICH PROFILE
-      </button>
-      <button id="workbench-btn" class="btn btn-secondary">
-        OPEN FULL WORKBENCH →
-      </button>
-    </div>
-
-    <!-- Config -->
+    <!-- Config URL -->
     <div class="config-section">
-      <label for="base-url">APP BASE URL</label>
-      <input id="base-url" type="url" placeholder="https://www.salescortex.me" />
+      <div class="field-group">
+        <label for="base-url">Velocity CRM Base URL</label>
+        <input id="base-url" type="url" class="field-input" style="font-family: 'Space Mono', monospace; font-size: 11px; padding: 6px 10px;" placeholder="https://www.salescortex.me" />
+      </div>
     </div>
 
-    <p id="status-text"></p>
+    <!-- Toast Layer -->
+    <div id="toast-container"></div>
 
     <script src="popup.js"></script>
   </body>
