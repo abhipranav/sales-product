@@ -8,7 +8,7 @@ chrome.runtime.onInstalled.addListener(() => {
 // Update badge when tab changes to LinkedIn
 chrome.tabs.onUpdated.addListener((_tabId, changeInfo, tab) => {
   if (changeInfo.status === "complete" && tab.url) {
-    const isLinkedIn = /linkedin\.com\/(in|company)\//i.test(tab.url);
+    const isLinkedIn = /linkedin\.com\/(?:in|company|sales\/(?:profile|people|view|work-entity\/profile|company|accounts|work-entity\/company))\//i.test(tab.url);
     chrome.action.setBadgeText({
       text: isLinkedIn ? "●" : "",
       tabId: tab.id
@@ -20,7 +20,7 @@ chrome.tabs.onActivated.addListener(async (activeInfo) => {
   try {
     const tab = await chrome.tabs.get(activeInfo.tabId);
     if (tab.url) {
-      const isLinkedIn = /linkedin\.com\/(in|company)\//i.test(tab.url);
+      const isLinkedIn = /linkedin\.com\/(?:in|company|sales\/(?:profile|people|view|work-entity\/profile|company|accounts|work-entity\/company))\//i.test(tab.url);
       chrome.action.setBadgeText({
         text: isLinkedIn ? "●" : "",
         tabId: tab.id
