@@ -1,6 +1,23 @@
+import type { Metadata } from "next";
 import type { Route } from "next";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
+
+export const metadata: Metadata = {
+  title: "LinkedIn Companion Chrome Extension — VelocityOS",
+  description: "Extract profile intelligence and sync it directly to your CRM with the VelocityOS LinkedIn Companion. Stop manual copying, generate AI sales briefs, and capture champions in one click.",
+  alternates: {
+    canonical: "/linkedin-extension",
+  },
+  keywords: [
+    "LinkedIn companion extension",
+    "sales scraper chrome extension",
+    "AI sales brief generator",
+    "LinkedIn CRM integration",
+    "automatic CRM data entry",
+    "outbound sales prospector"
+  ]
+};
 
 export default function LinkedInExtensionPage() {
   return (
