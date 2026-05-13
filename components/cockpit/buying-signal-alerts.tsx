@@ -1,5 +1,11 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import type { Deal, Signal } from "@/lib/domain/types";
 import { buildBuyingSignalAlerts } from "@/lib/services/capabilities";
 
@@ -10,11 +16,48 @@ interface BuyingSignalAlertsProps {
 
 export function BuyingSignalAlerts({ deal, signals }: BuyingSignalAlertsProps) {
   const alerts = buildBuyingSignalAlerts(signals, deal);
+  const router = useRouter();
+  const [isSimulating, setIsSimulating] = useState(false);
+
+  async function handleSimulate() {
+    if (isSimulating) return;
+    setIsSimulating(true);
+    toast.loading("Simulating new high-impact buying signal...", { id: "sim-signal" });
+
+    try {
+      const res = await fetch("/api/setup/simulate-signal", {
+        method: "POST"
+      });
+      const data = await res.json().catch(() => null);
+
+      if (!res.ok) {
+        throw new Error(data?.error || "Failed to simulate signal.");
+      }
+
+      toast.success(`[SIGNAL_INJECTED] ${data.signal.summary}`, { id: "sim-signal" });
+      router.refresh();
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err.message || "Failed to simulate buying signal.", { id: "sim-signal" });
+    } finally {
+      setIsSimulating(false);
+    }
+  }
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0">
         <CardTitle className="font-['Sora',sans-serif]">Buying-Signal Alerts</CardTitle>
+        <Button
+          type="button"
+          size="sm"
+          variant="cta"
+          disabled={isSimulating}
+          onClick={handleSimulate}
+          className="font-mono text-[9px] font-bold"
+        >
+          {isSimulating ? "SIMULATING..." : "[ SIMULATE SIGNAL ]"}
+        </Button>
       </CardHeader>
       <CardContent>
         <ul className="space-y-2">
