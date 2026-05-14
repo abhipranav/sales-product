@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { GongCallInsights } from "./insights-sidebar";
+
 
 interface MeetingNotesCaptureProps {
   dealId: string;
@@ -77,9 +79,14 @@ export function MeetingNotesCapture({ dealId }: MeetingNotesCaptureProps) {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle className="font-['Sora',sans-serif]">Meeting Notes to Actions</CardTitle>
-        <CardDescription>Paste call notes to auto-update activity, meeting brief, follow-up draft, and next tasks.</CardDescription>
+      <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 space-y-0">
+        <div className="space-y-1">
+          <CardTitle className="font-['Sora',sans-serif]">Meeting Notes to Actions</CardTitle>
+          <CardDescription>Paste call notes to auto-update activity, meeting brief, follow-up draft, and next tasks.</CardDescription>
+        </div>
+        <div className="flex-shrink-0">
+          <GongCallInsights dealId={dealId} onSuccess={() => router.refresh()} />
+        </div>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="grid gap-2">
