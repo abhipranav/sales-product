@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import type { MeetingBrief } from "@/lib/domain/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { AiFallbackWarning } from "@/components/cockpit/ai-fallback-warning";
 
 interface MeetingBriefCardProps {
   dealId: string;
@@ -61,6 +62,7 @@ export function MeetingBriefCard({ dealId, brief }: MeetingBriefCardProps) {
         </Button>
       </CardHeader>
       <CardContent>
+        <AiFallbackWarning />
         <p className="text-sm text-[hsl(var(--muted-foreground))]">{currentBrief.primaryGoal}</p>
 
         <div className="mt-4 grid gap-4">
