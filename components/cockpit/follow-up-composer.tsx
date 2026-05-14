@@ -17,6 +17,9 @@ import {
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
+import { AiFallbackWarning } from "@/components/cockpit/ai-fallback-warning";
+import { LavenderCopilotPanel } from "./copilot-panel";
+
 
 interface FollowUpComposerProps {
   dealId: string;
@@ -184,53 +187,71 @@ export function FollowUpComposer({ dealId, draft }: FollowUpComposerProps) {
               {isRegenerating ? "Generating..." : "Regenerate"}
             </Button>
           </div>
+
+          <AiFallbackWarning />
         </CardContent>
       </Card>
 
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-5xl">
           <DialogClose onClose={() => setIsEditOpen(false)} />
           <DialogHeader>
-            <DialogTitle>EDIT FOLLOW-UP DRAFT</DialogTitle>
+            <DialogTitle className="font-['Sora',sans-serif]">📧 Edit Follow-Up Draft with Lavender Co-Pilot</DialogTitle>
           </DialogHeader>
-          <div className="space-y-3">
-            <div className="space-y-1">
-              <Label htmlFor="follow-up-subject">Subject</Label>
-              <Input
-                id="follow-up-subject"
-                value={subject}
-                onChange={(event) => setSubject(event.target.value)}
-              />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="follow-up-body">Body</Label>
-              <Textarea
-                id="follow-up-body"
-                value={body}
-                rows={6}
-                onChange={(event) => setBody(event.target.value)}
-              />
-            </div>
-            <div className="grid gap-3 md:grid-cols-2">
+          
+          <div className="grid gap-6 md:grid-cols-[1.1fr_0.9fr] mt-4">
+            {/* Left side: Form fields */}
+            <div className="space-y-4">
               <div className="space-y-1">
-                <Label htmlFor="follow-up-ask">Ask</Label>
+                <Label htmlFor="follow-up-subject">Subject</Label>
                 <Input
-                  id="follow-up-ask"
-                  value={ask}
-                  onChange={(event) => setAsk(event.target.value)}
+                  id="follow-up-subject"
+                  value={subject}
+                  onChange={(event) => setSubject(event.target.value)}
                 />
               </div>
               <div className="space-y-1">
-                <Label htmlFor="follow-up-window">Suggested window</Label>
-                <Input
-                  id="follow-up-window"
-                  value={ctaTimeWindow}
-                  onChange={(event) => setCtaTimeWindow(event.target.value)}
+                <Label htmlFor="follow-up-body">Body</Label>
+                <Textarea
+                  id="follow-up-body"
+                  value={body}
+                  rows={8}
+                  onChange={(event) => setBody(event.target.value)}
+                  placeholder="Draft your follow-up email body..."
                 />
               </div>
+              <div className="grid gap-3 md:grid-cols-2">
+                <div className="space-y-1">
+                  <Label htmlFor="follow-up-ask">Ask</Label>
+                  <Input
+                    id="follow-up-ask"
+                    value={ask}
+                    onChange={(event) => setAsk(event.target.value)}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="follow-up-window">Suggested window</Label>
+                  <Input
+                    id="follow-up-window"
+                    value={ctaTimeWindow}
+                    onChange={(event) => setCtaTimeWindow(event.target.value)}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Right side: Lavender Co-Pilot Sidebar */}
+            <div className="border-t md:border-t-0 md:border-l border-[hsl(var(--border))] pt-6 md:pt-0 md:pl-6">
+              <LavenderCopilotPanel
+                subject={subject}
+                body={body}
+                onUpdateSubject={setSubject}
+                onUpdateBody={setBody}
+              />
             </div>
           </div>
-          <DialogFooter>
+
+          <DialogFooter className="mt-4">
             <Button type="button" variant="outline" onClick={() => setIsEditOpen(false)}>
               Close
             </Button>
