@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { NativeSelect } from "@/components/ui/native-select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { deriveLinkedInCaptureHints } from "@/lib/integrations/linkedin-companion";
 
 interface LinkedInCaptureWorkbenchProps {
@@ -107,7 +107,7 @@ export function LinkedInCaptureWorkbench({
 
   return (
     <div className="grid gap-4 xl:grid-cols-[1.1fr_0.9fr]">
-      <Card>
+      <Card className="border-[2px] border-[hsl(var(--border))] rounded-lg shadow-none bg-[hsl(var(--card))]">
         <CardHeader>
           <CardTitle className="font-mono text-xs uppercase tracking-wider">CAPTURE WORKBENCH</CardTitle>
         </CardHeader>
@@ -145,22 +145,28 @@ export function LinkedInCaptureWorkbench({
 
               <div className="space-y-1 md:col-span-2">
                 <Label htmlFor="existing-account">Attach to existing account (optional)</Label>
-                <NativeSelect
-                  id="existing-account"
+                <Select
                   value={existingAccountId}
-                  onChange={(event) => setExistingAccountId(event.target.value)}
+                  onValueChange={(val) => setExistingAccountId(val)}
                 >
-                  <option value="">Create or match by company details</option>
-                  {accounts.map((account) => (
-                    <option key={account.id} value={account.id}>
-                      {account.name}
-                    </option>
-                  ))}
-                </NativeSelect>
+                  <SelectTrigger id="existing-account" className="w-full">
+                    <SelectValue placeholder="Create or match by company details">
+                      {accounts.find((a) => a.id === existingAccountId)?.name || "Create or match by company details"}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">Create or match by company details</SelectItem>
+                    {accounts.map((account) => (
+                      <SelectItem key={account.id} value={account.id}>
+                        {account.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 
-            <div className="border-[2px] border-[hsl(var(--border))] bg-[hsl(var(--muted))] p-3">
+            <div className="border-[2px] border-[hsl(var(--border))] bg-[hsl(var(--muted)/0.25)] p-3 rounded-md">
               <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[hsl(var(--muted-foreground))]">
                 Company
               </p>
@@ -195,20 +201,24 @@ export function LinkedInCaptureWorkbench({
                 </div>
                 <div className="space-y-1">
                   <Label htmlFor="segment">Segment</Label>
-                  <NativeSelect
-                    id="segment"
+                  <Select
                     value={segment}
-                    onChange={(event) => setSegment(event.target.value as typeof segment)}
+                    onValueChange={(val) => setSegment(val as typeof segment)}
                   >
-                    <option value="startup">startup</option>
-                    <option value="mid-market">mid-market</option>
-                    <option value="enterprise">enterprise</option>
-                  </NativeSelect>
+                    <SelectTrigger id="segment" className="w-full">
+                      <SelectValue placeholder="Select segment" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="startup">startup</SelectItem>
+                      <SelectItem value="mid-market">mid-market</SelectItem>
+                      <SelectItem value="enterprise">enterprise</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
             </div>
 
-            <div className="border-[2px] border-[hsl(var(--border))] bg-[hsl(var(--muted))] p-3">
+            <div className="border-[2px] border-[hsl(var(--border))] bg-[hsl(var(--muted)/0.25)] p-3 rounded-md">
               <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[hsl(var(--muted-foreground))]">
                 Contact
               </p>
@@ -251,18 +261,22 @@ export function LinkedInCaptureWorkbench({
                     placeholder="https://www.linkedin.com/in/jane-doe/"
                   />
                 </div>
-                <div className="space-y-1">
+                <div className="space-y-1 md:col-span-2">
                   <Label htmlFor="contact-role">Relationship role</Label>
-                  <NativeSelect
-                    id="contact-role"
+                  <Select
                     value={contactRole}
-                    onChange={(event) => setContactRole(event.target.value as typeof contactRole)}
+                    onValueChange={(val) => setContactRole(val as typeof contactRole)}
                   >
-                    <option value="champion">champion</option>
-                    <option value="approver">approver</option>
-                    <option value="blocker">blocker</option>
-                    <option value="influencer">influencer</option>
-                  </NativeSelect>
+                    <SelectTrigger id="contact-role" className="w-full">
+                      <SelectValue placeholder="Select role" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="champion">champion</SelectItem>
+                      <SelectItem value="approver">approver</SelectItem>
+                      <SelectItem value="blocker">blocker</SelectItem>
+                      <SelectItem value="influencer">influencer</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
             </div>
@@ -283,7 +297,7 @@ export function LinkedInCaptureWorkbench({
       </Card>
 
       <div className="space-y-4">
-        <Card>
+        <Card className="border-[2px] border-[hsl(var(--border))] rounded-lg shadow-none bg-[hsl(var(--card))]">
           <CardHeader>
             <CardTitle className="font-mono text-xs uppercase tracking-wider">INSTALL FLOW</CardTitle>
           </CardHeader>
@@ -293,14 +307,17 @@ export function LinkedInCaptureWorkbench({
               <span className="font-mono text-[11px] text-[hsl(var(--foreground))]">extensions/linkedin-companion</span>.
             </p>
             <ol className="space-y-2">
-              <li className="border-[2px] border-[hsl(var(--border))] bg-[hsl(var(--muted))] px-3 py-2">
-                Open Chrome extension management and enable Developer Mode.
+              <li className="border-[2px] border-[hsl(var(--border))] bg-[hsl(var(--muted)/0.25)] px-3 py-2 flex items-start gap-3 rounded-md">
+                <span className="font-mono font-bold text-[hsl(var(--warning))]">[01]</span>
+                <span>Open Chrome extension management and enable Developer Mode.</span>
               </li>
-              <li className="border-[2px] border-[hsl(var(--border))] bg-[hsl(var(--muted))] px-3 py-2">
-                Choose Load unpacked and point to the companion folder.
+              <li className="border-[2px] border-[hsl(var(--border))] bg-[hsl(var(--muted)/0.25)] px-3 py-2 flex items-start gap-3 rounded-md">
+                <span className="font-mono font-bold text-[hsl(var(--warning))]">[02]</span>
+                <span>Choose Load unpacked and point to the companion folder.</span>
               </li>
-              <li className="border-[2px] border-[hsl(var(--border))] bg-[hsl(var(--muted))] px-3 py-2">
-                Set your app base URL once, then capture the active tab into this page.
+              <li className="border-[2px] border-[hsl(var(--border))] bg-[hsl(var(--muted)/0.25)] px-3 py-2 flex items-start gap-3 rounded-md">
+                <span className="font-mono font-bold text-[hsl(var(--warning))]">[03]</span>
+                <span>Set your app base URL once, then capture the active tab into this page.</span>
               </li>
             </ol>
             <Button asChild variant="outline" size="sm">
@@ -309,7 +326,7 @@ export function LinkedInCaptureWorkbench({
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-[2px] border-[hsl(var(--border))] rounded-lg shadow-none bg-[hsl(var(--card))]">
           <CardHeader>
             <CardTitle className="font-mono text-xs uppercase tracking-wider">WHY THIS FLOW</CardTitle>
           </CardHeader>
@@ -326,32 +343,46 @@ export function LinkedInCaptureWorkbench({
         </Card>
 
         {lastSaved ? (
-          <Card>
+          <Card className="border-[2px] border-[hsl(var(--warning))] bg-[hsl(var(--warning)/0.03)] shadow-none rounded-lg relative overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-[hsl(var(--warning))]" />
             <CardHeader>
-              <CardTitle className="font-mono text-xs uppercase tracking-wider">LAST SAVED</CardTitle>
+              <CardTitle className="font-mono text-xs uppercase tracking-wider flex items-center justify-between text-[hsl(var(--warning))]">
+                <span>LAST SAVED // SYNC_STATUS_ACTIVE</span>
+                <span className="h-2 w-2 rounded-full bg-[hsl(var(--warning))] animate-pulse" />
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="flex flex-wrap gap-2">
-                <Badge variant={lastSaved.account.status === "created" ? "success" : "outline"}>
-                  account {lastSaved.account.status}
+                <Badge variant={lastSaved.account.status === "created" ? "success" : "outline"} className="font-mono text-[10px]">
+                  ACC_{lastSaved.account.status.toUpperCase()}
                 </Badge>
                 {lastSaved.contact ? (
-                  <Badge variant={lastSaved.contact.status === "created" ? "success" : "outline"}>
-                    contact {lastSaved.contact.status}
+                  <Badge variant={lastSaved.contact.status === "created" ? "success" : "outline"} className="font-mono text-[10px]">
+                    CON_{lastSaved.contact.status.toUpperCase()}
                   </Badge>
                 ) : null}
               </div>
-              <div className="space-y-2 text-sm text-[hsl(var(--muted-foreground))]">
-                <p className="font-semibold text-[hsl(var(--foreground))]">{lastSaved.account.name}</p>
-                {lastSaved.contact ? <p>{lastSaved.contact.fullName}</p> : <p>No contact was saved in this capture.</p>}
+              <div className="space-y-2 text-xs font-mono text-[hsl(var(--muted-foreground))]">
+                <p className="font-semibold text-sm text-[hsl(var(--foreground))] uppercase tracking-wider">{lastSaved.account.name}</p>
+                {lastSaved.contact ? (
+                  <p className="text-[hsl(var(--foreground))]">{lastSaved.contact.fullName}</p>
+                ) : (
+                  <p>No contact was saved in this capture.</p>
+                )}
+                
+                <div className="mt-2 pt-2 border-t border-dashed border-[hsl(var(--border))] text-[10px] space-y-1">
+                  <p>TELEMETRY_REF: {lastSaved.account.id.substring(0, 8).toUpperCase()}</p>
+                  {lastSaved.contact && <p>CONTACT_REF: {lastSaved.contact.id.substring(0, 8).toUpperCase()}</p>}
+                  <p className="text-[hsl(var(--warning))]">✔ SYNCED_TO_CRM_DATABASE</p>
+                </div>
               </div>
-              <div className="flex flex-wrap gap-2">
-                <Button asChild size="sm" variant="cta">
-                  <Link href={`/accounts/${lastSaved.account.id}` as "/accounts"}>Open Account</Link>
+              <div className="flex flex-wrap gap-2 pt-1">
+                <Button asChild size="sm" variant="cta" className="h-7 text-[10px] px-3 font-mono">
+                  <Link href={`/accounts/${lastSaved.account.id}` as "/accounts"}>OPEN ACCOUNT</Link>
                 </Button>
                 {lastSaved.contact ? (
-                  <Button asChild size="sm" variant="outline">
-                    <Link href={`/contacts/${lastSaved.contact.id}` as "/contacts"}>Open Contact</Link>
+                  <Button asChild size="sm" variant="outline" className="h-7 text-[10px] px-3 font-mono">
+                    <Link href={`/contacts/${lastSaved.contact.id}` as "/contacts"}>OPEN CONTACT</Link>
                   </Button>
                 ) : null}
               </div>
