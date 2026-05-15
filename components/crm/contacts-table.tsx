@@ -15,6 +15,7 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/components/ui/select";
+import { buildStakeholderCoverage } from "@/lib/services/capabilities";
 
 interface Contact {
   id: string;
@@ -111,11 +112,26 @@ export function ContactsTable({ initialData, accountId, onCreateClick }: Contact
     }
   };
 
+  // Map state contacts to domain contacts for capabilities calculations
+  const mappedContactsForCoverage = contacts.map(c => ({
+    id: c.id,
+    accountId: c.accountId,
+    fullName: c.fullName,
+    title: c.title,
+    email: c.email || undefined,
+    linkedInUrl: c.linkedIn || undefined,
+    role: c.role
+  }));
+
+  const coverage = buildStakeholderCoverage(mappedContactsForCoverage);
+
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-        <CardTitle>Contacts</CardTitle>
-        <div className="flex items-center gap-3">
+    <Card className="border-[2px] border-[hsl(var(--border))] rounded-lg shadow-none overflow-hidden bg-[hsl(var(--card))]">
+      <CardHeader className="flex flex-col md:flex-row md:items-center justify-between space-y-4 md:space-y-0 pb-4 border-b border-[hsl(var(--border))] bg-[hsl(var(--muted)/0.1)]">
+        <CardTitle className="font-mono text-base uppercase tracking-wider text-[hsl(var(--foreground))]">
+          Contacts Registry
+        </CardTitle>
+        <div className="flex flex-wrap items-center gap-3">
           <Input
             placeholder="Search contacts..."
             value={search}
@@ -123,7 +139,7 @@ export function ContactsTable({ initialData, accountId, onCreateClick }: Contact
               setSearch(e.target.value);
               setOffset(0);
             }}
-            className="w-64"
+            className="w-full md:w-64 border-[2px] bg-[hsl(var(--muted)/0.35)]"
           />
           <Select
             value={role}
@@ -132,7 +148,7 @@ export function ContactsTable({ initialData, accountId, onCreateClick }: Contact
               setOffset(0);
             }}
           >
-            <SelectTrigger className="w-40">
+            <SelectTrigger className="w-full md:w-40 border-[2px] bg-[hsl(var(--muted)/0.35)] font-mono text-xs uppercase">
               <SelectValue placeholder="All roles" />
             </SelectTrigger>
             <SelectContent>
@@ -144,88 +160,136 @@ export function ContactsTable({ initialData, accountId, onCreateClick }: Contact
             </SelectContent>
           </Select>
           {onCreateClick && (
-            <Button onClick={onCreateClick}>
+            <Button onClick={onCreateClick} variant="cta" className="w-full md:w-auto">
               + New Contact
             </Button>
           )}
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="pt-6">
         {loading ? (
           <div className="flex items-center justify-center py-12">
-            <div className="animate-pulse text-[hsl(var(--muted-foreground))]">Loading contacts...</div>
+            <div className="animate-pulse font-mono text-xs uppercase tracking-widest text-[hsl(var(--muted-foreground))]">
+              Querying database registry...
+            </div>
           </div>
         ) : contacts.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-12 text-center">
-            <p className="text-[hsl(var(--muted-foreground))]">No contacts found</p>
+          <div className="flex flex-col items-center justify-center py-12 text-center font-mono">
+            <p className="text-xs uppercase tracking-wider text-[hsl(var(--muted-foreground))]">No records returned</p>
             {onCreateClick && (
               <Button variant="outline" className="mt-4" onClick={onCreateClick}>
-                Create your first contact
+                Add first registry entry
               </Button>
             )}
           </div>
         ) : (
           <>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="border-b border-[hsl(var(--border))]">
+            {/* STAKEHOLDER COVERAGE ANALYTICS INSTRUMENT */}
+            <div className="mb-6 p-4 border-[2px] border-[hsl(var(--border))] bg-[hsl(var(--muted)/0.25)] font-mono">
+              <div className="flex items-center justify-between border-b border-[hsl(var(--border))] pb-2 mb-3">
+                <span className="text-xs font-bold uppercase tracking-wider text-[hsl(var(--foreground))] flex items-center gap-2">
+                  <span className="h-2 w-2 rounded-full bg-[hsl(var(--success))] animate-pulse" />
+                  Stakeholder Coverage Instrument
+                </span>
+                <span className="text-[10px] text-[hsl(var(--muted-foreground))] uppercase">
+                  Status: Active Analysis
+                </span>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {[
+                  { role: "champion", label: "CHAMPION", active: coverage.hasChampion, color: "text-[hsl(var(--success))] border-[hsl(var(--success))] bg-[hsl(var(--success))/0.08]" },
+                  { role: "approver", label: "APPROVER", active: coverage.hasApprover, color: "text-blue-500 border-blue-500 bg-blue-500/0.08" },
+                  { role: "blocker", label: "BLOCKER", active: coverage.hasBlocker, color: "text-red-500 border-red-500 bg-red-500/0.08" },
+                  { role: "influencer", label: "INFLUENCER", active: coverage.hasInfluencer, color: "text-yellow-500 border-yellow-500 bg-yellow-500/0.08" }
+                ].map((item) => (
+                  <div
+                    key={item.role}
+                    className={`flex items-center justify-between p-2 border-[2px] text-[11px] transition-colors ${
+                      item.active 
+                        ? `${item.color} font-bold` 
+                        : "border-[hsl(var(--border))] text-[hsl(var(--muted-foreground))] bg-transparent opacity-50 font-normal"
+                    }`}
+                  >
+                    <span>{item.label}</span>
+                    <span className="text-[9px] tracking-wide font-bold">{item.active ? "[ COVERED ]" : "[ MISSING ]"}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-3 text-[11px] flex flex-col md:flex-row md:items-center justify-between text-[hsl(var(--muted-foreground))] bg-[hsl(var(--muted)/0.4)] p-2.5 border border-[hsl(var(--border))] gap-2">
+                <span className="tracking-wide">SYSTEM DIAGNOSIS: {coverage.gapSummary}</span>
+                {coverage.gapSummary.includes("Missing") ? (
+                  <span className="text-yellow-500 font-bold px-1.5 py-0.5 bg-yellow-500/10 border border-yellow-500/30 text-[9px] uppercase tracking-wider relative overflow-hidden shrink-0 self-start md:self-auto">
+                    Coverage Deficit Detected
+                  </span>
+                ) : (
+                  <span className="text-[hsl(var(--success))] font-bold px-1.5 py-0.5 bg-[hsl(var(--success))/0.1] border border-[hsl(var(--success))/0.3] text-[9px] uppercase tracking-wider shrink-0 self-start md:self-auto">
+                    Full Coverage Secured
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* HIGH-DENSITY INTEL TABLE */}
+            <div className="overflow-x-auto border-[2px] border-[hsl(var(--border))] rounded">
+              <table className="w-full border-collapse">
+                <thead className="border-b-[2px] border-[hsl(var(--border))] bg-[hsl(var(--muted)/0.35)] font-mono text-[11px] font-bold text-[hsl(var(--muted-foreground))]">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[hsl(var(--muted-foreground))]">
+                    <th className="px-4 py-3 text-left uppercase tracking-wider border-r-[2px] border-[hsl(var(--border))] last:border-r-0">
                       Name
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[hsl(var(--muted-foreground))]">
+                    <th className="px-4 py-3 text-left uppercase tracking-wider border-r-[2px] border-[hsl(var(--border))] last:border-r-0">
                       Title
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[hsl(var(--muted-foreground))]">
+                    <th className="px-4 py-3 text-left uppercase tracking-wider border-r-[2px] border-[hsl(var(--border))] last:border-r-0">
                       Account
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[hsl(var(--muted-foreground))]">
+                    <th className="px-4 py-3 text-left uppercase tracking-wider border-r-[2px] border-[hsl(var(--border))] last:border-r-0">
                       Role
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[hsl(var(--muted-foreground))]">
+                    <th className="px-4 py-3 text-left uppercase tracking-wider border-r-[2px] border-[hsl(var(--border))] last:border-r-0">
                       Email
                     </th>
-                    <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-[hsl(var(--muted-foreground))]">
+                    <th className="px-4 py-3 text-right uppercase tracking-wider last:border-r-0">
                       Actions
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[hsl(var(--border))]">
+                <tbody className="divide-y-[2px] divide-[hsl(var(--border))] font-mono text-[12px]">
                   {contacts.map((contact) => (
                     <tr
                       key={contact.id}
                       className="group transition-colors hover:bg-[hsl(var(--muted)/0.5)]"
                     >
-                      <td className="px-4 py-3">
+                      <td className="px-4 py-3 border-r-[2px] border-[hsl(var(--border))] last:border-r-0">
                         <Link
                           href={`/contacts/${contact.id}`}
-                          className="font-medium text-[hsl(var(--foreground))] hover:text-[hsl(var(--primary))] hover:underline"
+                          className="font-bold text-[hsl(var(--foreground))] hover:text-[hsl(var(--primary))] hover:underline"
                         >
                           {contact.fullName}
                         </Link>
                       </td>
-                      <td className="px-4 py-3 text-sm text-[hsl(var(--muted-foreground))]">
+                      <td className="px-4 py-3 border-r-[2px] border-[hsl(var(--border))] last:border-r-0 text-[hsl(var(--muted-foreground))]">
                         {contact.title}
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-4 py-3 border-r-[2px] border-[hsl(var(--border))] last:border-r-0">
                         <Link
                           href={`/accounts/${contact.accountId}`}
-                          className="text-sm text-[hsl(var(--primary))] hover:underline"
+                          className="text-[hsl(var(--primary))] hover:underline font-bold"
                         >
                           {contact.accountName}
                         </Link>
                       </td>
-                      <td className="px-4 py-3">
-                        <Badge variant={roleColor(contact.role)}>
+                      <td className="px-4 py-3 border-r-[2px] border-[hsl(var(--border))] last:border-r-0">
+                        <Badge variant={roleColor(contact.role)} className="border-[2px] border-[hsl(var(--border))] font-bold text-[9px] uppercase tracking-wider rounded-sm px-1.5 py-0.5">
                           {contact.role}
                         </Badge>
                       </td>
-                      <td className="px-4 py-3 text-sm text-[hsl(var(--muted-foreground))]">
+                      <td className="px-4 py-3 border-r-[2px] border-[hsl(var(--border))] last:border-r-0 text-[hsl(var(--muted-foreground))] font-mono text-[11px]">
                         {contact.email || "—"}
                       </td>
-                      <td className="px-4 py-3 text-right">
+                      <td className="px-4 py-3 text-right last:border-r-0">
                         <Link href={`/contacts/${contact.id}`}>
-                          <Button variant="ghost" size="sm">
+                          <Button variant="ghost" size="sm" className="h-7 px-2.5 text-[10px] uppercase font-bold border-[2px] border-transparent hover:border-[hsl(var(--border))] rounded">
                             View
                           </Button>
                         </Link>
@@ -237,9 +301,9 @@ export function ContactsTable({ initialData, accountId, onCreateClick }: Contact
             </div>
 
             {/* Pagination */}
-            <div className="mt-4 flex items-center justify-between border-t border-[hsl(var(--border))] pt-4">
-              <p className="text-sm text-[hsl(var(--muted-foreground))]">
-                Showing {offset + 1}–{Math.min(offset + contacts.length, total)} of {total} contacts
+            <div className="mt-4 flex items-center justify-between border-t-[2px] border-[hsl(var(--border))] pt-4 font-mono text-[11px]">
+              <p className="text-[hsl(var(--muted-foreground))] uppercase tracking-wider">
+                Showing {offset + 1}–{Math.min(offset + contacts.length, total)} of {total} entries
               </p>
               <div className="flex gap-2">
                 <Button
@@ -247,6 +311,7 @@ export function ContactsTable({ initialData, accountId, onCreateClick }: Contact
                   size="sm"
                   disabled={offset === 0}
                   onClick={() => setOffset(Math.max(0, offset - limit))}
+                  className="h-8 text-[10px] uppercase"
                 >
                   Previous
                 </Button>
@@ -255,6 +320,7 @@ export function ContactsTable({ initialData, accountId, onCreateClick }: Contact
                   size="sm"
                   disabled={!hasMore}
                   onClick={() => setOffset(offset + limit)}
+                  className="h-8 text-[10px] uppercase"
                 >
                   Next
                 </Button>
