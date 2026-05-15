@@ -179,16 +179,16 @@ function StageColumn({ stage, deals, total }: StageColumnProps) {
     <div
       ref={setNodeRef}
       className={`
-        flex-shrink-0 w-72  border transition-colors
-        ${isOver ? "border-[hsl(var(--primary))] bg-[hsl(var(--primary)/0.05)]" : "border-[hsl(var(--border))] bg-[hsl(var(--card))]"}
+        flex-shrink-0 w-72 border-[2px] transition-colors
+        ${isOver ? "border-[hsl(var(--primary))] bg-[hsl(var(--primary)/0.05)]" : "border-[hsl(var(--border))] bg-[hsl(var(--card))]" }
       `}
     >
-      <div className="p-3 border-b border-[hsl(var(--border))]">
+      <div className="p-3 border-b-[2px] border-[hsl(var(--border))] bg-[hsl(var(--muted))]">
         <div className="flex items-center justify-between">
-          <h3 className="font-semibold text-[hsl(var(--foreground))]">{stage.label}</h3>
-          <Badge variant="secondary">{deals.length}</Badge>
+          <h3 className="font-mono text-xs font-bold uppercase tracking-wider text-[hsl(var(--foreground))]">{stage.label}</h3>
+          <Badge variant="secondary" className="font-mono text-[10px] font-bold border-[2px] border-[hsl(var(--border))]">{deals.length}</Badge>
         </div>
-        <p className="text-sm text-[hsl(var(--muted-foreground))] mt-1">
+        <p className="text-xs font-mono font-bold text-[hsl(var(--muted-foreground))] mt-1">
           ${total.toLocaleString()}
         </p>
       </div>
@@ -198,8 +198,8 @@ function StageColumn({ stage, deals, total }: StageColumnProps) {
           <DraggableDealCard key={deal.id} deal={deal} />
         ))}
         {deals.length === 0 && (
-          <p className="text-sm text-[hsl(var(--muted-foreground))] text-center py-8">
-            No deals
+          <p className="text-sm font-mono text-[hsl(var(--muted-foreground))] text-center py-8">
+            NO DEALS
           </p>
         )}
       </div>
@@ -249,14 +249,19 @@ function DealCard({ deal, isDragging }: DealCardProps) {
   return (
     <Card
       className={`
-        cursor-grab active:cursor-grabbing transition-shadow
-        ${isDragging ? " ring-2 ring-[hsl(var(--primary))]" : "hover:"}
+        relative overflow-hidden cursor-grab active:cursor-grabbing transition-shadow border-[2px] border-[hsl(var(--border))]
+        ${isDragging ? "ring-2 ring-[hsl(var(--primary))] border-[hsl(var(--primary))]" : "hover:border-[hsl(var(--foreground))]" }
       `}
     >
-      <CardContent className="p-3 space-y-2">
+      {isOverdue && (
+        <div className="absolute top-0 left-0 right-0">
+          <div className="caution-stripe-thin" />
+        </div>
+      )}
+      <CardContent className={`p-3 space-y-2 ${isOverdue ? "pt-4" : "" }`}>
         <Link
           href={`/pipeline/${deal.id}` as "/pipeline"}
-          className="font-medium text-[hsl(var(--foreground))] hover:text-[hsl(var(--primary))] hover:underline block"
+          className="font-mono text-xs font-bold uppercase tracking-wider text-[hsl(var(--foreground))] hover:text-[hsl(var(--primary))] hover:underline block"
           onClick={(e) => e.stopPropagation()}
         >
           {deal.name}
@@ -264,32 +269,33 @@ function DealCard({ deal, isDragging }: DealCardProps) {
 
         <Link
           href={`/accounts/${deal.accountId}` as "/accounts"}
-          className="text-xs text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))] block"
+          className="font-mono text-[10px] text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))] block"
           onClick={(e) => e.stopPropagation()}
         >
           {deal.accountName}
         </Link>
 
         <div className="flex items-center justify-between">
-          <span className="text-sm font-semibold text-[hsl(var(--foreground))]">
+          <span className="font-mono text-xs font-bold text-[hsl(var(--foreground))]">
             ${deal.amount.toLocaleString()}
           </span>
           <Badge
             variant={deal.confidence >= 0.7 ? "success" : deal.confidence >= 0.4 ? "warning" : "destructive"}
+            className="font-mono text-[9px] font-bold border border-black dark:border-white"
           >
             {Math.round(deal.confidence * 100)}%
           </Badge>
         </div>
 
-        <div className="flex items-center justify-between text-xs text-[hsl(var(--muted-foreground))]">
-          <span className={isOverdue ? "text-[hsl(var(--destructive))]" : ""}>
+        <div className="flex items-center justify-between text-[10px] font-mono text-[hsl(var(--muted-foreground))]">
+          <span className={isOverdue ? "text-[hsl(var(--destructive))] font-bold" : ""}>
             {isOverdue
-              ? "Overdue"
+              ? "OVERDUE"
               : daysUntilClose === 0
-              ? "Today"
-              : `${daysUntilClose}d left`}
+              ? "TODAY"
+              : `${daysUntilClose}D LEFT`}
           </span>
-          <span>{deal.taskCount} tasks</span>
+          <span>{deal.taskCount} TASKS</span>
         </div>
       </CardContent>
     </Card>
