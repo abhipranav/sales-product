@@ -5,55 +5,45 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { getActorFromServerContext } from "@/lib/auth/actor";
 import { getCachedDashboardData } from "@/lib/services/dashboard-cache";
+import { QuickStartMilestones } from "@/components/onboarding/quick-start-milestones";
+
 
 const modules = [
   {
     href: "/cockpit",
     id: "MOD_01",
     title: "REP COCKPIT",
-    description: "Run the day: tasks, approvals, drafting, and execution telemetry."
+    description: "Dynamic GTM execution hub with multi-channel sequence campaigns, CRM Command Center, and live outbound approvals."
   },
   {
     href: "/accounts",
     id: "MOD_02",
     title: "ACCOUNTS",
-    description: "Account and stakeholder context with live buying signals."
+    description: "Strategic accounts, contact intelligence, and automated lead enrichment & duplicate detection with live intent signals."
   },
   {
     href: "/pipeline",
     id: "MOD_03",
     title: "PIPELINE",
-    description: "Revenue health, stage pressure, and close-risk visibility."
+    description: "Tactical revenue health, pipeline coverage, deal close dates, and stage pressure analytics with hazard indicators."
   },
   {
-    href: "/intelligence",
+    href: "/contacts",
     id: "MOD_04",
-    title: "INTELLIGENCE",
-    description: "Meeting briefing, strategy plays, and notes-to-actions workflows."
-  },
-  {
-    href: "/notifications",
-    id: "MOD_05",
-    title: "NOTIFICATIONS",
-    description: "Buying-signal inbox with acknowledgment and response cues."
+    title: "CONTACTS",
+    description: "Unified stakeholder hub, influence maps, engagement levels, and contact action profiles."
   },
   {
     href: "/integrations",
-    id: "MOD_06",
+    id: "MOD_05",
     title: "INTEGRATIONS",
-    description: "CRM and calendar ingestion controls with sync observability."
-  },
-  {
-    href: "/workflows",
-    id: "MOD_07",
-    title: "WORKFLOWS",
-    description: "Task orchestration, approval queue, and operational audit trail."
+    description: "High-fidelity CRM synchronization and direct calendar ingestion telemetry controls."
   },
   {
     href: "/settings",
-    id: "MOD_08",
+    id: "MOD_06",
     title: "SETTINGS",
-    description: "Profile, notification policy, and workspace operating preferences."
+    description: "Notification policies, compliance guardrails, and workspace operational preferences."
   }
 ] as const;
 
@@ -80,6 +70,10 @@ export default async function HomePage() {
           ))}
         </div>
       </div>
+
+      {/* Gamified Onboarding Quick-Start Milestones */}
+      <QuickStartMilestones />
+
 
       {/* Hero header */}
       <header className="mb-6 grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
@@ -145,6 +139,97 @@ export default async function HomePage() {
           </CardContent>
         </Card>
       </header>
+
+      {/* Operations Command Strip */}
+      <section className="mb-6">
+        <div className="flex items-center gap-2 mb-3">
+          <span className="h-2 w-2 rounded-full bg-yellow-400 animate-pulse" />
+          <h3 className="font-mono text-xs font-bold uppercase tracking-[0.1em] text-[hsl(var(--foreground))]">
+            OPERATIONS COMMAND STRIP
+          </h3>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <Link href="/activities" className="group block">
+            <div className="border-[2px] border-[hsl(var(--border))] bg-[hsl(var(--card))] p-4 hover:border-[hsl(var(--foreground))] hover:bg-[hsl(var(--foreground))] transition-all duration-150 relative overflow-hidden h-full flex flex-col justify-between">
+              <div>
+                <div className="flex justify-between items-center mb-2">
+                  <span className="font-mono text-[9px] text-[hsl(var(--muted-foreground))] group-hover:text-[hsl(var(--background))]/60">SYS_LOG_01</span>
+                  <span className="text-xs group-hover:text-[hsl(var(--background))]">📋</span>
+                </div>
+                <h4 className="font-sans text-sm font-bold text-[hsl(var(--foreground))] group-hover:text-[hsl(var(--background))] uppercase">
+                  Activities Log
+                </h4>
+                <p className="text-[11px] text-[hsl(var(--muted-foreground))] group-hover:text-[hsl(var(--background))]/70 mt-1 leading-normal font-mono">
+                  Review call transcripts, emails, and audit-ready execution logs.
+                </p>
+              </div>
+              <div className="mt-4 font-mono text-[9px] font-black text-[hsl(var(--foreground))] group-hover:text-[hsl(var(--background))] border-t border-[hsl(var(--border))] group-hover:border-[hsl(var(--background))]/30 pt-2">
+                [ ACCESS_LOGS ]
+              </div>
+            </div>
+          </Link>
+
+          <Link href="/workflows" className="group block">
+            <div className="border-[2px] border-[hsl(var(--border))] bg-[hsl(var(--card))] p-4 hover:border-[hsl(var(--foreground))] hover:bg-[hsl(var(--foreground))] transition-all duration-150 relative overflow-hidden h-full flex flex-col justify-between">
+              <div>
+                <div className="flex justify-between items-center mb-2">
+                  <span className="font-mono text-[9px] text-[hsl(var(--muted-foreground))] group-hover:text-[hsl(var(--background))]/60">SYS_LOG_02</span>
+                  <span className="text-xs group-hover:text-[hsl(var(--background))]">⚡</span>
+                </div>
+                <h4 className="font-sans text-sm font-bold text-[hsl(var(--foreground))] group-hover:text-[hsl(var(--background))] uppercase">
+                  Workflows
+                </h4>
+                <p className="text-[11px] text-[hsl(var(--muted-foreground))] group-hover:text-[hsl(var(--background))]/70 mt-1 leading-normal font-mono">
+                  Launch automated sales sequences and task execution trails.
+                </p>
+              </div>
+              <div className="mt-4 font-mono text-[9px] font-black text-[hsl(var(--foreground))] group-hover:text-[hsl(var(--background))] border-t border-[hsl(var(--border))] group-hover:border-[hsl(var(--background))]/30 pt-2">
+                [ LAUNCH_WORKFLOWS ]
+              </div>
+            </div>
+          </Link>
+
+          <Link href="/notifications" className="group block">
+            <div className="border-[2px] border-[hsl(var(--border))] bg-[hsl(var(--card))] p-4 hover:border-[hsl(var(--foreground))] hover:bg-[hsl(var(--foreground))] transition-all duration-150 relative overflow-hidden h-full flex flex-col justify-between">
+              <div>
+                <div className="flex justify-between items-center mb-2">
+                  <span className="font-mono text-[9px] text-[hsl(var(--muted-foreground))] group-hover:text-[hsl(var(--background))]/60">SYS_LOG_03</span>
+                  <span className="text-xs group-hover:text-[hsl(var(--background))]">🎯</span>
+                </div>
+                <h4 className="font-sans text-sm font-bold text-[hsl(var(--foreground))] group-hover:text-[hsl(var(--background))] uppercase">
+                  Signal Inbox
+                </h4>
+                <p className="text-[11px] text-[hsl(var(--muted-foreground))] group-hover:text-[hsl(var(--background))]/70 mt-1 leading-normal font-mono">
+                  Monitor live B2B intent anomalies and high-impact buying triggers.
+                </p>
+              </div>
+              <div className="mt-4 font-mono text-[9px] font-black text-[hsl(var(--foreground))] group-hover:text-[hsl(var(--background))] border-t border-[hsl(var(--border))] group-hover:border-[hsl(var(--background))]/30 pt-2">
+                [ REFRESH_SIGNALS ]
+              </div>
+            </div>
+          </Link>
+
+          <Link href="/accounts" className="group block">
+            <div className="border-[2px] border-[hsl(var(--border))] bg-[hsl(var(--card))] p-4 hover:border-[hsl(var(--foreground))] hover:bg-[hsl(var(--foreground))] transition-all duration-150 relative overflow-hidden h-full flex flex-col justify-between">
+              <div>
+                <div className="flex justify-between items-center mb-2">
+                  <span className="font-mono text-[9px] text-[hsl(var(--muted-foreground))] group-hover:text-[hsl(var(--background))]/60">SYS_LOG_04</span>
+                  <span className="text-xs group-hover:text-[hsl(var(--background))]">🏢</span>
+                </div>
+                <h4 className="font-sans text-sm font-bold text-[hsl(var(--foreground))] group-hover:text-[hsl(var(--background))] uppercase">
+                  Strategic Accounts
+                </h4>
+                <p className="text-[11px] text-[hsl(var(--muted-foreground))] group-hover:text-[hsl(var(--background))]/70 mt-1 leading-normal font-mono">
+                  Map stakeholder influence matrices and contact momentum graphs.
+                </p>
+              </div>
+              <div className="mt-4 font-mono text-[9px] font-black text-[hsl(var(--foreground))] group-hover:text-[hsl(var(--background))] border-t border-[hsl(var(--border))] group-hover:border-[hsl(var(--background))]/30 pt-2">
+                [ VIEW_ACCOUNTS ]
+              </div>
+            </div>
+          </Link>
+        </div>
+      </section>
 
       {/* Module grid */}
       <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">

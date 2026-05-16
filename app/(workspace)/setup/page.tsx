@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getActorFromServerContext } from "@/lib/auth/actor";
 import { getSystemReadiness, type ReadinessCheck } from "@/lib/services/system-readiness";
+import { DemoResetBox } from "@/components/settings/demo-reset-box";
 
 function levelToVariant(level: ReadinessCheck["level"]) {
   if (level === "ready") {
@@ -43,7 +44,12 @@ export default async function SetupPage() {
         </p>
       </header>
 
+      <div className="mb-6">
+        <DemoResetBox />
+      </div>
+
       <section className="mb-4 grid gap-4 md:grid-cols-4">
+
         <Card>
           <CardHeader>
             <CardTitle className="font-mono text-xs uppercase tracking-wider">CURRENT_MODE</CardTitle>

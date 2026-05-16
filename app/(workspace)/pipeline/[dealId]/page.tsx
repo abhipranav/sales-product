@@ -198,7 +198,7 @@ export default async function DealDetailPage({ params }: PageProps) {
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-wider text-[hsl(var(--muted-foreground))]">Likely Objections</p>
                   <ul className="mt-1 list-disc list-inside text-sm text-[hsl(var(--foreground))]">
-                    {deal.meetingBrief.likelyObjections.map((obj, i) => (
+                    {deal.meetingBrief.likelyObjections.map((obj: string, i: number) => (
                       <li key={i}>{obj}</li>
                     ))}
                   </ul>

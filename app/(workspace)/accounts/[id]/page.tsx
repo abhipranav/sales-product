@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { AccountDetailClient } from "./client";
+import { LeadEnrichmentDedupe } from "@/components/cockpit/lead-enrichment-dedupe";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -22,6 +23,25 @@ export default async function AccountDetailPage({ params }: PageProps) {
   } catch {
     notFound();
   }
+
+  const mappedContacts = account.contacts.map((c) => ({
+    id: c.id,
+    accountId: account.id,
+    fullName: c.fullName,
+    title: c.title,
+    email: c.email ?? undefined,
+    linkedInUrl: c.linkedIn ?? undefined,
+    role: c.role as any
+  }));
+
+  const mappedSignals = account.signals.map((s) => ({
+    id: s.id,
+    accountId: account.id,
+    type: s.type as any,
+    summary: s.summary,
+    happenedAt: s.happenedAt.toISOString(),
+    score: s.score
+  }));
 
   const segmentColor = (seg: string) => {
     switch (seg) {
@@ -201,6 +221,10 @@ export default async function AccountDetailPage({ params }: PageProps) {
             )}
           </CardContent>
         </Card>
+        {/* Lead Enrichment & Dedupe */}
+        <div className="lg:col-span-2">
+          <LeadEnrichmentDedupe contacts={mappedContacts} signals={mappedSignals} />
+        </div>
 
         {/* Signals */}
         <Card className="lg:col-span-2">

@@ -1,4 +1,5 @@
 import { UserSettingsPanel } from "@/components/settings/user-settings-panel";
+import { DemoResetBox } from "@/components/settings/demo-reset-box";
 
 export default function SettingsPage() {
   return (
@@ -13,7 +14,11 @@ export default function SettingsPage() {
         </p>
       </header>
 
-      <UserSettingsPanel />
+      <div className="space-y-6">
+        <UserSettingsPanel />
+        <DemoResetBox />
+      </div>
     </section>
   );
 }
+

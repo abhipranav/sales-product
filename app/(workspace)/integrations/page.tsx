@@ -43,49 +43,83 @@ export default async function IntegrationsPage() {
         <IntegrationStatusCards status={integrationStatus} />
       </section>
 
-      <section className="mb-4 grid gap-4 md:grid-cols-3">
+      <section className="mb-4 grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         <Link href="/workspace" className="block">
-          <Card className="h-full transition-all duration-150 hover:bg-[hsl(var(--foreground))] hover:text-[hsl(var(--background))] cursor-pointer group">
-            <CardHeader>
-              <CardTitle className="font-mono text-xs uppercase tracking-wider group-hover:text-[hsl(var(--background))]">WORKSPACE</CardTitle>
+          <Card className="h-full transition-all duration-200 border-[2px] border-[hsl(var(--border))] hover:border-[hsl(var(--warning))] hover:bg-[hsl(var(--muted)/0.15)] rounded-lg shadow-none bg-[hsl(var(--card))] cursor-pointer group">
+            <CardHeader className="pb-2">
+              <CardTitle className="font-mono text-xs uppercase tracking-wider flex items-center justify-between">
+                <span>WORKSPACE</span>
+                <span className="font-mono text-[9px] text-[hsl(var(--success))] font-bold">[ ACTIVE ]</span>
+              </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2">
-              <Badge variant="secondary">{summary.workspace.name}</Badge>
-              <p className="font-mono text-[10px] uppercase tracking-wider text-[hsl(var(--muted-foreground))] group-hover:text-[hsl(var(--background))]/60">{summary.workspace.actorEmail}</p>
+            <CardContent className="space-y-2 text-xs font-mono">
+              <div className="space-y-1">
+                <p className="text-[10px] text-[hsl(var(--muted-foreground))] uppercase">WORKSPACE_ID</p>
+                <p className="font-bold text-[hsl(var(--foreground))] truncate">{summary.workspace.name}</p>
+              </div>
+              <div className="space-y-1 pt-1 border-t border-[hsl(var(--border))] border-dashed">
+                <p className="text-[10px] text-[hsl(var(--muted-foreground))] uppercase">OPERATOR</p>
+                <p className="text-[10px] text-[hsl(var(--foreground))] truncate">{summary.workspace.actorEmail}</p>
+              </div>
             </CardContent>
           </Card>
         </Link>
         <Link href="/accounts" className="block">
-          <Card className="h-full transition-all duration-150 hover:bg-[hsl(var(--foreground))] hover:text-[hsl(var(--background))] cursor-pointer group">
-            <CardHeader>
-              <CardTitle className="font-mono text-xs uppercase tracking-wider group-hover:text-[hsl(var(--background))]">CRM_STATUS</CardTitle>
+          <Card className="h-full transition-all duration-200 border-[2px] border-[hsl(var(--border))] hover:border-[hsl(var(--warning))] hover:bg-[hsl(var(--muted)/0.15)] rounded-lg shadow-none bg-[hsl(var(--card))] cursor-pointer group">
+            <CardHeader className="pb-2">
+              <CardTitle className="font-mono text-xs uppercase tracking-wider flex items-center justify-between">
+                <span>CRM_STATUS</span>
+                <span className="font-mono text-[9px] text-[hsl(var(--success))] font-bold">[ HUBSPOT_ONLINE ]</span>
+              </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2">
-              <Badge variant="success">HUBSPOT CONNECTED</Badge>
-              <p className="font-mono text-[10px] uppercase tracking-wider text-[hsl(var(--muted-foreground))] group-hover:text-[hsl(var(--background))]/60">Payload-based upsert is active for account, contact, and deal entities.</p>
+            <CardContent className="space-y-2 text-xs font-mono">
+              <div className="space-y-1">
+                <p className="text-[10px] text-[hsl(var(--muted-foreground))] uppercase">DATA_UPSERT</p>
+                <p className="text-[10px] text-[hsl(var(--foreground))] uppercase font-bold">PAYLOAD ACTIVE</p>
+              </div>
+              <div className="space-y-1 pt-1 border-t border-[hsl(var(--border))] border-dashed">
+                <p className="text-[10px] text-[hsl(var(--muted-foreground))] uppercase">ENTITIES_TRACKED</p>
+                <p className="text-[10px] text-[hsl(var(--foreground))] uppercase truncate">ACCOUNTS / CONTACTS / DEALS</p>
+              </div>
             </CardContent>
           </Card>
         </Link>
         <Link href={"/integrations/linkedin" as Route} className="block">
-          <Card className="h-full transition-all duration-150 hover:bg-[hsl(var(--foreground))] hover:text-[hsl(var(--background))] cursor-pointer group">
-            <CardHeader>
-              <CardTitle className="font-mono text-xs uppercase tracking-wider group-hover:text-[hsl(var(--background))]">LINKEDIN_COMPANION</CardTitle>
+          <Card className="h-full transition-all duration-200 border-[2px] border-[hsl(var(--border))] hover:border-[hsl(var(--warning))] hover:bg-[hsl(var(--muted)/0.15)] rounded-lg shadow-none bg-[hsl(var(--card))] cursor-pointer group">
+            <CardHeader className="pb-2">
+              <CardTitle className="font-mono text-xs uppercase tracking-wider flex items-center justify-between">
+                <span>LINKEDIN_COMP</span>
+                <span className="font-mono text-[9px] text-[hsl(var(--warning))] font-bold">[ CAPTURE_READY ]</span>
+              </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2">
-              <Badge variant="accent">CAPTURE READY</Badge>
-              <p className="font-mono text-[10px] uppercase tracking-wider text-[hsl(var(--muted-foreground))] group-hover:text-[hsl(var(--background))]/60">
-                Send the current tab into a guided capture workbench, then save account and contact details into the CRM.
-              </p>
+            <CardContent className="space-y-2 text-xs font-mono">
+              <div className="space-y-1">
+                <p className="text-[10px] text-[hsl(var(--muted-foreground))] uppercase">companion method</p>
+                <p className="text-[10px] text-[hsl(var(--foreground))] uppercase font-bold">tab-to-crm workbench</p>
+              </div>
+              <div className="space-y-1 pt-1 border-t border-[hsl(var(--border))] border-dashed">
+                <p className="text-[10px] text-[hsl(var(--muted-foreground))] uppercase">Operator flow</p>
+                <p className="text-[10px] text-[hsl(var(--foreground))] truncate">Capture active tab details & sync to crm</p>
+              </div>
             </CardContent>
           </Card>
         </Link>
-        <Card>
-          <CardHeader>
-            <CardTitle className="font-mono text-xs uppercase tracking-wider">CALENDAR_STATUS</CardTitle>
+        <Card className="h-full border-[2px] border-[hsl(var(--border))] rounded-lg shadow-none bg-[hsl(var(--card))]">
+          <CardHeader className="pb-2">
+            <CardTitle className="font-mono text-xs uppercase tracking-wider flex items-center justify-between">
+              <span>CALENDAR_STATUS</span>
+              <span className="font-mono text-[9px] text-[hsl(var(--warning))] font-bold">[ STANDBY ]</span>
+            </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2">
-            <Badge variant="warning">MANUAL INGEST MODE</Badge>
-            <p className="font-mono text-[10px] uppercase tracking-wider text-[hsl(var(--muted-foreground))]">Current mode uses manual ingest. Provider sync can be switched on later.</p>
+          <CardContent className="space-y-2 text-xs font-mono">
+            <div className="space-y-1">
+              <p className="text-[10px] text-[hsl(var(--muted-foreground))] uppercase">INGESTION MODE</p>
+              <p className="text-[10px] text-[hsl(var(--foreground))] uppercase font-bold">MANUAL INGEST ACTIVE</p>
+            </div>
+            <div className="space-y-1 pt-1 border-t border-[hsl(var(--border))] border-dashed">
+              <p className="text-[10px] text-[hsl(var(--muted-foreground))] uppercase">PROVIDER_SYNC</p>
+              <p className="text-[10px] text-[hsl(var(--foreground))] uppercase">INACTIVE (STANDBY)</p>
+            </div>
           </CardContent>
         </Card>
       </section>

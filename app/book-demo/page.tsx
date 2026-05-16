@@ -1,9 +1,25 @@
+import type { Metadata } from "next";
 import type { Route } from "next";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { NativeSelect } from "@/components/ui/native-select";
+
+export const metadata: Metadata = {
+  title: "Book a Demo — VelocityOS",
+  description: "Schedule a personalized walkthrough of VelocityOS. See how our AI-native sales operating system eliminates tech stack sprawl, cuts admin load by 37%, and empowers GTM teams.",
+  alternates: {
+    canonical: "/book-demo",
+  },
+  keywords: [
+    "request sales demo",
+    "VelocityOS demo",
+    "GTM operations walkthrough",
+    "AI CRM integration demo",
+    "sales cockpit demo"
+  ]
+};
 
 export default function BookDemoPage() {
   return (

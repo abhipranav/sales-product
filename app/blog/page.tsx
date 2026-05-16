@@ -1,9 +1,20 @@
+import type { Metadata } from "next";
 import type { Route } from "next";
 import Link from "next/link";
 
-export const metadata = {
-  title: "Blog | Velocity_OS",
+export const metadata: Metadata = {
+  title: "Insights & AI Playbooks — VelocityOS",
   description: "B2B Sales execution insights, AI playbooks, and systems thinking for high-growth revenue ops.",
+  alternates: {
+    canonical: "/blog",
+  },
+  keywords: [
+    "sales execution insights",
+    "B2B AI playbooks",
+    "revenue operations blog",
+    "sales tech stack optimization",
+    "modern outbound sales"
+  ]
 };
 
 const POSTS = [
