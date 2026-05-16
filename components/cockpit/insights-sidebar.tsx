@@ -211,7 +211,7 @@ export function GongCallInsights({ dealId, onSuccess }: InsightsSidebarProps) {
                       <span aria-hidden>⚡</span> Action Items Activated
                     </p>
                     <p className="mt-1 text-[11px]">
-                      The discovered tasks and deadlines have been synced directly to your "Next Actions" checklist and pipeline board. Let's execute!
+                      {"The discovered tasks and deadlines have been synced directly to your \"Next Actions\" checklist and pipeline board. Let's execute!"}
                     </p>
                   </div>
 
