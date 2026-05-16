@@ -4,6 +4,7 @@ import { WorkspaceNav } from "@/components/shell/workspace-nav";
 import { ThemeToggle } from "@/components/shell/theme-toggle";
 import { AIStatusIndicator } from "@/components/shell/ai-status-indicator";
 import { CommandPaletteMount } from "@/components/shell/command-palette-mount";
+import { QuickIngestMount } from "@/components/shell/quick-ingest-mount";
 import { SystemReadinessBanner } from "@/components/shell/system-readiness-banner";
 import { getActorFromServerContext } from "@/lib/auth/actor";
 import { getSystemReadiness } from "@/lib/services/system-readiness";
@@ -97,6 +98,9 @@ export default async function WorkspaceLayout({ children }: WorkspaceLayoutProps
 
       {/* Global Command Palette */}
       <CommandPaletteMount />
+      {/* Global Quick Ingest Drawer */}
+      <QuickIngestMount />
     </div>
   );
 }
+
