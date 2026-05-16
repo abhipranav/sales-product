@@ -79,14 +79,12 @@ interface UserAISettingsResponse {
 }
 
 const RECOMMENDED_AI_MODELS = [
-  "gpt-5",
-  "gpt-5-mini",
-  "gpt-5-nano",
-  "gpt-5-codex"
+  "gpt-5.4-mini-2026-03-17",
+  "gpt-5.5-2026-04-23"
 ];
 
-function createDefaultAISettings(model = "gpt-5-mini"): UserAISettingsResponse {
-  const normalizedModel = model.trim().toLowerCase() || "gpt-5-mini";
+function createDefaultAISettings(model = "gpt-5.4-mini-2026-03-17"): UserAISettingsResponse {
+  const normalizedModel = model.trim().toLowerCase() || "gpt-5.4-mini-2026-03-17";
   const tomorrowUtc = new Date();
   tomorrowUtc.setUTCHours(24, 0, 0, 0);
 
@@ -105,14 +103,14 @@ function createDefaultAISettings(model = "gpt-5-mini"): UserAISettingsResponse {
       resetAt: tomorrowUtc.toISOString(),
       selectedModel: normalizedModel,
       selectedModelTokens: 0,
-      selectedModelDailyLimit: normalizedModel.startsWith("gpt-5-mini")
+      selectedModelDailyLimit: normalizedModel.includes("mini")
         ? 2_500_000
-        : normalizedModel === "gpt-5"
+        : normalizedModel.includes("5.5") || normalizedModel === "gpt-5"
           ? 250_000
           : null,
-      selectedModelRemaining: normalizedModel.startsWith("gpt-5-mini")
+      selectedModelRemaining: normalizedModel.includes("mini")
         ? 2_500_000
-        : normalizedModel === "gpt-5"
+        : normalizedModel.includes("5.5") || normalizedModel === "gpt-5"
           ? 250_000
           : null,
       selectedModelPercentUsed: 0,
@@ -179,7 +177,7 @@ export function UserSettingsPanel() {
   const [settings, setSettings] = useState<UserSettingsResponse | null>(null);
   const [aiSettings, setAISettings] = useState<UserAISettingsResponse>(createDefaultAISettings());
   const [aiApiKeyInput, setAIApiKeyInput] = useState("");
-  const [aiModelInput, setAIModelInput] = useState("gpt-5-mini");
+  const [aiModelInput, setAIModelInput] = useState("gpt-5.4-mini-2026-03-17");
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isSavingAI, setIsSavingAI] = useState(false);
@@ -202,7 +200,7 @@ export function UserSettingsPanel() {
 
         if (aiResponse.ok) {
           const aiPayload = (await aiResponse.json()) as Partial<UserAISettingsResponse>;
-          const normalizedModel = normalizeModelInput(aiPayload.model ?? "gpt-5-mini");
+          const normalizedModel = normalizeModelInput(aiPayload.model ?? "gpt-5.4-mini-2026-03-17");
           const mergedAISettings: UserAISettingsResponse = {
             ...createDefaultAISettings(normalizedModel),
             ...aiPayload,
@@ -843,7 +841,7 @@ export function UserSettingsPanel() {
                 id="ai-model"
                 value={aiModelInput}
                 onChange={(event) => setAIModelInput(event.target.value)}
-                placeholder="gpt-5-mini"
+                placeholder="gpt-5.4-mini-2026-03-17"
               />
               <div className="flex flex-wrap gap-2 pt-1">
                 {modelSuggestions.map((model) => (
